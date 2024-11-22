@@ -23,6 +23,12 @@ plugins {
     //alias(libs.plugins.conveyor) apply false
 }
 
+tasks {
+    register<Delete>("clean") {
+        delete(project.layout.buildDirectory)
+    }
+}
+
 subprojects {
     // Configure DependencyUpdatesTask, that checks dependencies for version updates.
     // https://github.com/ben-manes/gradle-versions-plugin

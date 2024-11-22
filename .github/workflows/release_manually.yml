@@ -15,13 +15,24 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'liberica'
           java-version: 21
+          distribution: 'liberica'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build with Gradle
-        run: ./gradlew build packageReleaseDistributionForCurrentOS
+        run: ./gradlew clean build bundle
       - uses: actions/upload-artifact@v4
+        if: ${{ matrix.os == 'macos-latest' }}
         with:
-          name: bundle-${{ matrix.os }}
-          path: build/distributions/main-release/*/*
+          name: MacOSX-arm64
+          path: build/ZUGFeRD-Manager-1.0.0.dmg
+      - uses: actions/upload-artifact@v4
+        if: ${{ matrix.os == 'macos-13' }}
+        with:
+          name: MacOSX-x64
+          path: build/ZUGFeRD-Manager-1.0.0.dmg
+      - uses: actions/upload-artifact@v4
+        if: ${{ matrix.os == 'windows-latest' }}
+        with:
+          name: Windows-x64
+          path: build/ZUGFeRD-Manager-1.0.0.exe

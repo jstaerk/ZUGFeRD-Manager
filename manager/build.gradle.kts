@@ -231,8 +231,13 @@ compose.desktop {
             description = "A desktop application for creating and validating e-invoices."
             licenseFile = rootProject.file("LICENSE.txt")
 
-            outputBaseDir.set(rootProject.layout.buildDirectory.dir("distributions"))
-            targetFormats(TargetFormat.Dmg, TargetFormat.Exe)
+            //outputBaseDir.set(rootProject.layout.buildDirectory.dir("distributions"))
+            if (isMac) {
+                targetFormats(TargetFormat.Dmg)
+            }
+            if (isWindows) {
+                targetFormats(TargetFormat.Exe)
+            }
 
             modules("java.base")
             modules("java.datatransfer")
@@ -297,5 +302,23 @@ tasks {
     //getByName("desktopProcessResources") {
     getByName("compileKotlinDesktop") {
         dependsOn("buildInfo")
+    }
+
+    register("bundle") {
+        dependsOn("packageReleaseDistributionForCurrentOS")
+
+        if (isMac) {
+            copy {
+                from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
+                into(rootProject.layout.buildDirectory.asFile.get())
+            }
+        }
+
+        if (isWindows) {
+            copy {
+                from(project.layout.buildDirectory.file("compose/binaries/main-release/exe"))
+                into(rootProject.layout.buildDirectory.asFile.get())
+            }
+        }
     }
 }
