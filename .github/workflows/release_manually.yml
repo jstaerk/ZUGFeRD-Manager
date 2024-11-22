@@ -1,10 +1,14 @@
-name: Build-Windows
+name: release manually
 
-on: [ push ]
+on: workflow_dispatch
 
 jobs:
-  build:
-    runs-on: windows-latest
+  release:
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest, macos-13 ]
+
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -13,12 +17,11 @@ jobs:
         with:
           distribution: 'liberica'
           java-version: 21
-          architecture: 'x64'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build with Gradle
         run: ./gradlew build packageReleaseDistributionForCurrentOS
       - uses: actions/upload-artifact@v4
         with:
-          name: exe-artifact
-          path: build/distributions/main-release/exe
+          name: bundle-${{ matrix.os }}
+          path: build/distributions/main-release/*/*
