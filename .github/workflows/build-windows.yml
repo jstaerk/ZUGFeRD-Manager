@@ -18,3 +18,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
       - name: Build with Gradle
         run: ./gradlew build packageReleaseDistributionForCurrentOS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exe-artifact
+          path: build/distributions/main-release/exe
