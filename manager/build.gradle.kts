@@ -127,6 +127,9 @@ kotlin {
                 if (isAmd64) {
                     runtimeOnly(libs.jcef.natives.linux.amd64)
                 }
+                if (isArm64) {
+                    runtimeOnly(libs.jcef.natives.linux.arm64)
+                }
             }
             if (isMac) {
                 if (isAmd64) {
@@ -306,18 +309,19 @@ tasks {
 
     register("bundle") {
         dependsOn("packageReleaseDistributionForCurrentOS")
-
-        if (isMac) {
-            copy {
-                from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
-                into(rootProject.layout.buildDirectory.asFile.get())
+        doLast {
+            if (isMac) {
+                copy {
+                    from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
+                    into(rootProject.layout.buildDirectory.asFile.get())
+                }
             }
-        }
 
-        if (isWindows) {
-            copy {
-                from(project.layout.buildDirectory.file("compose/binaries/main-release/exe"))
-                into(rootProject.layout.buildDirectory.asFile.get())
+            if (isWindows) {
+                copy {
+                    from(project.layout.buildDirectory.file("compose/binaries/main-release/exe"))
+                    into(rootProject.layout.buildDirectory.asFile.get())
+                }
             }
         }
     }

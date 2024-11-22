@@ -12,26 +12,35 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: 'liberica'
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
       - name: Build with Gradle
-        run: ./gradlew clean build bundle
-      - uses: actions/upload-artifact@v4
+        run: ./gradlew clean bundle
+
+      - name: Upload MacOSX-arm64
+        uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'macos-latest' }}
         with:
           name: MacOSX-arm64
           path: build/ZUGFeRD-Manager-1.0.0.dmg
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload MacOSX-x64
+        uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'macos-13' }}
         with:
           name: MacOSX-x64
           path: build/ZUGFeRD-Manager-1.0.0.dmg
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload Windows-x64
+        uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'windows-latest' }}
         with:
           name: Windows-x64

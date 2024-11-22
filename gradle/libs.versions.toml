@@ -35,6 +35,7 @@ filekit-compose = { group = "io.github.vinceglb", name = "filekit-compose", vers
 #icepdf-viewer = { group = "com.github.pcorless.icepdf", name = "icepdf-viewer", version.ref = "icepdf" }
 jcef-maven = { group = "me.friwi", name = "jcefmaven", version.ref = "jcef-maven" }
 jcef-natives-linux-amd64 = { group = "me.friwi", name = "jcef-natives-linux-amd64", version.ref = "jcef-natives" }
+jcef-natives-linux-arm64 = { group = "me.friwi", name = "jcef-natives-linux-arm64", version.ref = "jcef-natives" }
 jcef-natives-macosx-amd64 = { group = "me.friwi", name = "jcef-natives-macosx-amd64", version.ref = "jcef-natives" }
 jcef-natives-macosx-arm64 = { group = "me.friwi", name = "jcef-natives-macosx-arm64", version.ref = "jcef-natives" }
 jcef-natives-windows-amd64 = { group = "me.friwi", name = "jcef-natives-windows-amd64", version.ref = "jcef-natives" }
