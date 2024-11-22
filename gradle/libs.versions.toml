@@ -1,0 +1,60 @@
+[versions]
+application = "1.0.0"
+
+androidx-lifecycle = "2.8.4"
+appdirs = "1.2.2"
+buildinfo = "1.0.0"
+commons-lang = "3.17.0"
+compose-multiplatform = "1.7.1"
+#conveyor = "1.10"
+#conveyor-control = "1.1"
+filekit = "0.8.7"
+#icepdf = "7.2.1"w
+jcef-maven = "127.3.1"
+jcef-natives = "jcef-99c2f7a+cef-127.3.1+g6cbb30e+chromium-127.0.6533.100"
+junit = "4.13.2"
+kotlin = "2.0.21"
+kotlinx-coroutines = "1.9.0"
+kotlinx-datetime = "0.6.1"
+kotlinx-serialization = "1.7.3"
+logback = "1.5.12"
+mustang = "2.15.0"
+versions = "0.51.0"
+#webview = "1.9.20"
+#webview = "1.9.40-alpha04"
+
+[libraries]
+androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+appdirs = { group = "net.harawata", name = "appdirs", version.ref = "appdirs" }
+commons-lang = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commons-lang" }
+#conveyor-control = { group = "dev.hydraulic.conveyor", name = "conveyor-control", version.ref = "conveyor-control" }
+filekit-core = { group = "io.github.vinceglb", name = "filekit-core", version.ref = "filekit" }
+filekit-compose = { group = "io.github.vinceglb", name = "filekit-compose", version.ref = "filekit" }
+#icepdf-core = { group = "com.github.pcorless.icepdf", name = "icepdf-core", version.ref = "icepdf" }
+#icepdf-viewer = { group = "com.github.pcorless.icepdf", name = "icepdf-viewer", version.ref = "icepdf" }
+jcef-maven = { group = "me.friwi", name = "jcefmaven", version.ref = "jcef-maven" }
+jcef-natives-linux-amd64 = { group = "me.friwi", name = "jcef-natives-linux-amd64", version.ref = "jcef-natives" }
+jcef-natives-macosx-amd64 = { group = "me.friwi", name = "jcef-natives-macosx-amd64", version.ref = "jcef-natives" }
+jcef-natives-macosx-arm64 = { group = "me.friwi", name = "jcef-natives-macosx-arm64", version.ref = "jcef-natives" }
+jcef-natives-windows-amd64 = { group = "me.friwi", name = "jcef-natives-windows-amd64", version.ref = "jcef-natives" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-datetime-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime-jvm", version.ref = "kotlinx-datetime" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+mustang-library = { group = "org.mustangproject", name = "library", version.ref = "mustang" }
+mustang-validator = { group = "org.mustangproject", name = "validator", version.ref = "mustang" }
+#webview-multiplatform = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version.ref = "webview" }
+
+[plugins]
+buildinfo = { id = "net.h34t.buildinfo", version.ref = "buildinfo" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+#conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }

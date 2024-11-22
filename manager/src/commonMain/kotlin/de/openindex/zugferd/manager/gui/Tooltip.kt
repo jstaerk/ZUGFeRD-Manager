@@ -1,0 +1,47 @@
+package de.openindex.zugferd.manager.gui
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.unit.dp
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+fun Tooltip(
+    text: String,
+    delayMillis: Int = 300,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) = TooltipArea(
+    tooltip = {
+        Surface(
+            color = MaterialTheme.colorScheme.tertiaryContainer,
+            shape = RoundedCornerShape(4.dp),
+            modifier = Modifier
+                .shadow(4.dp),
+        ) {
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(10.dp)
+            )
+        }
+    },
+    delayMillis = delayMillis,
+    //tooltipPlacement = TooltipPlacement.CursorPoint(
+    //    alignment = Alignment.BottomCenter,
+    //    //offset = DpOffset.Zero,
+    //),
+    modifier = modifier,
+) {
+    content()
+}
