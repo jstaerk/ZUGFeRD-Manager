@@ -18,10 +18,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Get version
-        run: |
-          echo "APP_VERSION=$(./gradlew -q printVersion)" >> "$GITHUB_ENV"
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -34,56 +30,12 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bundle
 
-      - name: Upload MacOSX-arm64 (dmg)
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Upload
         env:
           TAG: ${{ github.ref }}
-          FILE: build/ZUGFeRD-Manager-${{ env.APP_VERSION }}.dmg
           GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
-        run:
-          gh release upload "$TAG" "$FILE"
-
-      - name: Upload MacOSX-x64 (dmg)
-        if: ${{ matrix.os == 'macos-13' }}
-        env:
-          TAG: ${{ github.ref }}
-          FILE: build/ZUGFeRD-Manager-${{ env.APP_VERSION }}.dmg
-          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
-        run:
-          gh release upload "$TAG" "$FILE"
-
-      - name: Upload Linux-x64 (deb)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        env:
-          TAG: ${{ github.ref }}
-          FILE: build/ZUGFeRD-Manager-${{ env.APP_VERSION }}-1_amd64.deb
-          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
-        run:
-          gh release upload "$TAG" "$FILE"
-
-      - name: Upload Linux-x64 (rpm)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        env:
-          TAG: ${{ github.ref }}
-          FILE: build/ZUGFeRD-Manager-${{ env.APP_VERSION }}-1.x86_64.rpm
-          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
-        run:
-          gh release upload "$TAG" "$FILE"
-
-      - name: Upload Linux-x64 (tar.gz)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        env:
-          TAG: ${{ github.ref }}
-          FILE: build/ZUGFeRD-Manager-${{ env.APP_VERSION }}-linux-x64.tar.gz
-          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
-        run:
-          gh release upload "$TAG" "$FILE"
-
-      - name: Upload Windows-x64 (exe)
-        if: ${{ matrix.os == 'windows-latest' }}
-        env:
-          TAG: ${{ github.ref }}
-          FILE: build/ZUGFeRD-Manager-${{ env.APP_VERSION }}.exe
-          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
-        run:
-          gh release upload "$TAG" "$FILE"
+        run: |
+          for file in $(find build -type f -maxdepth 1)
+          do
+            gh release upload "$TAG" "$file"
+          done
