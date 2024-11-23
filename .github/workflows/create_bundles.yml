@@ -1,4 +1,4 @@
-name: release manually
+name: create bundles
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ on:
         type: boolean
 
 jobs:
-  release:
+  bundle:
     strategy:
       matrix:
         os: [ macos-latest, macos-13, ubuntu-latest, windows-latest ]

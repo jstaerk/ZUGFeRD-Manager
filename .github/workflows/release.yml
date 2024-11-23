@@ -1,0 +1,30 @@
+name: release
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        uses: battila7/get-version-action@v2
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ZUGFeRD-Manager ${{ steps.version.outputs.version-without-v }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: ${{ github.ref_name == 'develop' }}

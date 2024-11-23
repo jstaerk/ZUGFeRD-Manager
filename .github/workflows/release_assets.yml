@@ -1,0 +1,90 @@
+name: release assets
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    strategy:
+      matrix:
+        os: [ macos-latest, macos-13, ubuntu-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        uses: battila7/get-version-action@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'liberica'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        run: ./gradlew clean bundle
+
+      - name: Upload MacOSX-arm64 (dmg)
+        if: ${{ matrix.os == 'macos-latest' }}
+        env:
+          TAG: ${{ github.ref }}
+          FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}.dmg
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload "$TAG" "$FILE"
+
+      - name: Upload MacOSX-x64 (dmg)
+        if: ${{ matrix.os == 'macos-13' }}
+        env:
+          TAG: ${{ github.ref }}
+          FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}.dmg
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload "$TAG" "$FILE"
+
+      - name: Upload Linux-x64 (deb)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          TAG: ${{ github.ref }}
+          FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}-1_amd64.deb
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload "$TAG" "$FILE"
+
+      - name: Upload Linux-x64 (rpm)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          TAG: ${{ github.ref }}
+          FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}-1.x86_64.rpm
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload "$TAG" "$FILE"
+
+      - name: Upload Linux-x64 (tar.gz)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          TAG: ${{ github.ref }}
+          FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}-linux-x64.tar.gz
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload "$TAG" "$FILE"
+
+      - name: Upload Windows-x64 (exe)
+        uses: svenstaro/upload-release-action@v2
+        if: ${{ matrix.os == 'windows-latest' }}
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/ZUGFeRD-Manager-${{ steps.get_version.outputs.version-without-v }}.exe
+          asset_name:
+          tag: ${{ github.ref }}
+          overwrite: true
