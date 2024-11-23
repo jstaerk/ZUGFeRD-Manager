@@ -35,7 +35,8 @@ jobs:
           TAG: ${{ github.ref }}
           GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run: |
-          for file in $(find build -type f -maxdepth 1)
-          do
-            gh release upload "$TAG" "$file"
-          done
+              for file in $(find build -type f -maxdepth 1)
+              do
+                echo "RELEASE $file IN $TAG"
+                gh release upload $TAG $file
+              done
