@@ -381,6 +381,10 @@ tasks {
 
             into(rootProject.layout.buildDirectory)
             from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
+            rename { name ->
+                val arch = if (isArm64) "arm64" else "x64"
+                name.replace(".dmg", "-mac-${arch}.dmg")
+            }
         }
     }
 

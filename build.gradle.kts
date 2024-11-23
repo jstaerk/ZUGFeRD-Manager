@@ -27,12 +27,6 @@ tasks {
     register<Delete>("clean") {
         delete(project.layout.buildDirectory)
     }
-
-    register("printVersion") {
-        doLast {
-            println(project(":ZUGFeRD-Manager").version)
-        }
-    }
 }
 
 subprojects {

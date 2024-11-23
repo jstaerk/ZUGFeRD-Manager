@@ -31,6 +31,7 @@ jobs:
         run: ./gradlew clean bundle
 
       - name: Upload
+        shell: bash
         env:
           TAG: ${{ github.ref_name }}
           GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
