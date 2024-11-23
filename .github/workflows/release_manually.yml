@@ -55,30 +55,44 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bundle
 
-      - name: Upload MacOSX-arm64
+      - name: Upload MacOSX-arm64 (dmg)
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'macos-latest' }}
         with:
-          name: MacOSX-arm64
-          path: build/*
+          name: MacOSX-dmg-arm64
+          path: build/*.dmg
 
-      - name: Upload MacOSX-x64
+      - name: Upload MacOSX-x64 (dmg)
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'macos-13' }}
         with:
-          name: MacOSX-x64
-          path: build/*
+          name: MacOSX-dmg-x64
+          path: build/*.dmg
 
-      - name: Upload Linux-x64
+      - name: Upload Linux-x64 (deb)
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'ubuntu-latest' }}
         with:
-          name: Linux-x64
-          path: build/*
+          name: Linux-deb-x64
+          path: build/*.deb
 
-      - name: Upload Windows-x64
+      - name: Upload Linux-x64 (rpm)
+        uses: actions/upload-artifact@v4
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        with:
+          name: Linux-deb-x64
+          path: build/*.rpm
+
+      - name: Upload Linux-x64 (tar.gz)
+        uses: actions/upload-artifact@v4
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        with:
+          name: Linux-deb-x64
+          path: build/*.tar.gz
+
+      - name: Upload Windows-x64 (exe)
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'windows-latest' }}
         with:
-          name: Windows-x64
-          path: build/*
+          name: Windows-exe-x64
+          path: build/*.exe
