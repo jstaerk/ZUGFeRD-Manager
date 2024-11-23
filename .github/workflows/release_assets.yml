@@ -32,7 +32,7 @@ jobs:
 
       - name: Upload
         env:
-          TAG: ${{ github.ref }}
+          TAG: ${{ github.ref_name }}
           GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run: |
               for file in $(find build -type f -maxdepth 1)
