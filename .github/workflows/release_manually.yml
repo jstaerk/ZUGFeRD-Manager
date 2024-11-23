@@ -31,16 +31,12 @@ jobs:
   release:
     strategy:
       matrix:
-        os:
-          - macos-latest
-          - macos-13
-          - ubuntu-latest
-          - windows-latest
-        exclude:
-          - os: ${{ !github.event.inputs.macos_arm64 && 'macos-latest' }}
-          - os: ${{ !github.event.inputs.macos_x64 && 'macos-13' }}
-          - os: ${{ !github.event.inputs.linux_x64 && 'ubuntu-latest' }}
-          - os: ${{ !github.event.inputs.windows_x64 && 'windows-latest' }}
+        os: []
+        include:
+          - os: ${{ inputs.macos_arm64 && 'macos-latest' }}
+          - os: ${{ inputs.macos_x64 && 'macos-13' }}
+          - os: ${{ inputs.linux_x64 && 'ubuntu-latest' }}
+          - os: ${{ inputs.windows_x64 && 'windows-latest' }}
 
     runs-on: ${{ matrix.os }}
     steps:
