@@ -1,5 +1,6 @@
 [versions]
-application = "1.0.0"
+application-version = "1.0.0"
+application-revision = "1"
 
 androidx-lifecycle = "2.8.4"
 appdirs = "1.2.2"

@@ -30,18 +30,25 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         with:
           name: MacOSX-arm64
-          path: build/ZUGFeRD-Manager-1.0.0.dmg
+          path: build/*
 
       - name: Upload MacOSX-x64
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'macos-13' }}
         with:
           name: MacOSX-x64
-          path: build/ZUGFeRD-Manager-1.0.0.dmg
+          path: build/*
+
+      - name: Upload Linux-x64
+        uses: actions/upload-artifact@v4
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        with:
+          name: Linux-x64
+          path: build/*
 
       - name: Upload Windows-x64
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'windows-latest' }}
         with:
           name: Windows-x64
-          path: build/ZUGFeRD-Manager-1.0.0.exe
+          path: build/*

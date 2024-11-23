@@ -4,7 +4,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.org.apache.commons.lang3.SystemUtils
 
 project.group = "de.openindex.zugferd"
-project.version = libs.versions.application.get()
+project.version = libs.versions.application.version.get()
 
 val isLinux = SystemUtils.IS_OS_LINUX
 val isMac = SystemUtils.IS_OS_MAC
@@ -245,66 +245,73 @@ compose.desktop {
                 targetFormats(TargetFormat.Exe)
             }
 
-            modules("java.base")
-            modules("java.datatransfer")
-            modules("java.desktop")
-            modules("java.logging")
-            modules("java.management")
-            modules("java.naming")
-            modules("java.net.http")
-            modules("java.prefs")
-            modules("java.security.jgss")
-            modules("java.security.sasl")
-            modules("java.sql")
-            modules("java.transaction.xa")
-            modules("java.xml")
-            modules("jdk.accessibility")
-            modules("jdk.crypto.ec")
-            modules("jdk.localedata")
-            modules("jdk.net")
-            modules("jdk.security.auth")
-            modules("jdk.xml.dom")
+            includeAllModules = true
+
+            //
+            // TODO: Further investigate module requirements.
+            //
+
+            //modules.add("java.base")
+            //modules.add("java.datatransfer")
+            //modules.add("java.desktop")
+            //modules.add("java.logging")
+            //modules.add("java.management")
+            //modules.add("java.naming")
+            //modules.add("java.net.http")
+            //modules.add("java.prefs")
+            //modules.add("java.security.jgss")
+            //modules.add("java.security.sasl")
+            //modules.add("java.sql")
+            //modules.add("java.transaction.xa")
+            //modules.add("java.xml")
+            //modules.add("jdk.accessibility")
+            //modules.add("jdk.crypto.ec")
+            //modules.add("jdk.localedata")
+            //modules.add("jdk.net")
+            //modules.add("jdk.security.auth")
+            //modules.add("jdk.xml.dom")
+
+            //if (isLinux) {
+            //    // Required by FileKit
+            //    // https://github.com/vinceglb/FileKit#-installation
+            //    modules.add("jdk.security.auth")
+            //}
 
             linux {
+                appCategory = "misc"
+                appRelease = libs.versions.application.revision.get()
+                menuGroup = "OpenIndex-ZUGFeRD"
+                installationPath = "/opt/OpenIndex-ZUGFeRD-Manager"
+                debMaintainer = "andy@openindex.de"
+                rpmLicenseType = "Apache-2.0"
                 packageVersion = project.version.toString()
-
-                // Required by FileKit
-                // https://github.com/vinceglb/FileKit#-installation
-                modules.add("jdk.security.auth")
             }
 
             macOS {
+                bundleID = "de.openindex.zugferd.manager"
+                dockName = "ZUGFeRD-Manager"
                 packageVersion = project.version.toString()
                 packageBuildVersion = project.version.toString()
+                appStore = true
+                appCategory = "public.app-category.business"
+
+                //infoPlist {
+                //    extraKeysRawXml = """
+                //        <key>CFBundleDevelopmentRegion</key>
+                //        <string>German</string>
+                //    """
+                //}
             }
 
             windows {
                 packageVersion = project.version.toString()
                 menuGroup = "OpenIndex-ZUGFeRD"
                 upgradeUuid = "c8ce1e91-7f6f-45a6-a1c5-14020bc7c5e3"
+                console = false
+                dirChooser = true
+                perUserInstall = true
             }
         }
-
-        /*
-        nativeDistributions {
-            packageName = "ZUGFeRD-Manager"
-            packageVersion = "1.0.0"
-
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            //targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            //targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Deb, TargetFormat.Rpm)
-
-            @Suppress("SpellCheckingInspection")
-            modules("jdk.localedata")
-
-            linux {
-                // Required by FileKit
-                // https://github.com/vinceglb/FileKit#-installation
-                //modules("jdk.security.auth")
-                modules.add("jdk.security.auth")
-            }
-        }
-        */
     }
 }
 
@@ -315,32 +322,76 @@ tasks {
     }
 
     register("bundle") {
-        dependsOn("packageReleaseDistributionForCurrentOS")
-        doLast {
-            if (isLinux) {
-                copy {
-                    from(project.layout.buildDirectory.file("compose/binaries/main-release/deb"))
-                    into(rootProject.layout.buildDirectory.asFile.get())
-                }
-                copy {
-                    from(project.layout.buildDirectory.file("compose/binaries/main-release/rpm"))
-                    into(rootProject.layout.buildDirectory.asFile.get())
-                }
-            }
+        group = "OpenIndex"
+        description = "Create application bundle for current operating system."
 
-            if (isMac) {
-                copy {
-                    from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
-                    into(rootProject.layout.buildDirectory.asFile.get())
-                }
-            }
+        if (isLinux) {
+            dependsOn("bundleLinuxArchive")
+            dependsOn("bundleLinuxDeb")
+            dependsOn("bundleLinuxRpm")
+        }
+        if (isMac) {
+            dependsOn("bundleMacDmg")
+        }
+        if (isWindows) {
+            dependsOn("bundleWindowsExe")
+        }
+    }
 
-            if (isWindows) {
-                copy {
-                    from(project.layout.buildDirectory.file("compose/binaries/main-release/exe"))
-                    into(rootProject.layout.buildDirectory.asFile.get())
-                }
+    if (isLinux) {
+        register<Tar>("bundleLinuxArchive") {
+            group = "OpenIndex"
+            description = "Create application archive for Linux."
+            dependsOn("createReleaseDistributable")
+
+            archiveExtension = "tar.gz"
+            archiveClassifier = if (isArm64) "linux-arm64" else "linux-x64"
+            compression = Compression.GZIP
+            destinationDirectory = rootProject.layout.buildDirectory
+            from(project.layout.buildDirectory.file("compose/binaries/main-release/app"))
+            from(rootProject.layout.projectDirectory.file("LICENSE.txt")) {
+                into(project.name)
             }
+        }
+
+        register<Copy>("bundleLinuxDeb") {
+            group = "OpenIndex"
+            description = "Create deb installer for Linux."
+            dependsOn("packageReleaseDistributionForCurrentOS")
+
+            into(rootProject.layout.buildDirectory)
+            from(project.layout.buildDirectory.file("compose/binaries/main-release/deb"))
+        }
+
+        register<Copy>("bundleLinuxRpm") {
+            group = "OpenIndex"
+            description = "Create rpm installer for Linux."
+            dependsOn("packageReleaseDistributionForCurrentOS")
+
+            into(rootProject.layout.buildDirectory)
+            from(project.layout.buildDirectory.file("compose/binaries/main-release/rpm"))
+        }
+    }
+
+    if (isMac) {
+        register<Copy>("bundleMacDmg") {
+            group = "OpenIndex"
+            description = "Create dmg installer for MacOS."
+            dependsOn("packageReleaseDistributionForCurrentOS")
+
+            into(rootProject.layout.buildDirectory)
+            from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
+        }
+    }
+
+    if (isWindows) {
+        register<Copy>("bundleWindowsExe") {
+            group = "OpenIndex"
+            description = "Create exe installer for Windows."
+            dependsOn("packageReleaseDistributionForCurrentOS")
+
+            into(rootProject.layout.buildDirectory)
+            from(project.layout.buildDirectory.file("compose/binaries/main-release/exe"))
         }
     }
 }
