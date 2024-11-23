@@ -33,10 +33,11 @@ jobs:
       matrix:
         os: [ macos-latest, macos-13, ubuntu-latest, windows-latest ]
         exclude:
-          macos-latest: ${{ !github.event.inputs.macos_arm64 }}
-          macos-13: ${{ !github.event.inputs.macos_x64 }}
-          ubuntu-latest: ${{ !github.event.inputs.linux_x64 }}
-          windows-latest: ${{ !github.event.inputs.windows_x64 }}
+          os:
+            macos-latest: ${{ !github.event.inputs.macos_arm64 }}
+            macos-13: ${{ !github.event.inputs.macos_x64 }}
+            ubuntu-latest: ${{ !github.event.inputs.linux_x64 }}
+            windows-latest: ${{ !github.event.inputs.windows_x64 }}
 
     runs-on: ${{ matrix.os }}
     steps:
