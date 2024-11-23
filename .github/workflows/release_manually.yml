@@ -32,10 +32,13 @@ jobs:
     strategy:
       matrix:
         os: [ macos-latest, macos-13, ubuntu-latest, windows-latest ]
+        exclude:
+          - os: ${{ !inputs.macos_arm64 && 'macos-latest' }}
+          - os: ${{ !inputs.macos_x64 && 'macos-13' }}
+          - os: ${{ !inputs.linux_x64 && 'ubuntu-latest' }}
+          - os: ${{ !inputs.windows_x64 && 'windows-latest' }}
 
     runs-on: ${{ matrix.os }}
-    if: ${{ (matrix.os == 'macos-latest' && inputs.macos_arm64) || (matrix.os == 'macos-13' && inputs.macos_x64) || (matrix.os == 'ubuntu-latest' && inputs.linux_x64) || (matrix.os == 'windows-latest' && inputs.windows_x64) }}
-
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
