@@ -80,14 +80,14 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'ubuntu-latest' }}
         with:
-          name: Linux-deb-x64
+          name: Linux-rpm-x64
           path: build/*.rpm
 
       - name: Upload Linux-x64 (tar.gz)
         uses: actions/upload-artifact@v4
         if: ${{ matrix.os == 'ubuntu-latest' }}
         with:
-          name: Linux-deb-x64
+          name: Linux-archive-x64
           path: build/*.tar.gz
 
       - name: Upload Windows-x64 (exe)
