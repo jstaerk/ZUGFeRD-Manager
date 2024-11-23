@@ -1,12 +1,42 @@
 name: release manually
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      macos_arm64:
+        description: "Build for MacOS arm64"
+        required: true
+        default: true
+        type: boolean
+
+      macos_x64:
+        description: "Build for MacOS x64"
+        required: true
+        default: true
+        type: boolean
+
+      linux_x64:
+        description: "Build for Linux x64"
+        required: true
+        default: true
+        type: boolean
+
+      windows_x64:
+        description: "Build for Windows x64"
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   release:
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-latest, macos-latest, macos-13 ]
+        os: [ macos-latest, macos-13, ubuntu-latest, windows-latest ]
+        exclude:
+          macos-latest: ${{ !github.event.inputs.macos_arm64 }}
+          macos-13: ${{ !github.event.inputs.macos_x64 }}
+          ubuntu-latest: ${{ !github.event.inputs.linux_x64 }}
+          windows-latest: ${{ !github.event.inputs.windows_x64 }}
 
     runs-on: ${{ matrix.os }}
     steps:
