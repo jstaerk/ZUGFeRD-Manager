@@ -345,10 +345,11 @@ tasks {
             dependsOn("createReleaseDistributable")
 
             archiveExtension = "tar.gz"
+            archiveVersion = libs.versions.application.pkg.get()
             archiveClassifier = if (isArm64) "linux-arm64" else "linux-x64"
             compression = Compression.GZIP
             destinationDirectory = rootProject.layout.buildDirectory
-            from(project.layout.buildDirectory.file("compose/binaries/main-release/app"))
+            from(project.layout.buildDirectory.dir("compose/binaries/main-release/app"))
             from(rootProject.layout.projectDirectory.file("LICENSE.txt")) {
                 into(project.name)
             }
@@ -360,7 +361,15 @@ tasks {
             dependsOn("packageReleaseDistributionForCurrentOS")
 
             into(rootProject.layout.buildDirectory)
-            from(project.layout.buildDirectory.file("compose/binaries/main-release/deb"))
+            from(project.layout.buildDirectory.dir("compose/binaries/main-release/deb"))
+            rename { name ->
+                if (!name.endsWith(".deb")) {
+                    return@rename name
+                }
+
+                val arch = if (isArm64) "arm64" else "x64"
+                "${project.name}-${libs.versions.application.pkg.get()}-linux-${arch}.deb"
+            }
         }
 
         register<Copy>("bundleLinuxRpm") {
@@ -369,7 +378,15 @@ tasks {
             dependsOn("packageReleaseDistributionForCurrentOS")
 
             into(rootProject.layout.buildDirectory)
-            from(project.layout.buildDirectory.file("compose/binaries/main-release/rpm"))
+            from(project.layout.buildDirectory.dir("compose/binaries/main-release/rpm"))
+            rename { name ->
+                if (!name.endsWith(".rpm")) {
+                    return@rename name
+                }
+
+                val arch = if (isArm64) "arm64" else "x64"
+                "${project.name}-${libs.versions.application.pkg.get()}-linux-${arch}.rpm"
+            }
         }
     }
 
@@ -380,10 +397,14 @@ tasks {
             dependsOn("packageReleaseDistributionForCurrentOS")
 
             into(rootProject.layout.buildDirectory)
-            from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
+            from(project.layout.buildDirectory.dir("compose/binaries/main-release/dmg"))
             rename { name ->
+                if (!name.endsWith(".dmg")) {
+                    return@rename name
+                }
+
                 val arch = if (isArm64) "arm64" else "x64"
-                name.replace(".dmg", "-mac-${arch}.dmg")
+                "${project.name}-${libs.versions.application.pkg.get()}-macos-${arch}.dmg"
             }
         }
     }
@@ -395,7 +416,15 @@ tasks {
             dependsOn("packageReleaseDistributionForCurrentOS")
 
             into(rootProject.layout.buildDirectory)
-            from(project.layout.buildDirectory.file("compose/binaries/main-release/exe"))
+            from(project.layout.buildDirectory.dir("compose/binaries/main-release/exe"))
+            rename { name ->
+                if (!name.endsWith(".exe")) {
+                    return@rename name
+                }
+
+                val arch = if (isArm64) "arm64" else "x64"
+                "${project.name}-${libs.versions.application.pkg.get()}-windows-${arch}.exe"
+            }
         }
     }
 }
