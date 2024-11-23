@@ -235,6 +235,9 @@ compose.desktop {
             licenseFile = rootProject.file("LICENSE.txt")
 
             //outputBaseDir.set(rootProject.layout.buildDirectory.dir("distributions"))
+            if (isLinux) {
+                targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
+            }
             if (isMac) {
                 targetFormats(TargetFormat.Dmg)
             }
@@ -264,6 +267,10 @@ compose.desktop {
 
             linux {
                 packageVersion = project.version.toString()
+
+                // Required by FileKit
+                // https://github.com/vinceglb/FileKit#-installation
+                modules.add("jdk.security.auth")
             }
 
             macOS {
@@ -310,6 +317,17 @@ tasks {
     register("bundle") {
         dependsOn("packageReleaseDistributionForCurrentOS")
         doLast {
+            if (isLinux) {
+                copy {
+                    from(project.layout.buildDirectory.file("compose/binaries/main-release/deb"))
+                    into(rootProject.layout.buildDirectory.asFile.get())
+                }
+                copy {
+                    from(project.layout.buildDirectory.file("compose/binaries/main-release/rpm"))
+                    into(rootProject.layout.buildDirectory.asFile.get())
+                }
+            }
+
             if (isMac) {
                 copy {
                     from(project.layout.buildDirectory.file("compose/binaries/main-release/dmg"))
