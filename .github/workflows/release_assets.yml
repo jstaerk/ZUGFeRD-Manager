@@ -39,7 +39,7 @@ jobs:
         env:
           TAG: ${{ github.ref }}
           FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}.dmg
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run:
           gh release upload "$TAG" "$FILE"
 
@@ -48,7 +48,7 @@ jobs:
         env:
           TAG: ${{ github.ref }}
           FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}.dmg
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run:
           gh release upload "$TAG" "$FILE"
 
@@ -57,7 +57,7 @@ jobs:
         env:
           TAG: ${{ github.ref }}
           FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}-1_amd64.deb
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run:
           gh release upload "$TAG" "$FILE"
 
@@ -66,7 +66,7 @@ jobs:
         env:
           TAG: ${{ github.ref }}
           FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}-1.x86_64.rpm
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run:
           gh release upload "$TAG" "$FILE"
 
@@ -75,16 +75,15 @@ jobs:
         env:
           TAG: ${{ github.ref }}
           FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}-linux-x64.tar.gz
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run:
           gh release upload "$TAG" "$FILE"
 
       - name: Upload Windows-x64 (exe)
-        uses: svenstaro/upload-release-action@v2
         if: ${{ matrix.os == 'windows-latest' }}
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/ZUGFeRD-Manager-${{ steps.get_version.outputs.version-without-v }}.exe
-          asset_name:
-          tag: ${{ github.ref }}
-          overwrite: true
+        env:
+          TAG: ${{ github.ref }}
+          FILE: build/ZUGFeRD-Manager-${{ steps.version.outputs.version-without-v }}.exe
+          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
+        run:
+          gh release upload "$TAG" "$FILE"

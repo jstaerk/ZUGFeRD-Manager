@@ -26,5 +26,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: ZUGFeRD-Manager ${{ steps.version.outputs.version-without-v }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ZUGFERD_RELEASE_KEY }}
           prerelease: ${{ github.ref_name == 'develop' }}
