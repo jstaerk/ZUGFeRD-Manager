@@ -1,6 +1,6 @@
 [versions]
 application-version = "1.0.0"
-application-pkg = "1.0.0-RC1"
+application-pkg = "1.0.0-RC2"
 application-revision = "1"
 
 androidx-lifecycle = "2.8.4"
