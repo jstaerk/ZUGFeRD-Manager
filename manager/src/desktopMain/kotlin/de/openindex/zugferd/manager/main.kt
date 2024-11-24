@@ -14,7 +14,12 @@ import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
+import de.openindex.zugferd.manager.utils.getPlatform
+import de.openindex.zugferd.manager.utils.installWebView
 import de.openindex.zugferd.manager.utils.loadPreferencesData
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
@@ -46,6 +51,9 @@ fun main() {
         )
     }
 
+    APP_LOGGER.info("Launching $APP_TITLE_FULL $APP_VERSION on ${getPlatform().name}")
+
+
     //
     // Enable interop blending.
     // Experimental feature with certain drawbacks:
@@ -75,9 +83,22 @@ fun main() {
         }
     }
 
-    application {
-        APP_LOGGER.info("Launching $APP_TITLE_FULL $APP_VERSION")
 
+    //
+    // Init JCEF-WebView in background while the application is starting.
+    //
+
+    @OptIn(DelicateCoroutinesApi::class)
+    GlobalScope.launch(Dispatchers.IO) {
+        installWebView()
+    }
+
+
+    //
+    // Start desktop application.
+    //
+
+    application {
         val scope = rememberCoroutineScope()
 
         // Initially load preferences within composable application.

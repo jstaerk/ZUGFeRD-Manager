@@ -35,6 +35,7 @@ buildInfo {
 
     customFields = mapOf(
         "VENDOR" to "OpenIndex",
+        "CHROME_VERSION" to libs.versions.jcef.natives.get(),
     )
 }
 

@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.utils.CEF_CLIENT
 import org.cef.browser.CefBrowser
 import java.awt.BorderLayout
@@ -42,13 +41,9 @@ actual fun WebViewer(html: String, modifier: Modifier) {
         background = MaterialTheme.colorScheme.surface,
         modifier = modifier,
         factory = {
-            //val app = CEF_APP
-            //val client = app.createClient()
             val browser = CEF_CLIENT.createBrowser(dataUrl, false, TRANSPARENT)
             //browser.createImmediately()
-
             browserState = browser
-
             WebPanel(browser)
         },
         update = { panel: WebPanel ->
