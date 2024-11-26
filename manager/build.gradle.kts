@@ -731,19 +731,10 @@ tasks {
             // to avoid bundling into the macOS application bundle.
             configurations.named("desktopRuntimeClasspath") {
                 //println(this.name)
-
-                if (isAmd64) {
-                    exclude(
-                        group = libs.jcef.natives.macosx.amd64.get().group,
-                        module = libs.jcef.natives.macosx.amd64.get().name,
-                    )
-                }
-                if (isArm64) {
-                    exclude(
-                        group = libs.jcef.natives.macosx.arm64.get().group,
-                        module = libs.jcef.natives.macosx.arm64.get().name,
-                    )
-                }
+                exclude(
+                    group = jcefNativesDependency.get().group,
+                    module = jcefNativesDependency.get().name,
+                )
             }
         }
     }
