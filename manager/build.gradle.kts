@@ -275,6 +275,7 @@ compose.desktop {
                 debMaintainer = "andy@openindex.de"
                 rpmLicenseType = "Apache-2.0"
                 packageVersion = project.version.toString()
+                iconFile.set(rootProject.layout.projectDirectory.dir("share").dir("icons").file("application.png"))
             }
 
             macOS {
@@ -283,6 +284,7 @@ compose.desktop {
                 packageVersion = project.version.toString()
                 packageBuildVersion = project.version.toString()
                 appCategory = "public.app-category.business"
+                iconFile.set(rootProject.layout.projectDirectory.dir("share").dir("icons").file("application.icns"))
 
                 // Currently not published to the App Store.
                 appStore = false
@@ -333,6 +335,7 @@ compose.desktop {
                 console = false
                 dirChooser = true
                 perUserInstall = true
+                iconFile.set(rootProject.layout.projectDirectory.dir("share").dir("icons").file("application.ico"))
             }
         }
     }
