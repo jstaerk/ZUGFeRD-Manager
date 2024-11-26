@@ -36,9 +36,10 @@ jobs:
           LOCAL_PROPERTIES_BASE64: ${{ secrets.LOCAL_PROPERTIES_BASE64 }}
         run: |
           # create variables
-          LOCAL_PROPERTIES_PATH="local.properties"
-          CERTIFICATE_PATH="share/apple/certificate.p12"
-          KEYCHAIN_PATH="share/apple/keychain.keychain-db"
+          WORK_DIR="$(pwd)"
+          LOCAL_PROPERTIES_PATH="${WORK_DIR}/local.properties"
+          CERTIFICATE_PATH="${WORK_DIR}/share/apple/certificate.p12"
+          KEYCHAIN_PATH="${WORK_DIR}/share/apple/keychain.keychain-db"
           
           # write base64 secrets into files
           echo -n "${LOCAL_PROPERTIES_BASE64}" | base64 --decode -o "${LOCAL_PROPERTIES_PATH}"
@@ -63,8 +64,8 @@ jobs:
           TAG: ${{ github.ref_name }}
           GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
         run: |
-              for file in $(find build -type f -maxdepth 1)
-              do
-                echo "RELEASE $file IN $TAG"
-                gh release upload $TAG $file
-              done
+          for file in $(find build -type f -maxdepth 1)
+          do
+            echo "RELEASE $file IN $TAG"
+            gh release upload $TAG $file
+          done
