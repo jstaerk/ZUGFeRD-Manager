@@ -733,7 +733,7 @@ tasks {
                 //println(this.name)
 
                 if (isAmd64) {
-                    libs.jcef.natives.macosx.amd64.get().exclude(
+                    exclude(
                         group = libs.jcef.natives.macosx.amd64.get().group,
                         module = libs.jcef.natives.macosx.amd64.get().name,
                     )
