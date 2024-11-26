@@ -16,7 +16,7 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.outputStream
 
 private val PREFERENCES_FILE: Path by lazy {
-    APP_DIR.resolve("preferences.json")
+    APP_WORK_DIR.resolve("preferences.json")
 }
 
 @OptIn(ExperimentalPathApi::class, ExperimentalSerializationApi::class)

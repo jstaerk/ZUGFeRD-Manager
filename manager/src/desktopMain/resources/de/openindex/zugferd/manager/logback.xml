@@ -27,6 +27,7 @@
     </appender>
 
     <logger name="de.openindex.zugferd" level="INFO"/>
+    <logger name="me.friwi.jcefmaven.impl.progress" level="INFO"/>
 
     <root level="WARN">
         <appender-ref ref="STDOUT"/>

@@ -4,7 +4,7 @@
 **/build/
 xcuserdata
 !src/**/build/
-local.properties
+#local.properties
 #.idea
 .DS_Store
 captures
@@ -19,6 +19,9 @@ captures
 
 /.idea/artifacts
 /conveyor.conf
+/local.properties
+/local.*.properties
+!/local.example.properties
 /node_modules
 /output
 /package.json

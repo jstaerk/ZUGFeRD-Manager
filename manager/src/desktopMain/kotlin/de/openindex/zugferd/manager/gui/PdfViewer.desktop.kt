@@ -6,25 +6,18 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import de.openindex.zugferd.manager.utils.CEF_CLIENT
+import de.openindex.zugferd.manager.utils.CEF_OFFSCREEN_RENDERING_ENABLED
 import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.swing.Swing
 import org.cef.browser.CefBrowser
 import java.awt.BorderLayout
 import javax.swing.JPanel
 
-
-//private const val OSR = false
 private const val TRANSPARENT = false
-private const val BLANK = "about:blank"
+//private const val BLANK = "about:blank"
 
 @Composable
 actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier) {
@@ -44,7 +37,7 @@ actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier) {
         background = MaterialTheme.colorScheme.surface,
         modifier = modifier,
         factory = {
-            val browser = CEF_CLIENT.createBrowser(pdfUrl, false, TRANSPARENT)
+            val browser = CEF_CLIENT.createBrowser(pdfUrl, CEF_OFFSCREEN_RENDERING_ENABLED, TRANSPARENT)
             //browser.createImmediately()
             browserState = browser
             PdfPanel(browser)

@@ -27,6 +27,12 @@ on:
         default: true
         type: boolean
 
+      signing_enabled:
+        description: "Sign application bundles"
+        required: true
+        default: false
+        type: boolean
+
 jobs:
   bundle:
     strategy:
@@ -51,6 +57,33 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Setup signing for MacOS
+        if: ${{ inputs.signing_enabled && (matrix.os == 'macos-latest' || matrix.os == 'macos-13') }}
+        env:
+          APPLE_BUILD_CERTIFICATE_BASE64: ${{ secrets.APPLE_BUILD_CERTIFICATE_BASE64 }}
+          APPLE_BUILD_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_BUILD_CERTIFICATE_PASSWORD }}
+          APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+          LOCAL_PROPERTIES_BASE64: ${{ secrets.LOCAL_PROPERTIES_BASE64 }}
+        run: |
+              # create variables
+              LOCAL_PROPERTIES_PATH="local.properties"
+              CERTIFICATE_PATH="share/apple/certificate.p12"
+              KEYCHAIN_PATH="share/apple/keychain.keychain-db"
+          
+              # write base64 secrets into files
+              echo -n "${LOCAL_PROPERTIES_BASE64}" | base64 --decode -o "${LOCAL_PROPERTIES_PATH}"
+              echo -n "${APPLE_BUILD_CERTIFICATE_BASE64}" | base64 --decode -o "${CERTIFICATE_PATH}"
+          
+              # create temporary keychain
+              security create-keychain -p "${APPLE_KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+              security set-keychain-settings -lut 21600 "${KEYCHAIN_PATH}"
+              security unlock-keychain -p "${APPLE_KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+    
+              # import certificate to keychain
+              security import "${CERTIFICATE_PATH}" -P "${APPLE_BUILD_CERTIFICATE_PASSWORD}" -A -t cert -f pkcs12 -k "${KEYCHAIN_PATH}"
+              security set-key-partition-list -S apple-tool:,apple: -k "${APPLE_KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
+              security list-keychain -d user -s "${KEYCHAIN_PATH}"
 
       - name: Build with Gradle
         run: ./gradlew clean bundle

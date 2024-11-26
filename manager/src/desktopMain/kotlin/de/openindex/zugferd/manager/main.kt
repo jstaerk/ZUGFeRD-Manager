@@ -1,6 +1,7 @@
 package de.openindex.zugferd.manager
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.awt.ComposeWindow
@@ -9,6 +10,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import ch.qos.logback.classic.ClassicConstants
+import de.openindex.zugferd.manager.utils.APP_LAUNCHER
 import de.openindex.zugferd.manager.utils.LOGS_DIR
 import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
@@ -17,14 +19,12 @@ import de.openindex.zugferd.manager.utils.LocalSenders
 import de.openindex.zugferd.manager.utils.getPlatform
 import de.openindex.zugferd.manager.utils.installWebView
 import de.openindex.zugferd.manager.utils.loadPreferencesData
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.bridge.SLF4JBridgeHandler
 import kotlin.io.path.absolutePathString
 
 val APP_LOGGER: Logger by lazy {
@@ -42,8 +42,7 @@ fun main() {
         "app.log.dir",
         LOGS_DIR.absolutePathString(),
     )
-    val logbackXml = object {}.javaClass
-        .getResource("/de/openindex/zugferd/ui/logback.xml")
+    val logbackXml = object {}.javaClass.getResource("logback.xml")
     if (logbackXml != null) {
         System.setProperty(
             ClassicConstants.CONFIG_FILE_PROPERTY,
@@ -51,7 +50,24 @@ fun main() {
         )
     }
 
-    APP_LOGGER.info("Launching $APP_TITLE_FULL $APP_VERSION on ${getPlatform().name}")
+    //
+    // Bridge between Java Logging and SLF4J.
+    // https://www.slf4j.org/legacy.html#jul-to-slf4j
+    // https://www.slf4j.org/api/org/slf4j/bridge/SLF4JBridgeHandler.html
+    //
+
+    SLF4JBridgeHandler.removeHandlersForRootLogger()
+    SLF4JBridgeHandler.install()
+
+
+    APP_LOGGER.info(
+        """
+            Launching $APP_TITLE_FULL
+            - version  : $APP_VERSION
+            - platform : ${getPlatform().name}
+            - launcher : $APP_LAUNCHER
+        """.trimIndent(),
+    )
 
 
     //
@@ -85,13 +101,16 @@ fun main() {
 
 
     //
-    // Init JCEF-WebView in background while the application is starting.
+    // Dump System Properties
     //
 
-    @OptIn(DelicateCoroutinesApi::class)
-    GlobalScope.launch(Dispatchers.IO) {
-        installWebView()
-    }
+    //System.getProperties().keys()
+    //    .asSequence()
+    //    .map { it.toString() }
+    //    .sortedBy { it }
+    //    .forEach {
+    //        APP_LOGGER.info("${it}: ${System.getProperty(it)}")
+    //    }
 
 
     //
@@ -100,6 +119,11 @@ fun main() {
 
     application {
         val scope = rememberCoroutineScope()
+
+        // Init WebView in background while the application is starting.
+        LaunchedEffect(Unit) {
+            installWebView()
+        }
 
         // Initially load preferences within composable application.
         val preferences = LocalPreferences.current
