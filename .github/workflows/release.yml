@@ -22,9 +22,9 @@ jobs:
       - name: Get branch
         uses: nelonoel/branch-name@v1.0.1
 
-      - name: Release
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           name: ZUGFeRD-Manager ${{ steps.version.outputs.version-without-v }}
-          token: ${{ secrets.ZUGFERD_RELEASE_KEY }}
+          token: ${{ secrets.RELEASE_TOKEN }}
           prerelease: ${{ env.BRANCH_NAME != 'master' }}

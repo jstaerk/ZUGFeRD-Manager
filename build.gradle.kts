@@ -15,12 +15,6 @@ plugins {
     // BuildInfo Plugin
     // https://codeberg.org/h34tnet/buildinfo
     alias(libs.plugins.buildinfo) apply false
-
-    // Conveyor Plugin
-    // https://www.hydraulic.dev/
-    // https://conveyor.hydraulic.dev/latest/
-    // https://conveyor.hydraulic.dev/latest/tutorial/hare/jvm/
-    //alias(libs.plugins.conveyor) apply false
 }
 
 tasks {
@@ -30,8 +24,12 @@ tasks {
 }
 
 subprojects {
-    // Configure DependencyUpdatesTask, that checks dependencies for version updates.
-    // https://github.com/ben-manes/gradle-versions-plugin
+    //
+    // Configure DependencyUpdatesTask for all subprojects,
+    // that checks dependencies for version updates.
+    //
+    // see https://github.com/ben-manes/gradle-versions-plugin
+    //
     tasks.withType<DependencyUpdatesTask>().configureEach {
         checkForGradleUpdate = false
 

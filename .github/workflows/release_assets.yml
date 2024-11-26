@@ -58,11 +58,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bundle
 
-      - name: Upload
+      - name: Upload bundle to release
         shell: bash
         env:
           TAG: ${{ github.ref_name }}
-          GITHUB_TOKEN: ${{ secrets.ZUGFERD_RELEASE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
           for file in $(find build -type f -maxdepth 1)
           do
