@@ -145,6 +145,10 @@ kotlin {
             //implementation(libs.icepdf.core)
             //implementation(libs.icepdf.viewer)
 
+            // Jaxen XPath Engine for Java
+            // https://github.com/jaxen-xpath/jaxen
+            runtimeOnly(libs.jaxen)
+
             // JCEF-Maven
             // https://github.com/jcefmaven/jcefmaven
             implementation(libs.jcef.maven)
