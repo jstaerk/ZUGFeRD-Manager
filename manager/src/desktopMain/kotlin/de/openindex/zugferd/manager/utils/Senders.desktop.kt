@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
@@ -41,7 +40,6 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.moveTo
 import kotlin.io.path.outputStream
-import kotlin.io.path.reader
 
 private val SENDERS_FILE: Path by lazy {
     DATA_DIR.resolve("senders.json")
