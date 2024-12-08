@@ -1,4 +1,4 @@
-@file:Suppress("SpellCheckingInspection")
+@file:Suppress("SpellCheckingInspection", "GrazieInspection")
 
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.org.apache.commons.lang3.SystemUtils
@@ -209,13 +209,16 @@ compose.desktop {
         // https://github.com/msgpack/msgpack-java/issues/600#issuecomment-1168754147
         // https://github.com/uncomplicate/neanderthal/issues/55#issuecomment-469914674
         //
+
         jvmArgs("--add-opens", "java.base/java.nio=ALL-UNNAMED")
         jvmArgs("--add-opens", "java.base/jdk.internal.ref=ALL-UNNAMED")
         jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED")
 
+
         //
         // Required by JCEF.
         //
+
         jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
         jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED") // recommended but not necessary
         if (isMac) {
@@ -225,8 +228,20 @@ compose.desktop {
 
         buildTypes {
             release {
+                //
+                // TODO: Check how to make use of ProGuard on release builds.
+                // Currently failing with an error.
+                // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md#minification--obfuscation
+                //
+
                 proguard {
                     isEnabled = false
+
+                    //
+                    // ProGuard-Gradle version.
+                    // https://mvnrepository.com/artifact/com.guardsquare/proguard-gradle
+                    //
+                    version = libs.versions.proguard.get()
                 }
             }
         }
