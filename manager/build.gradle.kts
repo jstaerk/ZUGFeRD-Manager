@@ -205,6 +205,15 @@ compose.desktop {
         jvmArgs("-Dfile.encoding=UTF-8")
 
         //
+        // Wanted by PDFBox.
+        // https://github.com/msgpack/msgpack-java/issues/600#issuecomment-1168754147
+        // https://github.com/uncomplicate/neanderthal/issues/55#issuecomment-469914674
+        //
+        jvmArgs("--add-opens", "java.base/java.nio=ALL-UNNAMED")
+        jvmArgs("--add-opens", "java.base/jdk.internal.ref=ALL-UNNAMED")
+        jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED")
+
+        //
         // Required by JCEF.
         //
         jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
