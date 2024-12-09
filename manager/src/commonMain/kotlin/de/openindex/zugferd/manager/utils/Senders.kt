@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager.utils
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import de.openindex.zugferd.manager.model.TradeParty
+import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
@@ -33,13 +34,13 @@ class Senders(data: List<TradeParty>) {
 
     private val nextKey: UInt
         get() = if (_senders.value.isNotEmpty()) {
-            _senders.value.maxOf { it._key } + 1.toUInt()
+            _senders.value.maxOf { it._key ?: 0.toUInt() } + 1.toUInt()
         } else {
             1.toUInt()
         }
 
     fun put(sender: TradeParty, preferences: Preferences? = null) {
-        _senders.value = if (sender._key == 0.toUInt()) {
+        _senders.value = if (sender._key == null) {
             val newSender = sender.copy(_key = nextKey)
             preferences?.setPreviousSenderKey(newSender._key)
 
@@ -55,7 +56,7 @@ class Senders(data: List<TradeParty>) {
     }
 
     fun remove(sender: TradeParty) {
-        remove(sender._key)
+        remove(sender._key ?: 0.toUInt())
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
@@ -64,10 +65,29 @@ class Senders(data: List<TradeParty>) {
             .filter { it._key != key }
     }
 
+    fun removeAll() {
+        _senders.value = listOf()
+    }
+
     suspend fun save() {
         saveSendersData(
             data = senders,
         )
+    }
+
+    suspend fun export(targetFile: PlatformFile) {
+        saveSendersData(
+            data = senders.map { it.copy(_key = null) },
+            targetFile = targetFile,
+        )
+    }
+
+    suspend fun import(sourceFile: PlatformFile) {
+        loadSendersData(
+            sourceFile = sourceFile,
+        ).map { it.copy(_key = null) }.forEach { put(it) }
+
+        save()
     }
 }
 
@@ -78,6 +98,6 @@ fun loadSenders(): Senders =
         Senders(loadSendersData())
     }
 
-expect suspend fun loadSendersData(): List<TradeParty>
+expect suspend fun loadSendersData(sourceFile: PlatformFile? = null): List<TradeParty>
 
-expect suspend fun saveSendersData(data: List<TradeParty>)
+expect suspend fun saveSendersData(data: List<TradeParty>, targetFile: PlatformFile? = null)

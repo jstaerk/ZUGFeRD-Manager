@@ -33,17 +33,25 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.APP_TITLE
+import de.openindex.zugferd.manager.gui.ActionsButton
 import de.openindex.zugferd.manager.gui.ProductItemSettings
+import de.openindex.zugferd.manager.gui.QuestionDialog
 import de.openindex.zugferd.manager.gui.SectionInfo
 import de.openindex.zugferd.manager.gui.SectionSubTitle
 import de.openindex.zugferd.manager.gui.SectionTitle
@@ -53,7 +61,10 @@ import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
-import kotlinx.coroutines.Dispatchers
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.compose.rememberFileSaverLauncher
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
 
 @Composable
@@ -82,6 +93,33 @@ fun SettingsSection(state: SettingsSectionState) {
 private fun SenderSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     val senders = LocalSenders.current
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    val importer = rememberFilePickerLauncher(
+        type = PickerType.File(listOf("json")),
+        mode = PickerMode.Single,
+        title = "Datei zum Import wählen",
+    ) { file ->
+        if (file == null) {
+            return@rememberFilePickerLauncher
+        }
+        scope.launch {
+            senders.import(
+                sourceFile = file,
+            )
+        }
+    }
+
+    val exporter = rememberFileSaverLauncher { file ->
+        if (file == null) {
+            return@rememberFileSaverLauncher
+        }
+        scope.launch {
+            senders.export(
+                targetFile = file,
+            )
+        }
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -89,6 +127,53 @@ private fun SenderSettings(state: SettingsSectionState) {
     ) {
         SectionSubTitle(
             text = "Absender",
+            actions = {
+                ActionsButton { doClose ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Absender importieren",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            importer.launch()
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Absender exportieren",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            exporter.launch(
+                                baseName = "zugferd-absender",
+                                extension = "json",
+                            )
+                        }
+                    )
+
+                    HorizontalDivider()
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Alle Absender löschen",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            showDeleteDialog = true
+                        }
+                    )
+                }
+            },
         )
 
         SectionInfo(
@@ -98,7 +183,7 @@ private fun SenderSettings(state: SettingsSectionState) {
         TradePartyItemSettings(
             tradeParties = senders.senders,
             onSave = { item ->
-                scope.launch(Dispatchers.IO) {
+                scope.launch {
                     senders.put(
                         sender = item,
                     )
@@ -106,7 +191,7 @@ private fun SenderSettings(state: SettingsSectionState) {
                 }
             },
             onRemove = { item ->
-                scope.launch(Dispatchers.IO) {
+                scope.launch {
                     senders.remove(
                         sender = item,
                     )
@@ -120,6 +205,20 @@ private fun SenderSettings(state: SettingsSectionState) {
             },
         )
     }
+
+    if (showDeleteDialog) {
+        QuestionDialog(
+            question = "Sollen wirklich alle Absender gelöscht werden?",
+            onCancel = { showDeleteDialog = false },
+            onAccept = {
+                showDeleteDialog = false
+                senders.removeAll()
+                scope.launch {
+                    senders.save()
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -127,6 +226,33 @@ private fun SenderSettings(state: SettingsSectionState) {
 private fun RecipientSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     val recipients = LocalRecipients.current
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    val importer = rememberFilePickerLauncher(
+        type = PickerType.File(listOf("json")),
+        mode = PickerMode.Single,
+        title = "Datei zum Import wählen",
+    ) { file ->
+        if (file == null) {
+            return@rememberFilePickerLauncher
+        }
+        scope.launch {
+            recipients.import(
+                sourceFile = file,
+            )
+        }
+    }
+
+    val exporter = rememberFileSaverLauncher { file ->
+        if (file == null) {
+            return@rememberFileSaverLauncher
+        }
+        scope.launch {
+            recipients.export(
+                targetFile = file,
+            )
+        }
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -134,6 +260,53 @@ private fun RecipientSettings(state: SettingsSectionState) {
     ) {
         SectionSubTitle(
             text = "Empfänger",
+            actions = {
+                ActionsButton { doClose ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Empfänger importieren",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            importer.launch()
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Empfänger exportieren",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            exporter.launch(
+                                baseName = "zugferd-empfaenger",
+                                extension = "json",
+                            )
+                        }
+                    )
+
+                    HorizontalDivider()
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Alle Empfänger löschen",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            showDeleteDialog = true
+                        }
+                    )
+                }
+            },
         )
 
         SectionInfo(
@@ -144,7 +317,7 @@ private fun RecipientSettings(state: SettingsSectionState) {
             isCustomer = true,
             tradeParties = recipients.recipients,
             onSave = { item ->
-                scope.launch(Dispatchers.IO) {
+                scope.launch {
                     recipients.put(
                         recipient = item,
                     )
@@ -152,7 +325,7 @@ private fun RecipientSettings(state: SettingsSectionState) {
                 }
             },
             onRemove = { item ->
-                scope.launch(Dispatchers.IO) {
+                scope.launch {
                     recipients.remove(
                         recipient = item,
                     )
@@ -166,6 +339,20 @@ private fun RecipientSettings(state: SettingsSectionState) {
             },
         )
     }
+
+    if (showDeleteDialog) {
+        QuestionDialog(
+            question = "Sollen wirklich alle Empfänger gelöscht werden?",
+            onCancel = { showDeleteDialog = false },
+            onAccept = {
+                showDeleteDialog = false
+                recipients.removeAll()
+                scope.launch {
+                    recipients.save()
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -173,6 +360,33 @@ private fun RecipientSettings(state: SettingsSectionState) {
 private fun ProductSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     val products = LocalProducts.current
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    val importer = rememberFilePickerLauncher(
+        type = PickerType.File(listOf("json")),
+        mode = PickerMode.Single,
+        title = "Datei zum Import wählen",
+    ) { file ->
+        if (file == null) {
+            return@rememberFilePickerLauncher
+        }
+        scope.launch {
+            products.import(
+                sourceFile = file,
+            )
+        }
+    }
+
+    val exporter = rememberFileSaverLauncher { file ->
+        if (file == null) {
+            return@rememberFileSaverLauncher
+        }
+        scope.launch {
+            products.export(
+                targetFile = file,
+            )
+        }
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -180,6 +394,53 @@ private fun ProductSettings(state: SettingsSectionState) {
     ) {
         SectionSubTitle(
             text = "Rechnungsposten",
+            actions = {
+                ActionsButton { doClose ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Posten importieren",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            importer.launch()
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Posten exportieren",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            exporter.launch(
+                                baseName = "zugferd-rechnungsposten",
+                                extension = "json",
+                            )
+                        }
+                    )
+
+                    HorizontalDivider()
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = "Alle Posten löschen",
+                                softWrap = false,
+                            )
+                        },
+                        onClick = {
+                            doClose()
+                            showDeleteDialog = true
+                        }
+                    )
+                }
+            },
         )
 
         SectionInfo(
@@ -189,7 +450,7 @@ private fun ProductSettings(state: SettingsSectionState) {
         ProductItemSettings(
             products = products.products,
             onSave = { item ->
-                scope.launch(Dispatchers.IO) {
+                scope.launch {
                     products.put(
                         product = item,
                     )
@@ -197,7 +458,7 @@ private fun ProductSettings(state: SettingsSectionState) {
                 }
             },
             onRemove = { item ->
-                scope.launch(Dispatchers.IO) {
+                scope.launch {
                     products.remove(
                         product = item,
                     )
@@ -209,6 +470,20 @@ private fun ProductSettings(state: SettingsSectionState) {
                     .takeIf { item?.isSaved == true }
                     ?: "Rechnungsposten hinzufügen"
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        QuestionDialog(
+            question = "Sollen wirklich alle Rechnungsposten gelöscht werden?",
+            onCancel = { showDeleteDialog = false },
+            onAccept = {
+                showDeleteDialog = false
+                products.removeAll()
+                scope.launch {
+                    products.save()
+                }
+            }
         )
     }
 }

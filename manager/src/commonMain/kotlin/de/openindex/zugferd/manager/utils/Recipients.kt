@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager.utils
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import de.openindex.zugferd.manager.model.TradeParty
+import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
@@ -33,13 +34,13 @@ class Recipients(data: List<TradeParty>) {
 
     private val nextKey: UInt
         get() = if (_recipients.value.isNotEmpty()) {
-            _recipients.value.maxOf { it._key } + 1.toUInt()
+            _recipients.value.maxOf { it._key ?: 0.toUInt() } + 1.toUInt()
         } else {
             1.toUInt()
         }
 
     fun put(recipient: TradeParty) {
-        _recipients.value = if (recipient._key == 0.toUInt()) {
+        _recipients.value = if (recipient._key == null) {
             _recipients.value
                 .plus(recipient.copy(_key = nextKey))
         } else {
@@ -50,7 +51,7 @@ class Recipients(data: List<TradeParty>) {
     }
 
     fun remove(recipient: TradeParty) {
-        remove(recipient._key)
+        remove(recipient._key ?: 0.toUInt())
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
@@ -59,10 +60,29 @@ class Recipients(data: List<TradeParty>) {
             .filter { it._key != key }
     }
 
+    fun removeAll() {
+        _recipients.value = listOf()
+    }
+
     suspend fun save() {
         saveRecipientsData(
             data = recipients,
         )
+    }
+
+    suspend fun export(targetFile: PlatformFile) {
+        saveRecipientsData(
+            data = recipients.map { it.copy(_key = null) },
+            targetFile = targetFile,
+        )
+    }
+
+    suspend fun import(sourceFile: PlatformFile) {
+        loadRecipientsData(
+            sourceFile = sourceFile,
+        ).map { it.copy(_key = null) }.forEach { put(it) }
+
+        save()
     }
 }
 
@@ -73,6 +93,6 @@ fun loadRecipients(): Recipients =
         Recipients(loadRecipientsData())
     }
 
-expect suspend fun loadRecipientsData(): List<TradeParty>
+expect suspend fun loadRecipientsData(sourceFile: PlatformFile? = null): List<TradeParty>
 
-expect suspend fun saveRecipientsData(data: List<TradeParty>)
+expect suspend fun saveRecipientsData(data: List<TradeParty>, targetFile: PlatformFile? = null)

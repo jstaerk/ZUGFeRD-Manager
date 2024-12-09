@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Product(
     @Suppress("PropertyName")
-    val _key: UInt = 0.toUInt(),
+    val _key: UInt? = null,
     @Suppress("PropertyName")
     val _defaultPricePerUnit: Double = 0.0,
 
@@ -40,7 +40,7 @@ data class Product(
     val taxCategoryCode: String = TaxCategoryCode.NORMAL_TAX.code,
 ) {
     val isSaved: Boolean
-        get() = _key > 0.toUInt()
+        get() = _key != null
 
     val summary: String
         get() = buildList {

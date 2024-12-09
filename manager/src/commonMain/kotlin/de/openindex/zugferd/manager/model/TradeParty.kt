@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TradeParty(
     @Suppress("PropertyName")
-    val _key: UInt = 0.toUInt(),
+    val _key: UInt? = null,
     @Suppress("PropertyName")
     val _defaultPaymentMethod: PaymentMethod = PaymentMethod.SEPA_CREDIT_TRANSFER,
 
@@ -51,7 +51,7 @@ data class TradeParty(
     val uriUniversalCommunicationId: SchemedID? = null,
 ) {
     val isSaved: Boolean
-        get() = _key > 0.toUInt()
+        get() = _key != null
 
     val summary: String
         get() = buildList {

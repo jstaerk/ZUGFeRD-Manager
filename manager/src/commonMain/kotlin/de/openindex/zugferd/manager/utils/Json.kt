@@ -32,6 +32,13 @@ val JSON_EXPORT = Json {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
+val JSON_EXPORT_WITHOUT_DEFAULTS = Json {
+    encodeDefaults = false
+    prettyPrint = true
+    prettyPrintIndent = "  "
+}
+
+@OptIn(ExperimentalSerializationApi::class)
 val JSON_IMPORT = Json {
     isLenient = true
     ignoreUnknownKeys = true

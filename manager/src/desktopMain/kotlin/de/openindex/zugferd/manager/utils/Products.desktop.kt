@@ -23,6 +23,7 @@ package de.openindex.zugferd.manager.utils
 
 import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.model.Product
+import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -46,31 +47,38 @@ private val PRODUCTS_FILE: Path by lazy {
 }
 
 @OptIn(ExperimentalPathApi::class, ExperimentalSerializationApi::class)
-actual suspend fun loadProductsData(): List<Product> {
+actual suspend fun loadProductsData(sourceFile: PlatformFile?): List<Product> {
     return withContext(Dispatchers.IO) {
-        if (!PRODUCTS_FILE.exists()) {
+        val isDataFile = sourceFile == null
+        val productsFile = sourceFile?.file?.toPath() ?: PRODUCTS_FILE
+
+        if (!productsFile.exists()) {
             return@withContext listOf()
         }
 
-        if (!PRODUCTS_FILE.isRegularFile()) {
+        if (!productsFile.isRegularFile()) {
             APP_LOGGER.warn("Products are invalid.")
-            PRODUCTS_FILE.deleteRecursively()
+            if (isDataFile) {
+                PRODUCTS_FILE.deleteRecursively()
+            }
             return@withContext listOf()
         }
 
         try {
-            PRODUCTS_FILE
+            productsFile
                 .inputStream()
                 .use { JSON_IMPORT.decodeFromStream(it) }
         } catch (e: Exception) {
             APP_LOGGER.warn("Products are not readable.", e)
 
-            val backupFile = BACKUPS_DIR
-                .resolve("unreadable")
-                .resolve("products.${System.currentTimeMillis()}.json")
-                .createParentDirectories()
+            if (isDataFile) {
+                val backupFile = BACKUPS_DIR
+                    .resolve("unreadable")
+                    .resolve("products.${System.currentTimeMillis()}.json")
+                    .createParentDirectories()
 
-            PRODUCTS_FILE.moveTo(backupFile, true)
+                PRODUCTS_FILE.moveTo(backupFile, true)
+            }
 
             listOf()
         }
@@ -78,9 +86,12 @@ actual suspend fun loadProductsData(): List<Product> {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-actual suspend fun saveProductsData(data: List<Product>) {
+actual suspend fun saveProductsData(data: List<Product>, targetFile: PlatformFile?) {
     withContext(Dispatchers.IO) {
-        val tempFile = if (PRODUCTS_FILE.isRegularFile()) {
+        val isDataFile = targetFile == null
+        val productsFile = targetFile?.file?.toPath() ?: PRODUCTS_FILE
+
+        val tempFile = if (PRODUCTS_FILE.isRegularFile() && isDataFile) {
             PRODUCTS_FILE.copyTo(
                 target = Files.createTempFile("products-", ".json"),
                 overwrite = true,
@@ -90,9 +101,14 @@ actual suspend fun saveProductsData(data: List<Product>) {
         }
 
         try {
-            PRODUCTS_FILE
+            productsFile
                 .outputStream()
-                .use { JSON_EXPORT.encodeToStream(data, it) }
+                .use {
+                    if (isDataFile)
+                        JSON_EXPORT.encodeToStream(data, it)
+                    else
+                        JSON_EXPORT_WITHOUT_DEFAULTS.encodeToStream(data, it)
+                }
         } catch (e: Exception) {
             APP_LOGGER.warn("Products are not writable.", e)
             tempFile?.copyTo(PRODUCTS_FILE)

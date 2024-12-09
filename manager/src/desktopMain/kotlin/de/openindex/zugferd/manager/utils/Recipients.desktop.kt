@@ -23,6 +23,7 @@ package de.openindex.zugferd.manager.utils
 
 import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.model.TradeParty
+import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -46,31 +47,38 @@ private val RECIPIENTS_FILE: Path by lazy {
 }
 
 @OptIn(ExperimentalPathApi::class, ExperimentalSerializationApi::class)
-actual suspend fun loadRecipientsData(): List<TradeParty> {
+actual suspend fun loadRecipientsData(sourceFile: PlatformFile?): List<TradeParty> {
     return withContext(Dispatchers.IO) {
-        if (!RECIPIENTS_FILE.exists()) {
+        val isDataFile = sourceFile == null
+        val recipientsFile = sourceFile?.file?.toPath() ?: RECIPIENTS_FILE
+
+        if (!recipientsFile.exists()) {
             return@withContext listOf()
         }
 
-        if (!RECIPIENTS_FILE.isRegularFile()) {
+        if (!recipientsFile.isRegularFile()) {
             APP_LOGGER.warn("Recipients are invalid.")
-            RECIPIENTS_FILE.deleteRecursively()
+            if (isDataFile) {
+                RECIPIENTS_FILE.deleteRecursively()
+            }
             return@withContext listOf()
         }
 
         try {
-            RECIPIENTS_FILE
+            recipientsFile
                 .inputStream()
                 .use { JSON_IMPORT.decodeFromStream(it) }
         } catch (e: Exception) {
             APP_LOGGER.warn("Recipients are not readable.", e)
 
-            val backupFile = BACKUPS_DIR
-                .resolve("unreadable")
-                .resolve("recipients.${System.currentTimeMillis()}.json")
-                .createParentDirectories()
+            if (isDataFile) {
+                val backupFile = BACKUPS_DIR
+                    .resolve("unreadable")
+                    .resolve("recipients.${System.currentTimeMillis()}.json")
+                    .createParentDirectories()
 
-            RECIPIENTS_FILE.moveTo(backupFile, true)
+                RECIPIENTS_FILE.moveTo(backupFile, true)
+            }
 
             listOf()
         }
@@ -78,9 +86,12 @@ actual suspend fun loadRecipientsData(): List<TradeParty> {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-actual suspend fun saveRecipientsData(data: List<TradeParty>) {
+actual suspend fun saveRecipientsData(data: List<TradeParty>, targetFile: PlatformFile?) {
     withContext(Dispatchers.IO) {
-        val tempFile = if (RECIPIENTS_FILE.isRegularFile()) {
+        val isDataFile = targetFile == null
+        val recipientsFile = targetFile?.file?.toPath() ?: RECIPIENTS_FILE
+
+        val tempFile = if (RECIPIENTS_FILE.isRegularFile() && isDataFile) {
             RECIPIENTS_FILE.copyTo(
                 target = Files.createTempFile("recipients-", ".json"),
                 overwrite = true,
@@ -90,9 +101,14 @@ actual suspend fun saveRecipientsData(data: List<TradeParty>) {
         }
 
         try {
-            RECIPIENTS_FILE
+            recipientsFile
                 .outputStream()
-                .use { JSON_EXPORT.encodeToStream(data, it) }
+                .use {
+                    if (isDataFile)
+                        JSON_EXPORT.encodeToStream(data, it)
+                    else
+                        JSON_EXPORT_WITHOUT_DEFAULTS.encodeToStream(data, it)
+                }
         } catch (e: Exception) {
             APP_LOGGER.warn("Recipients are not writable.", e)
             tempFile?.copyTo(RECIPIENTS_FILE)

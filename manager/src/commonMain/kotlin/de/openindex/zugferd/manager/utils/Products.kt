@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager.utils
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import de.openindex.zugferd.manager.model.Product
+import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
@@ -33,13 +34,13 @@ class Products(data: List<Product>) {
 
     private val nextKey: UInt
         get() = if (_products.value.isNotEmpty()) {
-            _products.value.maxOf { it._key } + 1.toUInt()
+            _products.value.maxOf { it._key ?: 0.toUInt() } + 1.toUInt()
         } else {
             1.toUInt()
         }
 
     fun put(product: Product) {
-        _products.value = if (product._key == 0.toUInt()) {
+        _products.value = if (product._key == null) {
             _products.value
                 .plus(product.copy(_key = nextKey))
         } else {
@@ -50,7 +51,7 @@ class Products(data: List<Product>) {
     }
 
     fun remove(product: Product) {
-        remove(product._key)
+        remove(product._key ?: 0.toUInt())
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
@@ -59,10 +60,29 @@ class Products(data: List<Product>) {
             .filter { it._key != key }
     }
 
+    fun removeAll() {
+        _products.value = listOf()
+    }
+
     suspend fun save() {
         saveProductsData(
             data = products,
         )
+    }
+
+    suspend fun export(targetFile: PlatformFile) {
+        saveProductsData(
+            data = products.map { it.copy(_key = null) },
+            targetFile = targetFile,
+        )
+    }
+
+    suspend fun import(sourceFile: PlatformFile) {
+        loadProductsData(
+            sourceFile = sourceFile,
+        ).map { it.copy(_key = null) }.forEach { put(it) }
+
+        save()
     }
 }
 
@@ -73,6 +93,6 @@ fun loadProducts(): Products =
         Products(loadProductsData())
     }
 
-expect suspend fun loadProductsData(): List<Product>
+expect suspend fun loadProductsData(sourceFile: PlatformFile? = null): List<Product>
 
-expect suspend fun saveProductsData(data: List<Product>)
+expect suspend fun saveProductsData(data: List<Product>, targetFile: PlatformFile? = null)
