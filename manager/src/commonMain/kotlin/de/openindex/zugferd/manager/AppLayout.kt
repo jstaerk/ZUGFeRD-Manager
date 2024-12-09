@@ -25,6 +25,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,12 +74,13 @@ fun AppLayout(
                             painter = painterResource(Res.drawable.application),
                             contentDescription = APP_TITLE,
                             modifier = Modifier
-                                .padding(start = 4.dp, end = 24.dp)
+                                .padding(start = 4.dp, end = 38.dp)
                                 .width(40.dp)
                         )
 
                         Text(
                             text = APP_TITLE,
+                            style = MaterialTheme.typography.headlineMedium,
                         )
                     }
                 },
@@ -164,6 +166,11 @@ private fun AppNavigation() {
         //header = { Text(text = "Head") },
         modifier = Modifier,
     ) {
+        Spacer(
+            modifier = Modifier
+                .height(4.dp),
+        )
+
         //Text(text = "Item")
         AppSection.entries.forEach {
             AppNavigationItem(section = it)
