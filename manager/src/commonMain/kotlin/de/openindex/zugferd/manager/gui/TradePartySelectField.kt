@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
@@ -65,6 +66,7 @@ fun TradePartySelectField(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun TradePartySelectFieldWithAdd(
     label: String = "Partner",
     addLabel: String = "Neuer Partner",

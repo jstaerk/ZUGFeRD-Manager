@@ -22,6 +22,7 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -158,6 +159,7 @@ fun CheckSection(state: CheckSectionState) {
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun CheckSectionActions(state: CheckSectionState) {
     val scope = rememberCoroutineScope()
     val preferences = LocalPreferences.current

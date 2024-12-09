@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
@@ -64,6 +65,7 @@ fun ProductSelectField(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun ProductSelectFieldWithAdd(
     label: String = "Rechnungsposten",
     addLabel: String = "Neuer Rechnungsposten",

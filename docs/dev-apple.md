@@ -1,4 +1,4 @@
-# Notes about Apple
+# Developer notes about Apple
 
 ## Commands about signing and notarization
 
@@ -62,7 +62,7 @@ APP="ZUGFeRD-Manager.dmg"
 xcrun stapler staple "${APP}"
 ```
 
-# Additional links
+## Additional links
 
 - [Signing and notarizing distributions for macOS](https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Signing_and_notarization_on_macOS/README.md)
 - [Inside Code Signing: Certificates](https://developer.apple.com/documentation/technotes/tn3161-inside-code-signing-certificates)

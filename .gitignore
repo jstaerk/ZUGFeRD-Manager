@@ -17,6 +17,7 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 
+hs_err_*.log
 /.idea/artifacts
 /local.properties
 /local.*.properties

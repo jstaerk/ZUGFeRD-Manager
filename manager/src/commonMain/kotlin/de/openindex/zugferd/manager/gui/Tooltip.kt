@@ -23,6 +23,7 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -39,6 +41,9 @@ fun Tooltip(
     text: String,
     delayMillis: Int = 300,
     modifier: Modifier = Modifier,
+    tooltipPlacement: TooltipPlacement = TooltipPlacement.CursorPoint(
+        offset = DpOffset(0.dp, 16.dp)
+    ),
     content: @Composable () -> Unit
 ) = TooltipArea(
     tooltip = {
@@ -58,6 +63,7 @@ fun Tooltip(
         }
     },
     delayMillis = delayMillis,
+    tooltipPlacement = tooltipPlacement,
     //tooltipPlacement = TooltipPlacement.CursorPoint(
     //    alignment = Alignment.BottomCenter,
     //    //offset = DpOffset.Zero,

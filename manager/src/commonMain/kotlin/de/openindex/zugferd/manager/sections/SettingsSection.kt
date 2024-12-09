@@ -210,9 +210,9 @@ private fun ProductSettings(state: SettingsSectionState) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 @Suppress("UNUSED_PARAMETER")
+@OptIn(ExperimentalLayoutApi::class)
 private fun ThemeSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     Column(

@@ -22,6 +22,8 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -97,6 +99,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun CreateSection(state: CreateSectionState) {
     val isValid = state.invoiceValid
     val selectedPdf = state.selectedPdf
@@ -173,6 +176,7 @@ fun CreateSection(state: CreateSectionState) {
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun CreateSectionActions(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
     val preferences = LocalPreferences.current
@@ -588,6 +592,7 @@ private fun ColumnScope.ItemsForm(state: CreateSectionState) {
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 @Suppress("UnusedReceiverParameter")
 private fun ColumnScope.ItemForm(
     item: Item,
