@@ -26,7 +26,11 @@ Die Anwendung richtet sich an **kleine** Unternehmen, die eine einfache und mög
 
 3. Öffnen Sie den *ZUGFeRD-Manager*, klicken Sie links auf den Bereich **"Erzeugen"** und dann oben rechts auf **"PDF wählen"**. Wählen Sie die zuvor erzeugte PDF-Datei aus und tragen Sie im *ZUGFeRD-Manager* die Details zur Rechnung ein (Datum Rechnungsempfänger, Rechnungsposten, etc.).
 
+   <img src="./share/screenshots/create-start.png" width="500" alt="Erzeugung einer ZUGFeRD-Rechnung beginnen">
+
 4. Wenn alle Pflichteingaben vorgenommen wurden, erscheint oben rechts der Button **"E-Rechnung erzeugen"**. Klicken Sie auf den Button, wählen Sie den Speicherort der E-Rechnung aus und die ZUGFeRD-Rechnung wird als PDF-Datei auf Ihre Festplatte gespeichert.
+
+   <img src="./share/screenshots/create-finish.png" width="500" alt="Erzeugung einer ZUGFeRD-Rechnung abschließen">
 
 **Hinweis:** Die erzeugte ZUGFeRD-Rechnung kann wie eine normale PDF-Datei von Ihren Kunden geöffnet und angesehen werden, enthält aber auch die weiteren maschinenlesbare Informationen, welche Sie im *ZUGFeRD-Manager* eingetragen haben.
 
