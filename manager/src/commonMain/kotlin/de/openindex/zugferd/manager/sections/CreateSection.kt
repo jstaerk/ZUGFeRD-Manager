@@ -69,6 +69,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import de.openindex.zugferd.manager.gui.CurrencySelectField
@@ -89,6 +90,7 @@ import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
 import de.openindex.zugferd.manager.utils.XmlVisualTransformation
+import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.formatAsPercentage
 import de.openindex.zugferd.manager.utils.formatAsPrice
 import de.openindex.zugferd.manager.utils.formatAsQuantity
@@ -101,6 +103,7 @@ import kotlinx.coroutines.launch
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun CreateSection(state: CreateSectionState) {
+    val scope = rememberCoroutineScope()
     val isValid = state.invoiceValid
     val selectedPdf = state.selectedPdf
     val selectedPdfIsArchive = state.selectedPdfIsArchive
@@ -127,12 +130,42 @@ fun CreateSection(state: CreateSectionState) {
                 }
 
                 AnimatedVisibility(visible = !selectedPdfIsArchive) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(color = MaterialTheme.colorScheme.secondaryContainer),
                     ) {
+                        Tooltip(
+                            text = "Dies kann zu Fehlern in der erzeugten E-Rechnung führen.\n" +
+                                    "Besser ist es, die Rechnung z.B. aus Word heraus in PDF/A zu exportieren.\n" +
+                                    "Bitte die erzeugte E-Rechnung nachträglich prüfen.",
+                            tooltipPlacement = TooltipPlacement.CursorPoint(
+                                alignment = Alignment.TopCenter,
+                                offset = DpOffset(8.dp, (-16).dp)
+                            ),
+                        ) {
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        state.setSelectedPdf(
+                                            pdf = convertToPdfArchive(
+                                                pdfFile = selectedPdf,
+                                            )
+                                        )
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(all = 8.dp),
+                            ) {
+                                Text(
+                                    text = "in PDF/A-3 umwandeln",
+                                    softWrap = false,
+                                )
+                            }
+                        }
+
                         Text(
                             text = "Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. Damit kann keine E-Rechnung erzeugt werden.",
                             textAlign = TextAlign.Center,
@@ -267,7 +300,7 @@ private fun EmptyView(state: CreateSectionState) {
 
 @Composable
 private fun CreateView(state: CreateSectionState) {
-    val selectedPdf = state.selectedPdf!!
+    val selectedPdfName = state.originalSelectedPdf?.name ?: "???"
 
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -276,7 +309,7 @@ private fun CreateView(state: CreateSectionState) {
             .padding(vertical = 16.dp, horizontal = 20.dp)
     ) {
         SectionTitle(
-            text = "E-Rechnung mit „${selectedPdf.name}“ erstellen",
+            text = "E-Rechnung mit „${selectedPdfName}“ erstellen",
         )
 
         Column(

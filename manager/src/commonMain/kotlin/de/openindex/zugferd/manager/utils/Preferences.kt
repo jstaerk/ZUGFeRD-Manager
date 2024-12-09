@@ -147,6 +147,15 @@ class Preferences(data: PreferencesData) {
         _previousProductKey = productKey
     }
 
+    //
+    // Convert to PDF/A automatically on invoice import.
+    //
+
+    private var _autoConvertToPdfA = mutableStateOf(data.autoConvertToPdfA)
+    val autoConvertToPdfA get() = _autoConvertToPdfA.value
+    fun setAutoConvertToPdfA(enabled: Boolean) {
+        _autoConvertToPdfA.value = enabled
+    }
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun toData(): PreferencesData =
@@ -161,6 +170,7 @@ class Preferences(data: PreferencesData) {
             previousCurrency = _previousCurrency,
             previousSenderKey = _previousSenderKey,
             previousProductKey = _previousProductKey,
+            autoConvertToPdfA = _autoConvertToPdfA.value,
         )
 
     suspend fun save() {
@@ -183,6 +193,7 @@ data class PreferencesData(
     val previousCurrency: String? = null,
     val previousSenderKey: UInt? = null,
     val previousProductKey: UInt? = null,
+    val autoConvertToPdfA: Boolean = false,
 )
 
 val LocalPreferences = compositionLocalOf { loadPreferences() }

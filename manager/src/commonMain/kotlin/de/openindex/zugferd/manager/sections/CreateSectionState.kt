@@ -34,6 +34,7 @@ import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.Products
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Senders
+import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.isPdfArchive
 import de.openindex.zugferd.manager.utils.trimToNull
@@ -44,9 +45,18 @@ import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.datetime.LocalDate
 
 class CreateSectionState : SectionState() {
+    // This file was originally selected by the user.
+    private var _originalSelectedPdf = mutableStateOf<PlatformFile?>(null)
+
+    val originalSelectedPdf: PlatformFile?
+        get() = _originalSelectedPdf.value
+
+    // This file might contain a converted PDF/A, based on the originally selected file by the user.
     private var _selectedPdf = mutableStateOf<PlatformFile?>(null)
+
+    // This returns the converted PDF/A (if exists) or the originally selected file.
     val selectedPdf: PlatformFile?
-        get() = _selectedPdf.value
+        get() = _selectedPdf.value ?: _originalSelectedPdf.value
 
     private var _selectedPdfIsArchive = mutableStateOf(false)
     val selectedPdfIsArchive: Boolean
@@ -82,8 +92,17 @@ class CreateSectionState : SectionState() {
             null
         }
 
-        _selectedPdf.value = pdf
-        _selectedPdfIsArchive.value = isPdfArchive(pdf)
+        _originalSelectedPdf.value = pdf
+        _selectedPdf.value = null
+
+        val pdfIsArchive = isPdfArchive(pdf)
+        if (!pdfIsArchive && preferences.autoConvertToPdfA) {
+            val convertedPdf = convertToPdfArchive(pdf)
+            _selectedPdf.value = convertedPdf
+            _selectedPdfIsArchive.value = isPdfArchive(convertedPdf)
+        } else {
+            _selectedPdfIsArchive.value = pdfIsArchive
+        }
 
         // Create empty invoice instance.
         _invoice.value = Invoice(
@@ -98,15 +117,21 @@ class CreateSectionState : SectionState() {
         )
     }
 
+    suspend fun setSelectedPdf(pdf: PlatformFile) {
+        _selectedPdf.value = pdf
+        _selectedPdfIsArchive.value = isPdfArchive(pdf)
+    }
+
     suspend fun exportPdf(preferences: Preferences) {
-        val sourceFile = _selectedPdf.value ?: return
+        val sourceFile = selectedPdf ?: return
+        val originalSourceFile = _originalSelectedPdf.value ?: return
         val targetFile = FileKit.saveFile(
             bytes = null,
-            baseName = sourceFile.name.substringBeforeLast(".").plus(".e-rechnung"),
+            baseName = originalSourceFile.name.substringBeforeLast(".").plus(".e-rechnung"),
             extension = "pdf",
             initialDirectory = preferences.previousExportLocation
                 ?: preferences.previousPdfLocation
-                ?: sourceFile.path,
+                ?: originalSourceFile.path,
         ) ?: return
 
         // Remember directory of exported pdf.

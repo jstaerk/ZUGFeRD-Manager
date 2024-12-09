@@ -35,12 +35,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.APP_TITLE
 import de.openindex.zugferd.manager.gui.ProductItemSettings
 import de.openindex.zugferd.manager.gui.SectionInfo
 import de.openindex.zugferd.manager.gui.SectionSubTitle
@@ -69,6 +71,7 @@ fun SettingsSection(state: SettingsSectionState) {
             SenderSettings(state)
             RecipientSettings(state)
             ProductSettings(state)
+            PdfASettings(state)
             ThemeSettings(state)
         }
     }
@@ -332,6 +335,51 @@ private fun ThemeSettings(state: SettingsSectionState) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+@Suppress("UNUSED_PARAMETER")
+private fun PdfASettings(state: SettingsSectionState) {
+    val scope = rememberCoroutineScope()
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier,
+    ) {
+        val preferences = LocalPreferences.current
+
+        SectionSubTitle(
+            text = "PDF/A-Format bei Erzeugung von E-Rechnungen",
+        )
+
+        SectionInfo(
+            text = "Bei der Erzeugung von E-Rechnungen muss die gewählte Rechnungsdatei im PDF/A-Format vorliegen. " +
+                    "Im Optimalfall sollte dieses Dateiformat direkt aus Word / LibreOffice etc. heraus exportiert werden. " +
+                    "$APP_TITLE kann eine gewählte PDF-Datei automatisch umwandeln. Dies ist aber nicht 100%ig zuverlässig " +
+                    "und kann zu Fehlern in der erzeugten E-Rechnung führen. Falls eine Umwandlung innerhalb von $APP_TITLE " +
+                    "trotzdem gewünscht ist, kann diese bei Bedarf automatisch durchgeführt werden, wenn eine PDF-Rechnung " +
+                    "ausgewählt wird.",
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier,
+        ) {
+            Switch(
+                checked = preferences.autoConvertToPdfA,
+                onCheckedChange = {
+                    preferences.setAutoConvertToPdfA(it)
+                    scope.launch {
+                        preferences.save()
+                    }
+                }
+            )
+
+            Text(
+                text = "PDF-Dateien automatisch in PDF/A umwandeln",
+            )
         }
     }
 }
