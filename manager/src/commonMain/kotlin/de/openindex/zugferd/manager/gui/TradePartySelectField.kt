@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +49,7 @@ fun TradePartySelectField(
     //actions: @Composable RowScope.() -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val options = remember {
+    val options = remember(tradeParties) {
         buildMap {
             tradeParties.forEach { party ->
                 put(party, party.summary)
@@ -70,17 +72,15 @@ fun TradePartySelectField(
 fun TradePartySelectFieldWithAdd(
     label: String = "Partner",
     addLabel: String = "Neuer Partner",
+    editLabel: String = "Partner bearbeiten",
     tradeParty: TradeParty? = null,
     tradeParties: List<TradeParty>,
     onSelect: (tradeParty: TradeParty, savePermanently: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var newTradeParty by remember { mutableStateOf<TradeParty?>(null) }
-
-    val options by remember {
-        mutableStateOf(
-            tradeParties.toMutableList()
-        )
+    val unsavedTradeParty by derivedStateOf {
+        tradeParties.find { !it.isSaved }
     }
 
     Row(
@@ -90,7 +90,7 @@ fun TradePartySelectFieldWithAdd(
         TradePartySelectField(
             label = label,
             tradeParty = tradeParty,
-            tradeParties = options,
+            tradeParties = tradeParties,
             onSelect = { selection ->
                 onSelect(selection, false)
             },
@@ -98,61 +98,38 @@ fun TradePartySelectFieldWithAdd(
         )
 
         Tooltip(
-            text = addLabel,
+            text = addLabel.takeIf { unsavedTradeParty == null } ?: editLabel,
         ) {
             IconButton(
                 onClick = {
-                    newTradeParty = TradeParty(
+                    newTradeParty = unsavedTradeParty ?: TradeParty(
                         country = getDefaultCountryCode(),
                     )
                 },
                 modifier = Modifier,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Hinzufügen",
-                )
+                if (unsavedTradeParty == null) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = addLabel,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = editLabel,
+                    )
+                }
             }
         }
     }
 
-    /*
-    TradePartySelectField(
-        label = label,
-        tradeParty = tradeParty,
-        tradeParties = options,
-        onSelect = { selection ->
-            onSelect(selection, false)
-        },
-        actions = {
-            Tooltip(
-                text = addLabel,
-            ) {
-                IconButton(
-                    onClick = {
-                        newTradeParty = TradeParty()
-                    },
-                    modifier = Modifier,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Hinzufügen",
-                    )
-                }
-            }
-        },
-        modifier = modifier,
-    )
-    */
-
     if (newTradeParty != null) {
         TradePartyDialog(
-            title = addLabel,
+            title = addLabel.takeIf { unsavedTradeParty == null } ?: editLabel,
             value = newTradeParty!!,
             permanentSaveOption = true,
             onDismissRequest = { newTradeParty = null },
             onSubmitRequest = { selection, savePermanently ->
-                options.addFirst(selection)
                 onSelect(selection, savePermanently)
                 newTradeParty = null
             },

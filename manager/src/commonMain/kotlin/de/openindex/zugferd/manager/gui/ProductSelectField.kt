@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +48,7 @@ fun ProductSelectField(
     //actions: @Composable RowScope.() -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val options = remember {
+    val options = remember(products) {
         buildMap {
             products.forEach { party ->
                 put(party, party.summary)
@@ -69,17 +71,15 @@ fun ProductSelectField(
 fun ProductSelectFieldWithAdd(
     label: String = "Rechnungsposten",
     addLabel: String = "Neuer Rechnungsposten",
+    editLabel: String = "Rechnungsposten bearbeiten",
     product: Product? = null,
     products: List<Product>,
     onSelect: (product: Product, savePermanently: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var newProduct by remember { mutableStateOf<Product?>(null) }
-
-    val options by remember {
-        mutableStateOf(
-            products.toMutableList()
-        )
+    val unsavedProduct by derivedStateOf {
+        products.find { !it.isSaved }
     }
 
     Row(
@@ -89,7 +89,7 @@ fun ProductSelectFieldWithAdd(
         ProductSelectField(
             label = label,
             product = product,
-            products = options,
+            products = products,
             onSelect = { selection ->
                 onSelect(selection, false)
             },
@@ -97,60 +97,36 @@ fun ProductSelectFieldWithAdd(
         )
 
         Tooltip(
-            text = addLabel,
+            text = addLabel.takeIf { unsavedProduct == null } ?: editLabel,
         ) {
             IconButton(
                 onClick = {
-                    newProduct = Product()
+                    newProduct = unsavedProduct ?: Product()
                 },
                 modifier = Modifier,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Hinzufügen",
-                )
+                if (unsavedProduct == null) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = addLabel,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = editLabel,
+                    )
+                }
             }
         }
     }
 
-    /*
-    ProductSelectField(
-        label = label,
-        product = product,
-        products = options,
-        onSelect = { selection ->
-            onSelect(selection, false)
-        },
-        actions = {
-            Tooltip(
-                text = addLabel,
-            ) {
-                IconButton(
-
-                    onClick = {
-                        newProduct = Product()
-                    },
-                    modifier = Modifier,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Hinzufügen",
-                    )
-                }
-            }
-        },
-        modifier = modifier,
-    )
-    */
-
     if (newProduct != null) {
         ProductDialog(
-            title = addLabel,
+            title = addLabel.takeIf { unsavedProduct == null } ?: editLabel,
             value = newProduct!!,
             permanentSaveOption = true,
             onDismissRequest = { newProduct = null },
             onSubmitRequest = { selection, savePermanently ->
-                options.addFirst(selection)
                 onSelect(selection, savePermanently)
                 newProduct = null
             },

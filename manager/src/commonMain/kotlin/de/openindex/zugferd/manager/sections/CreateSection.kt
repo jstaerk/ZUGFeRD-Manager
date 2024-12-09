@@ -435,8 +435,24 @@ private fun DetailsView(state: CreateSectionState) {
 private fun ColumnScope.GeneralForm(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
     val preferences = LocalPreferences.current
+
     val senders = LocalSenders.current
+    val sendersList = derivedStateOf {
+        if (state.invoiceSender?.isSaved == false) {
+            listOf(state.invoiceSender!!, *senders.senders.toTypedArray())
+        } else {
+            senders.senders
+        }
+    }
+
     val recipients = LocalRecipients.current
+    val recipientsList = derivedStateOf {
+        if (state.invoiceRecipient?.isSaved == false) {
+            listOf(state.invoiceRecipient!!, *recipients.recipients.toTypedArray())
+        } else {
+            recipients.recipients
+        }
+    }
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -451,8 +467,9 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             TradePartySelectFieldWithAdd(
                 label = "Absender*",
                 addLabel = "Neuer Absender",
+                editLabel = "Absender bearbeiten",
                 tradeParty = state.invoiceSender,
-                tradeParties = senders.senders,
+                tradeParties = sendersList.value,
                 onSelect = { sender, savePermanently ->
                     state.invoiceSender = sender
                     if (savePermanently) {
@@ -470,8 +487,9 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             TradePartySelectFieldWithAdd(
                 label = "Empfänger*",
                 addLabel = "Neuer Empfänger",
+                editLabel = "Empfänger bearbeiten",
                 tradeParty = state.invoiceRecipient,
-                tradeParties = recipients.recipients,
+                tradeParties = recipientsList.value,
                 onSelect = { recipient, savePermanently ->
                     state.invoiceRecipient = recipient
                     state.invoicePaymentMethod = recipient._defaultPaymentMethod
@@ -634,7 +652,16 @@ private fun ColumnScope.ItemForm(
     onRemove: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+
     val products = LocalProducts.current
+    val productsList = derivedStateOf {
+        if (item.product?.isSaved == false) {
+            listOf(item.product, *products.products.toTypedArray())
+        } else {
+            products.products
+        }
+    }
+
     val unitSingularName = remember(item.product?.unit) {
         UnitOfMeasurement.getByCode(item.product?.unit)
             ?.description
@@ -662,8 +689,9 @@ private fun ColumnScope.ItemForm(
             ProductSelectFieldWithAdd(
                 label = "Rechnungsposten*",
                 addLabel = "Neuer Rechnungsposten",
+                editLabel = "Rechnungsposten bearbeiten",
                 product = item.product ?: Product(),
-                products = products.products,
+                products = productsList.value,
                 onSelect = { product, savePermanently ->
                     onUpdate(
                         item.copy(
