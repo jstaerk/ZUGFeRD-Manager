@@ -7,9 +7,14 @@
 🇺🇸 This is a free desktop application for Windows, MacOS & Linux, that creates and validates ZUGFeRD invoices. Please scroll down for information about development in English language.
 
 
+## Download
+
+*ZUGFeRD Manager* wird in den nächsten Tagen in Version 1.0.0 veröffentlicht. Die Vorab-Versionen ("Release Candidates") finden Sie bereits auf der [Release-Seite dieses Projekts](https://github.com/OpenIndex/ZUGFeRD-Manager/releases).
+
+
 ## Zielgruppe
 
-Die Anwendung richtet sich an **kleine** Unternehmen, die eine einfache und möglichst unkomplizierte Lösung benötigen, um mit E-Rechnungen ab 2025 umgehen zu können.
+Die Anwendung richtet sich an **kleine** Unternehmen, die eine einfache und möglichst unkomplizierte Lösung benötigen, um ab 2025 mit E-Rechnungen umgehen zu können.
 
 
 ## Wie erstellt man eine ZUGFeRD-Rechnung?
@@ -22,7 +27,7 @@ Die Anwendung richtet sich an **kleine** Unternehmen, die eine einfache und mög
 
    <img src="./share/screenshots/pdfa-libreoffice.png" width="400" alt="PDF/A Format beim PDF-Export in LibreOffice aktivieren">
 
-   **Hinweis:** *ZUGFeRD-Manager* kann auch normale PDF-Dateien verarbeiten und in das PDF-Archivformat umwandeln. Dies kann aber unter Umständen zu Fehlern und ungültigen ZUGFeRD-Rechnungen führen - vor allem, wenn die Rechnungen aufwändige Gestaltungselemente enthalten oder keine Schriften eingebettet haben.
+   **Hinweis:** *ZUGFeRD-Manager* kann auch normale PDF-Dateien verarbeiten und in das PDF-Archivformat umwandeln. Dies kann aber unter Umständen zu Fehlern und ungültigen ZUGFeRD-Rechnungen führen - vor allem, wenn die Rechnungen aufwändige Gestaltungselemente enthalten oder die verwendeten Schriften nicht eingebettet sind.
 
 3. Öffnen Sie den *ZUGFeRD-Manager*, klicken Sie links auf den Bereich **"Erzeugen"** und dann oben rechts auf **"PDF wählen"**. Wählen Sie die zuvor erzeugte PDF-Datei aus und tragen Sie im *ZUGFeRD-Manager* die Details zur Rechnung ein (Datum Rechnungsempfänger, Rechnungsposten, etc.).
 
@@ -50,3 +55,23 @@ Sie können und sollten Ihre eigenen erzeugten E-Rechnungen sowie auch von Ander
 3. Auf der rechten Seite können Sie sich neben der PDF-Ansicht auch die maschinenlesbaren Daten in aufbereiteter Form oder im XML-Format anzeigen lassen.
 
    <img src="./share/screenshots/verify-details.png" width="400" alt="Details zum Inhalt einer ZUGFeRD-Rechnung">
+
+
+## Lizenzbedingungen
+
+Die Software steht kostenfrei unter den Bedingungen der [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html) zur Verfügung (Open Source). Die Autoren übernehmen keinerlei Haftung für eventuelle Schäden, die aus der Nutzung dieser Software resultieren.
+
+
+## 🇺🇸 Information about development 🇺🇸
+
+The application is written in [Kotlin / JVM](https://kotlinlang.org/) using [Compose Multiplatform for desktop applications](https://www.jetbrains.com/compose-multiplatform/). Common and JVM related code is separated, to make a future port to other platforms hopefully as easy as possible.
+
+
+### Translations
+
+The application is currently only available in German language. Translation into other languages is currently not planned, but generally possible.
+
+
+### Third party components
+
+The application relies on the [Mustang Project](https://www.mustangproject.org) and its [Open Source library and validation tool](https://github.com/ZUGFeRD/mustangproject).
