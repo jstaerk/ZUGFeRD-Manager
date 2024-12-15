@@ -199,7 +199,7 @@ fun TradePartyItemSettings(
     ItemSettings(
         items = tradeParties,
         itemKey = { it._key },
-        itemText = { it.summary },
+        itemText = { it.summaryShort },
         itemCreate = { TradeParty() },
         onRemove = onRemove,
     ) { selectedItem ->

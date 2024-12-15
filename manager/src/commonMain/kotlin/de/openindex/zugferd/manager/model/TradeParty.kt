@@ -74,4 +74,27 @@ data class TradeParty(
                 add("#${id.trim()}")
             }
         }.joinToString(" | ")
+
+    val summaryShort: String
+        get() = buildList {
+            add(name.trim().takeIf { it.isNotBlank() } ?: "???")
+
+            if (id?.trimToNull() != null) {
+                add("#${id.trim()}")
+            } else {
+                val address = buildList {
+                    if (!zip.isNullOrBlank()) {
+                        add(zip.trim())
+                    }
+                    if (!location.isNullOrBlank()) {
+                        add(location.trim())
+                    }
+                }.joinToString(" ")
+
+                if (address.trim().isNotBlank()) {
+                    add(address)
+                }
+            }
+
+        }.joinToString(" | ")
 }
