@@ -80,9 +80,15 @@ class Products(data: List<Product>) {
     suspend fun import(sourceFile: PlatformFile) {
         loadProductsData(
             sourceFile = sourceFile,
-        ).map { it.copy(_key = null) }.forEach { put(it) }
+        )
+            .map { it.copy(_key = null) }
+            .forEach { import(it) }
 
         save()
+    }
+
+    private fun import(product: Product) {
+        put(product)
     }
 }
 
