@@ -85,9 +85,33 @@ class Senders(data: List<TradeParty>) {
     suspend fun import(sourceFile: PlatformFile) {
         loadSendersData(
             sourceFile = sourceFile,
-        ).map { it.copy(_key = null) }.forEach { put(it) }
+        )
+            .map { it.copy(_key = null) }
+            .forEach { import(it) }
 
         save()
+    }
+
+    @Suppress("DuplicatedCode")
+    private fun import(sender: TradeParty) {
+        val id = sender.id?.trimToNull()
+        if (id == null) {
+            put(sender)
+            return
+        }
+
+        val existingSender = _senders.value
+            .firstOrNull { it.id == sender.id }
+
+        val updatedSender = if (existingSender != null) {
+            sender.copy(_key = existingSender._key)
+        } else {
+            sender.copy(_key = nextKey)
+        }
+
+        _senders.value = _senders.value
+            .filter { it.id != updatedSender.id }
+            .plus(updatedSender)
     }
 }
 

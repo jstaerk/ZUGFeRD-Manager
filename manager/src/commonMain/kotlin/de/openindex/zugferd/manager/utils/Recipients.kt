@@ -80,9 +80,33 @@ class Recipients(data: List<TradeParty>) {
     suspend fun import(sourceFile: PlatformFile) {
         loadRecipientsData(
             sourceFile = sourceFile,
-        ).map { it.copy(_key = null) }.forEach { put(it) }
+        )
+            .map { it.copy(_key = null) }
+            .forEach { import(it) }
 
         save()
+    }
+
+    @Suppress("DuplicatedCode")
+    private fun import(recipient: TradeParty) {
+        val id = recipient.id?.trimToNull()
+        if (id == null) {
+            put(recipient)
+            return
+        }
+
+        val existingRecipient = _recipients.value
+            .firstOrNull { it.id == recipient.id }
+
+        val updatedRecipient = if (existingRecipient != null) {
+            recipient.copy(_key = existingRecipient._key)
+        } else {
+            recipient.copy(_key = nextKey)
+        }
+
+        _recipients.value = _recipients.value
+            .filter { it.id != updatedRecipient.id }
+            .plus(updatedRecipient)
     }
 }
 
