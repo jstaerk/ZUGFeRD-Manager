@@ -43,6 +43,7 @@ jobs:
           - os: ${{ !inputs.macos_x64 && 'macos-13' }}
           - os: ${{ !inputs.linux_x64 && 'ubuntu-latest' }}
           - os: ${{ !inputs.windows_x64 && 'windows-latest' }}
+      fail-fast: false
 
     runs-on: ${{ matrix.os }}
     steps:
