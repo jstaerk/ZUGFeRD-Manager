@@ -24,6 +24,8 @@ package de.openindex.zugferd.manager.utils
 import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.AppInfo
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import me.friwi.jcefmaven.CefAppBuilder
 import org.cef.CefApp
@@ -88,14 +90,7 @@ private val CEF_VERSION_FILE: Path by lazy {
 
 private var CEF_APP: CefApp? = null
 
-private val CEF_CLIENT: CefClient by lazy {
-    try {
-        CEF_APP!!.createClient()
-    } catch (e: Exception) {
-        APP_LOGGER.error("Browser is not properly initialized!", e)
-        throw RuntimeException("Browser is not properly initialized!", e)
-    }
-}
+private var CEF_CLIENT: CefClient? = null
 
 private var CEF_BROWSER: CefBrowser? = null
 
@@ -105,8 +100,17 @@ private var CEF_BROWSER: CefBrowser? = null
  * switch the loaded url.
  */
 fun getCefBrowser(url: String): CefBrowser {
+    if (CEF_CLIENT == null) {
+        try {
+            CEF_CLIENT = CEF_APP!!.createClient()
+        } catch (e: Exception) {
+            APP_LOGGER.error("Browser is not properly initialized!", e)
+            throw RuntimeException("Browser is not properly initialized!", e)
+        }
+    }
+
     return if (CEF_BROWSER == null) {
-        CEF_CLIENT.createBrowser(
+        CEF_CLIENT!!.createBrowser(
             url,
             CEF_OFFSCREEN_RENDERING_ENABLED,
             CEF_TRANSPARENCY_ENABLED,
@@ -121,7 +125,13 @@ fun getCefBrowser(url: String): CefBrowser {
 }
 
 fun uninstallWebView() {
+    CEF_BROWSER?.close(true)
+    CEF_CLIENT?.dispose()
     CEF_APP?.dispose()
+
+    runBlocking {
+        delay(1000)
+    }
 }
 
 @OptIn(ExperimentalPathApi::class)
@@ -166,36 +176,9 @@ suspend fun installWebView() {
         builder.cefSettings.cache_path = CEF_CACHE_DIR.resolve("client").absolutePathString()
         builder.cefSettings.windowless_rendering_enabled = CEF_WINDOWLESS_RENDERING_ENABLED
 
-        //builder.cefSettings.background_color = builder.cefSettings.ColorType(1, 0, 0, 0)
-
         if (CEF_DISABLE_GPU) {
             builder.addJcefArgs("--disable-gpu")
         }
-
-        //builder.setAppHandler(
-        //    object : MavenCefAppHandlerAdapter() {
-        //        override fun onBeforeTerminate(): Boolean {
-        //            //if (SystemUtils.IS_OS_MAC) {
-        //            //    exitProcess(0)
-        //            //    @Suppress("UNREACHABLE_CODE")
-        //            //    return true
-        //            //}
-        //
-        //            //CEF_APP?.dispose()
-        //            //exitProcess(0)
-        //
-        //            return true
-        //        }
-        //    }
-        //)
-
-        //builder.setProgressHandler { state, percent ->
-        //    APP_LOGGER.info(
-        //        "Chrome-Setup | {} | {}",
-        //        state,
-        //        if (percent >= 0f) "${percent}%" else "in progress",
-        //    )
-        //}
 
         builder.build()
     }
