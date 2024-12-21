@@ -120,6 +120,10 @@ fun getCefBrowser(url: String): CefBrowser {
     }
 }
 
+fun uninstallWebView() {
+    CEF_APP?.dispose()
+}
+
 @OptIn(ExperimentalPathApi::class)
 suspend fun installWebView() {
     if (CEF_APP != null) {

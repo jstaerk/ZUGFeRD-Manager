@@ -25,6 +25,7 @@ val SHUTDOWN_HANDLER = object : DesktopShutdownHandler {
         windowState: WindowState,
     ) {
         APP_LOGGER.info("Save settings on shutdown...")
+        uninstallWebView()
 
         val pos = windowState.position
         preferences.setWindowPosition(
