@@ -22,7 +22,6 @@
 package de.openindex.zugferd.manager
 
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.awt.ComposeWindow
@@ -38,7 +37,6 @@ import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
 import de.openindex.zugferd.manager.utils.getPlatform
-import de.openindex.zugferd.manager.utils.installWebView
 import de.openindex.zugferd.manager.utils.loadPreferencesData
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -140,11 +138,6 @@ fun main() {
 
     application {
         val scope = rememberCoroutineScope()
-
-        // Init WebView in background while the application is starting.
-        LaunchedEffect(Unit) {
-            installWebView()
-        }
 
         // Initially load preferences within composable application.
         val preferences = LocalPreferences.current

@@ -28,6 +28,7 @@ import kotlinx.coroutines.withContext
 import me.friwi.jcefmaven.CefAppBuilder
 import org.cef.CefApp
 import org.cef.CefClient
+import org.cef.browser.CefBrowser
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.absolutePathString
@@ -40,7 +41,10 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.reader
 import kotlin.io.path.writer
 
-const val CEF_OFFSCREEN_RENDERING_ENABLED = false
+const val CEF_WINDOWLESS_RENDERING_ENABLED = true
+const val CEF_OFFSCREEN_RENDERING_ENABLED = true
+const val CEF_TRANSPARENCY_ENABLED = false
+const val CEF_DISABLE_GPU = false
 
 private val CEF_IS_BUNDLED: Boolean by lazy {
     CEF_BUNDLED_INSTALL_DIR.isDirectory()
@@ -81,7 +85,10 @@ private val CEF_VERSION_FILE: Path by lazy {
     CACHE_DIR
         .resolve("chrome.version")
 }
-val CEF_CLIENT: CefClient by lazy {
+
+private var CEF_APP: CefApp? = null
+
+private val CEF_CLIENT: CefClient by lazy {
     try {
         CEF_APP!!.createClient()
     } catch (e: Exception) {
@@ -90,10 +97,35 @@ val CEF_CLIENT: CefClient by lazy {
     }
 }
 
-private var CEF_APP: CefApp? = null
+private var CEF_BROWSER: CefBrowser? = null
+
+/**
+ * As we never show multiple browser instances at once,
+ * we keep one browser instance permanently in memory and only
+ * switch the loaded url.
+ */
+fun getCefBrowser(url: String): CefBrowser {
+    return if (CEF_BROWSER == null) {
+        CEF_CLIENT.createBrowser(
+            url,
+            CEF_OFFSCREEN_RENDERING_ENABLED,
+            CEF_TRANSPARENCY_ENABLED,
+        )
+    } else {
+        CEF_BROWSER!!.let {
+            it.stopLoad()
+            it.loadURL(url)
+            it
+        }
+    }
+}
 
 @OptIn(ExperimentalPathApi::class)
 suspend fun installWebView() {
+    if (CEF_APP != null) {
+        return
+    }
+
     CEF_APP = withContext(Dispatchers.IO) {
         CEF_LOG_FILE.deleteIfExists()
 
@@ -128,10 +160,13 @@ suspend fun installWebView() {
         builder.cefSettings.log_file = CEF_LOG_FILE.absolutePathString()
         builder.cefSettings.root_cache_path = CEF_CACHE_DIR.absolutePathString()
         builder.cefSettings.cache_path = CEF_CACHE_DIR.resolve("client").absolutePathString()
-        builder.cefSettings.windowless_rendering_enabled = CEF_OFFSCREEN_RENDERING_ENABLED
+        builder.cefSettings.windowless_rendering_enabled = CEF_WINDOWLESS_RENDERING_ENABLED
 
         //builder.cefSettings.background_color = builder.cefSettings.ColorType(1, 0, 0, 0)
-        //builder.addJcefArgs("--disable-gpu")
+
+        if (CEF_DISABLE_GPU) {
+            builder.addJcefArgs("--disable-gpu")
+        }
 
         //builder.setAppHandler(
         //    object : MavenCefAppHandlerAdapter() {
