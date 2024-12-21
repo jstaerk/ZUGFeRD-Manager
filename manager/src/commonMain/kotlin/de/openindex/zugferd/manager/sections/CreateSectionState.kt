@@ -62,6 +62,10 @@ class CreateSectionState : SectionState() {
     val selectedPdfIsArchive: Boolean
         get() = _selectedPdfIsArchive.value
 
+    private var _selectedPdfArchiveError = mutableStateOf<String?>(null)
+    val selectedPdfArchiveError: String?
+        get() = _selectedPdfArchiveError.value
+
     suspend fun selectPdf(preferences: Preferences, senders: Senders, products: Products) {
         val pdf = FileKit.pickFile(
             type = PickerType.File(extensions = listOf("pdf")),
@@ -94,12 +98,19 @@ class CreateSectionState : SectionState() {
 
         _originalSelectedPdf.value = pdf
         _selectedPdf.value = null
+        _selectedPdfIsArchive.value = false
+        _selectedPdfArchiveError.value = null
 
         val pdfIsArchive = isPdfArchive(pdf)
         if (!pdfIsArchive && preferences.autoConvertToPdfA) {
-            val convertedPdf = convertToPdfArchive(pdf)
-            _selectedPdf.value = convertedPdf
-            _selectedPdfIsArchive.value = isPdfArchive(convertedPdf)
+            try {
+                val convertedPdf = convertToPdfArchive(pdf)
+                _selectedPdf.value = convertedPdf
+                _selectedPdfIsArchive.value = isPdfArchive(convertedPdf)
+            } catch (e: Exception) {
+                _selectedPdfIsArchive.value = false
+                _selectedPdfArchiveError.value = e.localizedMessage ?: e.message
+            }
         } else {
             _selectedPdfIsArchive.value = pdfIsArchive
         }
@@ -117,10 +128,26 @@ class CreateSectionState : SectionState() {
         )
     }
 
-    suspend fun setSelectedPdf(pdf: PlatformFile) {
-        _selectedPdf.value = pdf
-        _selectedPdfIsArchive.value = isPdfArchive(pdf)
+    suspend fun convertToPdfArchive() {
+        if (selectedPdfIsArchive) {
+            return
+        }
+        val originalPdf = originalSelectedPdf ?: return
+
+        try {
+            val convertedPdf = convertToPdfArchive(originalPdf)
+            _selectedPdf.value = convertedPdf
+            _selectedPdfIsArchive.value = isPdfArchive(convertedPdf)
+        } catch (e: Exception) {
+            _selectedPdfIsArchive.value = false
+            _selectedPdfArchiveError.value = e.localizedMessage ?: e.message
+        }
     }
+
+    //suspend fun setSelectedPdf(pdf: PlatformFile) {
+    //    _selectedPdf.value = pdf
+    //    _selectedPdfIsArchive.value = isPdfArchive(pdf)
+    //}
 
     suspend fun exportPdf(preferences: Preferences) {
         val sourceFile = selectedPdf ?: return

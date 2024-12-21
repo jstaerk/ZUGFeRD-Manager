@@ -90,7 +90,6 @@ import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
 import de.openindex.zugferd.manager.utils.XmlVisualTransformation
-import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.formatAsPercentage
 import de.openindex.zugferd.manager.utils.formatAsPrice
 import de.openindex.zugferd.manager.utils.formatAsQuantity
@@ -107,6 +106,7 @@ fun CreateSection(state: CreateSectionState) {
     val isValid = state.invoiceValid
     val selectedPdf = state.selectedPdf
     val selectedPdfIsArchive = state.selectedPdfIsArchive
+    val selectedPdfArchiveError = state.selectedPdfArchiveError
 
     if (selectedPdf == null) {
         EmptyView(state)
@@ -129,13 +129,24 @@ fun CreateSection(state: CreateSectionState) {
                     CreateView(state)
                 }
 
-                AnimatedVisibility(visible = !selectedPdfIsArchive) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(color = MaterialTheme.colorScheme.secondaryContainer),
+                AnimatedVisibility(visible = !isValid && selectedPdfIsArchive) {
+                    Notification(
+                        text = "Die Angaben zur Rechnung sind unvollständig. Eine E-Rechnung kann erst erzeugt werden, " +
+                                "wenn alle nötigen Angaben vorhanden sind.",
+                    )
+                }
+
+                AnimatedVisibility(visible = !selectedPdfIsArchive && selectedPdfArchiveError != null) {
+                    Notification(
+                        text = "Die PDF-Datei konnte nicht in das PDF/A Format umgewandelt werden. " +
+                                "$selectedPdfArchiveError",
+                    )
+                }
+
+                AnimatedVisibility(visible = !selectedPdfIsArchive && selectedPdfArchiveError == null) {
+                    Notification(
+                        text = "Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. " +
+                                "Damit kann keine E-Rechnung erzeugt werden.",
                     ) {
                         Tooltip(
                             text = "Dies kann zu Fehlern in der erzeugten E-Rechnung führen.\n" +
@@ -149,11 +160,7 @@ fun CreateSection(state: CreateSectionState) {
                             Button(
                                 onClick = {
                                     scope.launch {
-                                        state.setSelectedPdf(
-                                            pdf = convertToPdfArchive(
-                                                pdfFile = selectedPdf,
-                                            )
-                                        )
+                                        state.convertToPdfArchive()
                                     }
                                 },
                                 modifier = Modifier
@@ -165,35 +172,6 @@ fun CreateSection(state: CreateSectionState) {
                                 )
                             }
                         }
-
-                        Text(
-                            text = "Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. Damit kann keine E-Rechnung erzeugt werden.",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            style = MaterialTheme.typography.bodySmall,
-                            softWrap = true,
-                            modifier = Modifier
-                                .padding(16.dp)
-                        )
-                    }
-                }
-
-                AnimatedVisibility(visible = !isValid && selectedPdfIsArchive) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(color = MaterialTheme.colorScheme.secondaryContainer),
-                    ) {
-                        Text(
-                            text = "Die Angaben zur Rechnung sind unvollständig. Eine E-Rechnung kann erst erzeugt werden, wenn alle nötigen Angaben vorhanden sind.",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            style = MaterialTheme.typography.bodySmall,
-                            softWrap = true,
-                            modifier = Modifier
-                                .padding(16.dp)
-                        )
                     }
                 }
             }
@@ -968,5 +946,31 @@ private fun ColumnScope.AmountSummary(
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
+    }
+}
+
+@Composable
+private fun Notification(
+    text: String,
+    action: @Composable () -> Unit = {},
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.secondaryContainer),
+    ) {
+        action()
+
+        Text(
+            text = text,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            style = MaterialTheme.typography.bodySmall,
+            softWrap = true,
+            modifier = Modifier
+                .padding(16.dp)
+        )
     }
 }
