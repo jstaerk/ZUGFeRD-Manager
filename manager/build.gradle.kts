@@ -3,6 +3,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.org.apache.commons.lang3.SystemUtils
 import java.nio.file.LinkOption
+import java.util.Calendar
 import java.util.Properties
 import kotlin.io.path.isExecutable
 import kotlin.io.path.isRegularFile
@@ -121,11 +122,6 @@ kotlin {
             // Kotlinx-Serialization
             // https://github.com/Kotlin/kotlinx.serialization
             implementation(libs.kotlinx.serialization.json)
-
-            // WebView for JetBrains Compose Multiplatform
-            // https://github.com/KevinnZou/compose-webview-multiplatform
-            // https://github.com/KevinnZou/compose-webview-multiplatform#multiplatform
-            //api(libs.webview.multiplatform)
         }
 
         desktopMain.dependencies {
@@ -139,11 +135,6 @@ kotlin {
             // Commons-Lang
             // https://commons.apache.org/proper/commons-lang/
             implementation(libs.commons.lang)
-
-            // IcePDF
-            // https://github.com/pcorless/icepdf
-            //implementation(libs.icepdf.core)
-            //implementation(libs.icepdf.viewer)
 
             // Jaxen XPath Engine for Java
             // https://github.com/jaxen-xpath/jaxen
@@ -223,11 +214,14 @@ compose.desktop {
 
         //
         // Required by JCEF.
+        // https://github.com/jcefmaven/jcefmaven#limitations
         //
 
-        jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
-        jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED") // recommended but not necessary
+        jvmArgs("--add-exports", "java.base/java.lang=ALL-UNNAMED")
+        jvmArgs("--add-exports", "java.desktop/sun.awt=ALL-UNNAMED")
+        jvmArgs("--add-exports", "java.desktop/sun.java2d=ALL-UNNAMED")
         if (isMac) {
+            jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
             jvmArgs("--add-opens", "java.desktop/sun.lwawt=ALL-UNNAMED")
             jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
         }
@@ -253,10 +247,13 @@ compose.desktop {
         }
 
         nativeDistributions {
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+            val copyrightYear = "2024-$currentYear".takeIf { currentYear > 2024 } ?: "2024"
+
             packageName = "ZUGFeRD-Manager"
             //packageVersion = project.version.toString()
             vendor = "OpenIndex"
-            copyright = "© 2024 OpenIndex. All rights reserved."
+            copyright = "© $copyrightYear OpenIndex. All rights reserved."
             description = "A desktop application for creating and validating e-invoices."
             licenseFile = rootProject.file("LICENSE.txt")
 

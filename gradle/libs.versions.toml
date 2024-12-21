@@ -9,7 +9,6 @@ buildinfo = "1.0.0"
 commons-lang = "3.17.0"
 compose-multiplatform = "1.7.3"
 filekit = "0.8.8"
-#icepdf = "7.2.1"
 jaxen = "2.0.0"
 jcef-maven = "127.3.1"
 jcef-natives = "jcef-99c2f7a+cef-127.3.1+g6cbb30e+chromium-127.0.6533.100"
@@ -23,8 +22,6 @@ mustang = "2.15.2"
 proguard = "7.6.0"
 slf4j-jul = "2.0.16"
 versions = "0.51.0"
-#webview = "1.9.20"
-#webview = "1.9.40-alpha04"
 
 [libraries]
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
@@ -33,8 +30,7 @@ appdirs = { group = "net.harawata", name = "appdirs", version.ref = "appdirs" }
 commons-lang = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commons-lang" }
 filekit-core = { group = "io.github.vinceglb", name = "filekit-core", version.ref = "filekit" }
 filekit-compose = { group = "io.github.vinceglb", name = "filekit-compose", version.ref = "filekit" }
-#icepdf-core = { group = "com.github.pcorless.icepdf", name = "icepdf-core", version.ref = "icepdf" }
-#icepdf-viewer = { group = "com.github.pcorless.icepdf", name = "icepdf-viewer", version.ref = "icepdf" }
+gluegen-rt = { group = "org.jogamp.gluegen", name = "gluegen-rt", version.ref = "gluegen" }
 jaxen = { group = "jaxen", name = "jaxen", version.ref = "jaxen" }
 jcef-maven = { group = "me.friwi", name = "jcefmaven", version.ref = "jcef-maven" }
 jcef-natives-linux-amd64 = { group = "me.friwi", name = "jcef-natives-linux-amd64", version.ref = "jcef-natives" }
@@ -53,7 +49,6 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.
 mustang-library = { group = "org.mustangproject", name = "library", version.ref = "mustang" }
 mustang-validator = { group = "org.mustangproject", name = "validator", version.ref = "mustang" }
 slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j-jul" }
-#webview-multiplatform = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version.ref = "webview" }
 
 [plugins]
 buildinfo = { id = "net.h34t.buildinfo", version.ref = "buildinfo" }
