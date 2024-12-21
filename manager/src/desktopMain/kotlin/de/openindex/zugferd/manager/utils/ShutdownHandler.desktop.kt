@@ -24,9 +24,10 @@ val SHUTDOWN_HANDLER = object : DesktopShutdownHandler {
         preferences: Preferences,
         windowState: WindowState,
     ) {
-        APP_LOGGER.info("Save settings on shutdown...")
+        APP_LOGGER.info("Unload JCEF on shutdown...")
         uninstallWebView()
 
+        APP_LOGGER.info("Save settings on shutdown...")
         val pos = windowState.position
         preferences.setWindowPosition(
             x = if (pos.isSpecified) pos.x.value.toInt() else null,
