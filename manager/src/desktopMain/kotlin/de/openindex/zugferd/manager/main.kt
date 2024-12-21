@@ -22,10 +22,8 @@
 package de.openindex.zugferd.manager
 
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.unit.isSpecified
+import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -36,9 +34,9 @@ import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
+import de.openindex.zugferd.manager.utils.SHUTDOWN_HANDLER
 import de.openindex.zugferd.manager.utils.getPlatform
 import de.openindex.zugferd.manager.utils.loadPreferencesData
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
 import org.slf4j.Logger
@@ -50,7 +48,9 @@ val APP_LOGGER: Logger by lazy {
     LoggerFactory.getLogger("de.openindex.zugferd.manager")
 }
 
-val LocalDesktopWindow = staticCompositionLocalOf<ComposeWindow?> { null }
+//val LocalDesktopWindow = staticCompositionLocalOf<ComposeWindow?> { null }
+//val LocalWindowState = staticCompositionLocalOf<WindowState?> { null }
+val LocalApplicationScope = staticCompositionLocalOf<ApplicationScope?> { null }
 
 fun main() {
     //
@@ -137,8 +137,6 @@ fun main() {
     //
 
     application {
-        val scope = rememberCoroutineScope()
-
         // Initially load preferences within composable application.
         val preferences = LocalPreferences.current
 
@@ -159,31 +157,26 @@ fun main() {
             position = preferences.windowPosition,
         )
 
+        Runtime.getRuntime().addShutdownHook(Thread {
+            APP_LOGGER.info("Shutdown hook was triggered...")
+            SHUTDOWN_HANDLER.saveSettingsOnShutdown(
+                preferences = preferences,
+                windowState = windowState,
+            )
+        })
+
         Window(
             title = "$APP_TITLE_FULL $APP_VERSION",
             state = windowState,
             onCloseRequest = {
-                val pos = windowState.position
-                preferences.setWindowPosition(
-                    x = if (pos.isSpecified) pos.x.value.toInt() else null,
-                    y = if (pos.isSpecified) pos.y.value.toInt() else null,
-                )
-
-                val size = windowState.size
-                preferences.setWindowSize(
-                    width = if (size.isSpecified) size.width.value.toInt() else 1000,
-                    height = if (size.isSpecified) size.height.value.toInt() else 800,
-                )
-
-                scope.launch {
-                    preferences.save()
-                }
-
+                APP_LOGGER.info("Closing window...")
                 exitApplication()
             },
         ) {
-            CompositionLocalProvider(LocalDesktopWindow provides window) {
+            CompositionLocalProvider(LocalApplicationScope provides this@application) {
+                //CompositionLocalProvider(LocalWindowState provides windowState) {
                 App()
+                //}
             }
         }
     }

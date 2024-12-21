@@ -28,7 +28,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
@@ -41,8 +44,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import de.openindex.zugferd.zugferd_manager.generated.resources.application
@@ -121,44 +129,17 @@ fun AppLayout(
 
 @Composable
 private fun AppContent() {
-    //DummyContent(
-    //    modifier = Modifier
-    //        .background(color = Color.LightGray)
-    //        .fillMaxWidth(),
-    //)
-
-    //VerticalScrollBox {
-    //    Surface(
-    //        modifier = Modifier.fillMaxSize(),
-    //    ) {
-    //        Column {
-    //            for (item in 0..30) {
-    //                Text(text = "Item #$item")
-    //                if (item < 30) {
-    //                    Spacer(modifier = Modifier.height(5.dp))
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
         LocalAppState.current.section.content()
     }
-
-    /*VerticalScrollBox {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            LocalAppState.current.section.content()
-        }
-    }*/
 }
 
 @Composable
 private fun AppNavigation() {
+    var shutdownRequested by remember { mutableStateOf(false) }
+
     NavigationRail(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -173,7 +154,7 @@ private fun AppNavigation() {
 
         //Text(text = "Item")
         AppSection.entries.forEach {
-            AppNavigationItem(section = it)
+            AppSectionNavigationItem(section = it)
         }
 
         Spacer(
@@ -188,24 +169,47 @@ private fun AppNavigation() {
             modifier = Modifier
                 .padding(all = 8.dp),
         )
+
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .width(50.dp)
+        )
+
+        AppNavigationItem(
+            label = "Beenden",
+            activeIcon = Icons.Default.Cancel,
+            selected = false,
+            onClick = {
+                shutdownRequested = true
+            },
+        )
+    }
+
+    if (shutdownRequested) {
+        LocalShutdownHandler.current?.shutdown()
     }
 }
 
 @Composable
-private fun AppNavigationItem(section: AppSection) {
-    val appState = LocalAppState.current
-
+private fun AppNavigationItem(
+    label: String,
+    activeIcon: ImageVector,
+    inactiveIcon: ImageVector = activeIcon,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
     NavigationRailItem(
-        selected = appState.isSection(section),
-        onClick = { appState.setSection(section) },
+        selected = selected,
+        onClick = onClick,
         icon = {
             Icon(
-                imageVector = if (appState.isSection(section)) section.activeIcon else section.inactiveIcon,
-                contentDescription = section.label,
+                imageVector = if (selected) activeIcon else inactiveIcon,
+                contentDescription = label,
             )
         },
         enabled = true,
-        label = { Text(text = section.label) },
+        label = { Text(text = label) },
         alwaysShowLabel = true,
         //colors = NavigationRailItemDefaults.colors(),
         colors = NavigationRailItemDefaults.colors(
@@ -217,5 +221,18 @@ private fun AppNavigationItem(section: AppSection) {
         ),
         //interactionSource = null,
         modifier = Modifier,
+    )
+}
+
+@Composable
+private fun AppSectionNavigationItem(section: AppSection) {
+    val appState = LocalAppState.current
+
+    AppNavigationItem(
+        label = section.label,
+        activeIcon = section.activeIcon,
+        inactiveIcon = section.inactiveIcon,
+        selected = appState.isSection(section),
+        onClick = { appState.setSection(section) },
     )
 }

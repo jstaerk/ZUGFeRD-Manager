@@ -22,7 +22,11 @@
 package de.openindex.zugferd.manager
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import de.openindex.zugferd.manager.theme.AppTheme
+import de.openindex.zugferd.manager.utils.ShutdownHandler
+import de.openindex.zugferd.manager.utils.getShutdownHandler
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 const val APP_NAME: String = AppInfo.Project.NAME
@@ -33,13 +37,17 @@ val APP_TITLE: String = APP_NAME.replace('-', ' ').trim()
 val APP_TITLE_FULL: String = "$APP_VENDOR $APP_TITLE"
 val APP_VERSION_SHORT: String = APP_VERSION.substringBefore('-').trim()
 
+val LocalShutdownHandler = staticCompositionLocalOf<ShutdownHandler?> { null }
+
 @Composable
 @Preview
 fun App() {
     //println(AppInfo.Project.NAME)
+    val shutdownHandler = getShutdownHandler()
 
-    AppTheme {
-        AppLayout()
-        //DummyContent()
+    CompositionLocalProvider(LocalShutdownHandler provides shutdownHandler) {
+        AppTheme {
+            AppLayout()
+        }
     }
 }
