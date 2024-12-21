@@ -50,17 +50,16 @@ subprojects {
                 }
             }
 
-            val betaAllowedForGroup = listOf(
-                "org.jetbrains.compose",
-                "org.jetbrains.compose.desktop",
-                "org.jetbrains.compose.material",
-                "org.jetbrains.compose.material3",
-            )
-
             val suffixes = mutableListOf("alpha", "eap")
 
-            if (!betaAllowedForGroup.contains(group)) {
+            val betaAllowedForGroup = group.startsWith("org.jetbrains.compose")
+            if (!betaAllowedForGroup) {
                 suffixes.add("beta")
+            }
+
+            val rcAllowedForGroup = group.startsWith("org.jetbrains.compose")
+            if (!rcAllowedForGroup) {
+                suffixes.add("rc")
             }
 
             return suffixes.any {
@@ -69,6 +68,37 @@ subprojects {
         }
 
         rejectVersionIf {
+            //
+            // Handle version numbers for jcef-natives-* dependencies separately.
+            //
+            // For example extract 127.3.1 from version strings like
+            // jcef-99c2f7a+cef-127.3.1+g6cbb30e+chromium-127.0.6533.100
+            // and comparing these against each other.
+            //
+            if (candidate.module.startsWith("jcef-natives-")) {
+                val currentVersion = libs.versions.jcef.natives.get().split("+")[1].split("-")[1]
+                val candidateVersion = this.candidate.version.split("+")[1].split("-")[1]
+                //println("${this.candidate.module} => $currentVersion == $candidateVersion")
+
+                val currentVersionNumbers = currentVersion.split(".").map { it.toInt() }
+                val candidateVersionNumbers = candidateVersion.split(".").map { it.toInt() }
+
+                var candidateIsNewer: Boolean? = null
+                currentVersionNumbers.forEachIndexed { index, currentNumber ->
+                    if (candidateIsNewer != null) {
+                        return@forEachIndexed
+                    }
+
+                    val candidateNumber = candidateVersionNumbers.getOrNull(index) ?: 0
+                    candidateIsNewer = candidateNumber > currentNumber
+                }
+                //println("${this.candidate.module} => $currentVersion == $candidateVersion => $candidateIsNewer")
+
+                // Returning true to reject a candidate version.
+                return@rejectVersionIf !(candidateIsNewer ?: false)
+            }
+
+
             isNonStable(this.candidate.version, this.candidate.group, this.candidate.module)
                     && !isNonStable(this.currentVersion, this.candidate.group, this.candidate.module)
         }
