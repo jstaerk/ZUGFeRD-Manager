@@ -32,6 +32,10 @@ dependencyResolutionManagement {
         // Required by compose-webview-multiplatform
         // https://github.com/KevinnZou/compose-webview-multiplatform#multiplatform
         //maven("https://jogamp.org/deployment/maven")
+
+        // Required by jogl & gluegen
+        // https://jogamp.org/deployment/maven/org/jogamp/gluegen/gluegen-rt/2.5.0/gluegen-rt-2.5.0.jar
+        maven("https://jogamp.org/deployment/maven")
     }
 }
 

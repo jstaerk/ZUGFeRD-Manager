@@ -136,11 +136,32 @@ kotlin {
             // https://commons.apache.org/proper/commons-lang/
             implementation(libs.commons.lang)
 
+            // Gluegen Runtime
+            // This replaces the outdated version provided by JCEF Maven
+            // https://jogamp.org/gluegen/www/
+            runtimeOnly(libs.gluegen.rt)
+            if (isLinux) {
+                if (isAmd64) {
+                    runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-linux-amd64")
+                }
+                if (isArm64) {
+                    runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-linux-aarch64")
+                }
+            }
+            if (isMac) {
+                runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-macosx-universal")
+            }
+            if (isWindows) {
+                if (isAmd64) {
+                    runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-windows-amd64")
+                }
+            }
+
             // Jaxen XPath Engine for Java
             // https://github.com/jaxen-xpath/jaxen
             runtimeOnly(libs.jaxen)
 
-            // JCEF-Maven
+            // JCEF Maven
             // https://github.com/jcefmaven/jcefmaven
             implementation(libs.jcef.maven)
             if (isLinux) {
@@ -162,6 +183,27 @@ kotlin {
             if (isWindows) {
                 if (isAmd64) {
                     runtimeOnly(libs.jcef.natives.windows.amd64)
+                }
+            }
+
+            // OpenGL Bindings for Java
+            // This replaces the outdated version provided by JCEF Maven
+            // https://jogamp.org/jogl/www/
+            runtimeOnly(libs.jogl.all)
+            if (isLinux && isAmd64) {
+                if (isAmd64) {
+                    runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-linux-amd64")
+                }
+                if (isArm64) {
+                    runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-linux-aarch64")
+                }
+            }
+            if (isMac) {
+                runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-macosx-universal")
+            }
+            if (isWindows) {
+                if (isAmd64) {
+                    runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-windows-amd64")
                 }
             }
 
@@ -830,4 +872,12 @@ tasks {
             }
         }
     }
+}
+
+configurations.all {
+    // JCEF-Maven provides outdated versions for "Gluegen Runtime" and "OpenGL Bindings".
+    // Therefore, off-screen rendering is not possible on MacOS Silicon (maybe as well on other systems).
+    // We are ignoring their outdated dependencies and provide newer versions by ourselves.
+    exclude(group = "me.friwi", module = "gluegen-rt")
+    exclude(group = "me.friwi", module = "jogl-all")
 }
