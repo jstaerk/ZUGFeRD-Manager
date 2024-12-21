@@ -186,8 +186,14 @@ kotlin {
             // https://www.mustangproject.org/
             // https://github.com/ZUGFeRD/mustangproject/
             implementation(libs.mustang.library)
-            implementation(libs.mustang.validator)
+            //implementation(libs.mustang.validator)
             //implementation(variantOf(libs.mustang.validator) { classifier("shaded") })
+            //implementation(libs.mustang.validator) {
+            //    artifact {
+            //        classifier = "shaded"
+            //    }
+            //}
+            implementation("${libs.mustang.validator.get().module}:${libs.versions.mustang.get()}:shaded")
 
             // SLF4J
             // https://www.slf4j.org/
