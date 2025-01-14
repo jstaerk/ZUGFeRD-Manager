@@ -24,8 +24,6 @@ package de.openindex.zugferd.manager.utils
 import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.AppInfo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import me.friwi.jcefmaven.CefAppBuilder
 import org.cef.CefApp
@@ -129,9 +127,9 @@ fun uninstallWebView() {
     CEF_CLIENT?.dispose()
     CEF_APP?.dispose()
 
-    runBlocking {
-        delay(1000)
-    }
+    //runBlocking {
+    //    delay(10000)
+    //}
 }
 
 @OptIn(ExperimentalPathApi::class)
@@ -180,6 +178,36 @@ suspend fun installWebView() {
             builder.addJcefArgs("--disable-gpu")
         }
 
+        //builder.setAppHandler(
+        //    object : MavenCefAppHandlerAdapter() {
+        //        override fun stateHasChanged(state: CefApp.CefAppState?) {
+        //            APP_LOGGER.info("JCEF state: $state")
+        //            super.stateHasChanged(state)
+        //        }
+        //    }
+        //)
+
         builder.build()
+
+        /*
+        val settings = CefSettings()
+        settings.locale = "de-DE"
+        settings.log_file = CEF_LOG_FILE.absolutePathString()
+        settings.root_cache_path = CEF_CACHE_DIR.absolutePathString()
+        settings.cache_path = CEF_CACHE_DIR.resolve("client").absolutePathString()
+        settings.windowless_rendering_enabled = CEF_WINDOWLESS_RENDERING_ENABLED
+
+        val jcefArgs = buildList {
+            if (CEF_DISABLE_GPU) {
+                add("--disable-gpu")
+            }
+        }
+
+        CefInitializer.initialize(
+            CEF_INSTALL_DIR.toFile(),
+            jcefArgs.toMutableList(),
+            settings,
+        )
+        */
     }
 }
