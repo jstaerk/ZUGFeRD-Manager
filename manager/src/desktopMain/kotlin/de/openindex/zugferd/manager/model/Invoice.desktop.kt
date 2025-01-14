@@ -178,7 +178,13 @@ actual suspend fun Invoice.export(
     return true
 }
 
-class CustomZUGFeRDExporterFromPDFA : ZUGFeRDExporterFromPDFA() {
+/**
+ * TODO: This workaround should not be necessary anymore, as the issue was fixed with Mustang 2.16.0.
+ *       Needs further investigation.
+ *       see https://github.com/ZUGFeRD/mustangproject/issues/565
+ *       see https://github.com/ZUGFeRD/mustangproject/releases/tag/core-2.16.0
+ */
+private class CustomZUGFeRDExporterFromPDFA : ZUGFeRDExporterFromPDFA() {
     override fun determineAndSetExporter(pdfAVersion: Int) {
         super.determineAndSetExporter(pdfAVersion)
         if (theExporter == null) {
@@ -205,7 +211,13 @@ class CustomZUGFeRDExporterFromPDFA : ZUGFeRDExporterFromPDFA() {
     }
 }
 
-class CustomZUGFeRD2PullProvider : ZUGFeRD2PullProvider() {
+/**
+ * TODO: This workaround should not be necessary anymore, as the issue was fixed with Mustang 2.16.0.
+ *       Needs further investigation.
+ *       see https://github.com/ZUGFeRD/mustangproject/issues/565
+ *       see https://github.com/ZUGFeRD/mustangproject/releases/tag/core-2.16.0
+ */
+private class CustomZUGFeRD2PullProvider : ZUGFeRD2PullProvider() {
     companion object {
         val elementOrderForSpecifiedTradePaymentTerms = listOf(
             "ID",
