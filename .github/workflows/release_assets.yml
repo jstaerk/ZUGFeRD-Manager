@@ -19,15 +19,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: 'liberica'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
       - name: Setup signing for MacOS
         if: ${{ matrix.os == 'macos-latest' || matrix.os == 'macos-13' }}
         env:
@@ -56,8 +47,15 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "${APPLE_KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
           security list-keychain -d user -s "${KEYCHAIN_PATH}"
 
+      - name: Init JetBrains JDK
+        shell: bash
+        run: ./init-jdk.sh
+
       - name: Build with Gradle
-        run: ./gradlew clean bundle
+        shell: bash
+        run: |
+          source env.sh
+          ./gradlew clean bundle
 
       - name: Upload bundle to release
         shell: bash
