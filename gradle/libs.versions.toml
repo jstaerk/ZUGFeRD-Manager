@@ -9,11 +9,7 @@ buildinfo = "1.0.0"
 commons-lang = "3.17.0"
 compose-multiplatform = "1.7.3"
 filekit = "0.8.8"
-gluegen = "2.5.0"
 jaxen = "2.0.0"
-jcef-maven = "127.3.1"
-jcef-natives = "jcef-99c2f7a+cef-127.3.1+g6cbb30e+chromium-127.0.6533.100"
-jogl = "2.5.0"
 #junit = "4.13.2"
 kotlin = "2.1.0"
 kotlinx-coroutines = "1.10.1"
@@ -32,15 +28,7 @@ appdirs = { group = "net.harawata", name = "appdirs", version.ref = "appdirs" }
 commons-lang = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commons-lang" }
 filekit-core = { group = "io.github.vinceglb", name = "filekit-core", version.ref = "filekit" }
 filekit-compose = { group = "io.github.vinceglb", name = "filekit-compose", version.ref = "filekit" }
-gluegen-rt = { group = "org.jogamp.gluegen", name = "gluegen-rt", version.ref = "gluegen" }
 jaxen = { group = "jaxen", name = "jaxen", version.ref = "jaxen" }
-jcef-maven = { group = "me.friwi", name = "jcefmaven", version.ref = "jcef-maven" }
-jcef-natives-linux-amd64 = { group = "me.friwi", name = "jcef-natives-linux-amd64", version.ref = "jcef-natives" }
-jcef-natives-linux-arm64 = { group = "me.friwi", name = "jcef-natives-linux-arm64", version.ref = "jcef-natives" }
-jcef-natives-macosx-amd64 = { group = "me.friwi", name = "jcef-natives-macosx-amd64", version.ref = "jcef-natives" }
-jcef-natives-macosx-arm64 = { group = "me.friwi", name = "jcef-natives-macosx-arm64", version.ref = "jcef-natives" }
-jcef-natives-windows-amd64 = { group = "me.friwi", name = "jcef-natives-windows-amd64", version.ref = "jcef-natives" }
-jogl-all = { group = "org.jogamp.jogl", name = "jogl-all", version.ref = "jogl" }
 #junit = { group = "junit", name = "junit", version.ref = "junit" }
 #kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 #kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

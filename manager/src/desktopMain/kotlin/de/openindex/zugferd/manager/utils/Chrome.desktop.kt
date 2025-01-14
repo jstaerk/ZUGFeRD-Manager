@@ -21,54 +21,28 @@
 
 package de.openindex.zugferd.manager.utils
 
+import com.jetbrains.cef.JCefAppConfig
 import de.openindex.zugferd.manager.APP_LOGGER
-import de.openindex.zugferd.manager.AppInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.friwi.jcefmaven.CefAppBuilder
+import org.apache.commons.lang3.SystemUtils
 import org.cef.CefApp
 import org.cef.CefClient
+import org.cef.CefSettings
 import org.cef.browser.CefBrowser
+import org.cef.browser.CefRendering
+import org.cef.handler.CefAppHandlerAdapter
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteIfExists
-import kotlin.io.path.deleteRecursively
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.reader
-import kotlin.io.path.writer
 
-const val CEF_WINDOWLESS_RENDERING_ENABLED = true
-const val CEF_OFFSCREEN_RENDERING_ENABLED = true
-const val CEF_TRANSPARENCY_ENABLED = false
-const val CEF_DISABLE_GPU = false
-
-private val CEF_IS_BUNDLED: Boolean by lazy {
-    CEF_BUNDLED_INSTALL_DIR.isDirectory()
-}
-
-private val CEF_BUNDLED_INSTALL_DIR: Path by lazy {
-    if (getPlatform().isRunningInMacAppBundle && APP_LAUNCHER != null) {
-        APP_LAUNCHER!!.parent.parent.resolve("chrome")
-    } else {
-        RESOURCES_DIR.resolve("chrome")
-    }
-}
-
-private val CEF_INSTALL_DIR: Path by lazy {
-    if (CEF_IS_BUNDLED) {
-        APP_LOGGER.info("Using bundled Chrome libraries.")
-        CEF_BUNDLED_INSTALL_DIR
-    } else {
-        APP_LOGGER.info("Installing Chrome libraries into user directory.")
-        APP_WORK_DIR
-            .resolve("chrome")
-            .createDirectories()
-    }
-}
+private const val CEF_WINDOWLESS_RENDERING_ENABLED = false
+private const val CEF_OFFSCREEN_RENDERING_ENABLED = false
+private const val CEF_TRANSPARENCY_ENABLED = false
+private const val CEF_DISABLE_GPU = false
+private const val CEF_DEBUG = false
 
 private val CEF_CACHE_DIR: Path by lazy {
     CACHE_DIR
@@ -79,11 +53,6 @@ private val CEF_CACHE_DIR: Path by lazy {
 private val CEF_LOG_FILE: Path by lazy {
     LOGS_DIR
         .resolve("chrome.log")
-}
-
-private val CEF_VERSION_FILE: Path by lazy {
-    CACHE_DIR
-        .resolve("chrome.version")
 }
 
 private var CEF_APP: CefApp? = null
@@ -110,7 +79,9 @@ fun getCefBrowser(url: String): CefBrowser {
     return if (CEF_BROWSER == null) {
         CEF_CLIENT!!.createBrowser(
             url,
-            CEF_OFFSCREEN_RENDERING_ENABLED,
+            CefRendering.OFFSCREEN
+                .takeIf { CEF_OFFSCREEN_RENDERING_ENABLED }
+                ?: CefRendering.DEFAULT,
             CEF_TRANSPARENCY_ENABLED,
         )
     } else {
@@ -126,10 +97,6 @@ fun uninstallWebView() {
     CEF_BROWSER?.close(true)
     CEF_CLIENT?.dispose()
     CEF_APP?.dispose()
-
-    //runBlocking {
-    //    delay(10000)
-    //}
 }
 
 @OptIn(ExperimentalPathApi::class)
@@ -138,76 +105,108 @@ suspend fun installWebView() {
         return
     }
 
+    // org.cef.Startup
+    if (SystemUtils.IS_OS_MAC) {
+        if (getPlatform().isRunningInMacAppBundle) {
+            val frameworksPath = APP_LAUNCHER!!.parent.parent.resolve("Frameworks")
+
+            System.setProperty(
+                "ALT_CEF_FRAMEWORK_DIR",
+                frameworksPath.resolve("Chromium Embedded Framework.framework").absolutePathString(),
+            )
+            System.setProperty(
+                "ALT_CEF_HELPER_APP_DIR",
+                frameworksPath.resolve("jcef Helper.app").absolutePathString(),
+            )
+            //System.setProperty(
+            //    "ALT_JCEF_LIB_DIR",
+            //    "",
+            //)
+        }
+    }
+
     CEF_APP = withContext(Dispatchers.IO) {
         CEF_LOG_FILE.deleteIfExists()
 
-        // Delete CEF installation directory,
-        // if a newer version is available.
-        if (!CEF_IS_BUNDLED && CEF_INSTALL_DIR.exists()) {
-            val installedCefVersion = if (CEF_VERSION_FILE.isRegularFile()) {
-                CEF_VERSION_FILE
-                    .reader(charset = Charsets.UTF_8)
-                    .use { it.readText().trimToNull() }
-            } else {
-                null
-            }
-
-            if (installedCefVersion != AppInfo.Custom.CHROME_VERSION) {
-                APP_LOGGER.info("Delete outdated Chrome version \"${installedCefVersion}\".")
-                CEF_INSTALL_DIR.deleteRecursively()
-            }
+        if (CEF_DEBUG) {
+            enableVerboseLogging()
         }
 
-        // Remember currently installed CEF version.
-        if (!CEF_IS_BUNDLED) {
-            CEF_VERSION_FILE
-                .writer(charset = Charsets.UTF_8)
-                .use { it.write(AppInfo.Custom.CHROME_VERSION) }
-        }
+        //if (CEF_DEBUG) {
+        //    CefLog.init(
+        //        CEF_LOG_FILE.absolutePathString(),
+        //        CefSettings.LogSeverity.LOGSEVERITY_VERBOSE,
+        //    )
+        //} else {
+        //    CefLog.init(
+        //        CEF_LOG_FILE.absolutePathString(),
+        //        CefSettings.LogSeverity.LOGSEVERITY_WARNING,
+        //    )
+        //}
 
-        val builder = CefAppBuilder()
-        builder.setInstallDir(CEF_INSTALL_DIR.toFile())
-        builder.skipInstallation = CEF_IS_BUNDLED
-        builder.cefSettings.locale = "de-DE"
-        builder.cefSettings.log_file = CEF_LOG_FILE.absolutePathString()
-        builder.cefSettings.root_cache_path = CEF_CACHE_DIR.absolutePathString()
-        builder.cefSettings.cache_path = CEF_CACHE_DIR.resolve("client").absolutePathString()
-        builder.cefSettings.windowless_rendering_enabled = CEF_WINDOWLESS_RENDERING_ENABLED
+        // Perform startup initialization on platforms that require it.
+        APP_LOGGER.info("CEF-STARTUP")
+        CefApp.startup(emptyArray())
+
+        val config = JCefAppConfig.getInstance()
+        val args = mutableListOf<String>()
+        args.addAll(config.appArgs)
+
+        // Disable DRM / Widevine
+        // https://magpcss.org/ceforum/viewtopic.php?f=6&t=19093
+        args.add("--disable-component-update")
 
         if (CEF_DISABLE_GPU) {
-            builder.addJcefArgs("--disable-gpu")
+            args.addAll(
+                listOf(
+                    "--disable-gpu",
+                    "--disable-gpu-compositing",
+                    "--disable-gpu-vsync",
+                    "--disable-software-rasterizer",
+                    //"--disable-extensions",
+                )
+            )
         }
 
-        //builder.setAppHandler(
-        //    object : MavenCefAppHandlerAdapter() {
-        //        override fun stateHasChanged(state: CefApp.CefAppState?) {
-        //            APP_LOGGER.info("JCEF state: $state")
-        //            super.stateHasChanged(state)
-        //        }
-        //    }
-        //)
-
-        builder.build()
-
-        /*
-        val settings = CefSettings()
-        settings.locale = "de-DE"
-        settings.log_file = CEF_LOG_FILE.absolutePathString()
-        settings.root_cache_path = CEF_CACHE_DIR.absolutePathString()
+        val settings = config.cefSettings
+        //settings.no_sandbox = true
         settings.cache_path = CEF_CACHE_DIR.resolve("client").absolutePathString()
+        //settings.root_cache_path = CEF_CACHE_DIR.absolutePathString()
         settings.windowless_rendering_enabled = CEF_WINDOWLESS_RENDERING_ENABLED
+        settings.log_file = CEF_LOG_FILE.absolutePathString()
+        settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_VERBOSE
+            .takeIf { CEF_DEBUG }
+            ?: CefSettings.LogSeverity.LOGSEVERITY_WARNING
 
-        val jcefArgs = buildList {
-            if (CEF_DISABLE_GPU) {
-                add("--disable-gpu")
+        // Locale file loading can be disabled completely.
+        //settings.pack_loading_disabled = true
+        settings.locale = "de"
+
+        CefApp.addAppHandler(object : CefAppHandlerAdapter(emptyArray()) {
+            override fun stateHasChanged(state: CefApp.CefAppState) {
+                // Shutdown the app if the native CEF part is terminated
+                //if (state == CefAppState.TERMINATED) System.exit(0)
+                APP_LOGGER.info("CEF state: $state")
             }
-        }
 
-        CefInitializer.initialize(
-            CEF_INSTALL_DIR.toFile(),
-            jcefArgs.toMutableList(),
-            settings,
-        )
-        */
+            override fun onBeforeChildProcessLaunch(commandLine: String) {
+                //CefLog.Info("Child process launched: $commandLine")
+                APP_LOGGER.info("CEF process launched: $commandLine")
+                super.onBeforeChildProcessLaunch(commandLine)
+            }
+        })
+
+        APP_LOGGER.info("CEF-GET-INSTANCE")
+        CefApp.getInstance(settings)
     }
+}
+
+@Suppress("SpellCheckingInspection")
+private fun enableVerboseLogging() {
+    System.setProperty("jcef.tests.verbose", "true")
+    System.setProperty("jcef.trace.cefbrowser_n.lifespan", "true")
+    System.setProperty("jcef.trace.cefclient.lifespan", "true")
+    System.setProperty("jcef.trace.cefapp.lifespan", "true")
+    System.setProperty("jcef.trace.cefbrowserwr.addnotify", "true")
+    System.setProperty("jcef.log.trace_thread", "true")
 }

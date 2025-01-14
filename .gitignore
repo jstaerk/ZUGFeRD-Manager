@@ -18,7 +18,9 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 hs_err_*.log
+/env.sh
 /.idea/artifacts
+/jdk
 /local.properties
 /local.*.properties
 !/local.example.properties
