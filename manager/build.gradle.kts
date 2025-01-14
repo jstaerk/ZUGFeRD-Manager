@@ -81,7 +81,6 @@ buildInfo {
 
     customFields = mapOf(
         "VENDOR" to "OpenIndex",
-        "CHROME_VERSION" to libs.versions.jcef.natives.get(),
     )
 }
 
@@ -136,76 +135,9 @@ kotlin {
             // https://commons.apache.org/proper/commons-lang/
             implementation(libs.commons.lang)
 
-            // Gluegen Runtime
-            // This replaces the outdated version provided by JCEF Maven
-            // https://jogamp.org/gluegen/www/
-            runtimeOnly(libs.gluegen.rt)
-            if (isLinux) {
-                if (isAmd64) {
-                    runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-linux-amd64")
-                }
-                if (isArm64) {
-                    runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-linux-aarch64")
-                }
-            }
-            if (isMac) {
-                runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-macosx-universal")
-            }
-            if (isWindows) {
-                if (isAmd64) {
-                    runtimeOnly("${libs.gluegen.rt.get().module}:${libs.versions.gluegen.get()}:natives-windows-amd64")
-                }
-            }
-
             // Jaxen XPath Engine for Java
             // https://github.com/jaxen-xpath/jaxen
             runtimeOnly(libs.jaxen)
-
-            // JCEF Maven
-            // https://github.com/jcefmaven/jcefmaven
-            implementation(libs.jcef.maven)
-            if (isLinux) {
-                if (isAmd64) {
-                    runtimeOnly(libs.jcef.natives.linux.amd64)
-                }
-                if (isArm64) {
-                    runtimeOnly(libs.jcef.natives.linux.arm64)
-                }
-            }
-            if (isMac) {
-                if (isAmd64) {
-                    runtimeOnly(libs.jcef.natives.macosx.amd64)
-                }
-                if (isArm64) {
-                    runtimeOnly(libs.jcef.natives.macosx.arm64)
-                }
-            }
-            if (isWindows) {
-                if (isAmd64) {
-                    runtimeOnly(libs.jcef.natives.windows.amd64)
-                }
-            }
-
-            // OpenGL Bindings for Java
-            // This replaces the outdated version provided by JCEF Maven
-            // https://jogamp.org/jogl/www/
-            runtimeOnly(libs.jogl.all)
-            if (isLinux && isAmd64) {
-                if (isAmd64) {
-                    runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-linux-amd64")
-                }
-                if (isArm64) {
-                    runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-linux-aarch64")
-                }
-            }
-            if (isMac) {
-                runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-macosx-universal")
-            }
-            if (isWindows) {
-                if (isAmd64) {
-                    runtimeOnly("${libs.jogl.all.get().module}:${libs.versions.jogl.get()}:natives-windows-amd64")
-                }
-            }
 
             // Logback
             // https://commons.apache.org/proper/commons-lang/
@@ -371,6 +303,13 @@ compose.desktop {
                 //"jdk.security.jgss", // Defines JDK extensions to the GSS-API and an implementation of the SASL GSSAPI mechanism.
                 //"jdk.xml.dom", // Defines the subset of the W3C Document Object Model (DOM) API that is not part of the Java SE API.
                 //"jdk.zipfs", // Provides the implementation of the Zip file system provider.
+
+                //
+                // Jetbrains JDK specific modules
+                //
+                "gluegen.rt",
+                "jcef",
+                "jogl.all",
             )
 
             if (isLinux) {
@@ -528,35 +467,6 @@ tasks {
     }
 
     if (isMac) {
-        // The jcef-natives dependency.
-        // It contains the Chrome libraries,
-        // that are extracted into the application bundle.
-        val jcefNativesDependency = if (isArm64)
-            libs.jcef.natives.macosx.arm64
-        else
-            libs.jcef.natives.macosx.amd64
-
-        // Where the jcef-natives dependency is processed.
-        val jcefNativesDir = project.layout.buildDirectory
-            .dir("natives/jcef").get()
-
-        // Where the jcef-natives dependency is copied to.
-        val jcefNativesJarDir = jcefNativesDir.dir("jar")
-
-        // Where the jcef-natives dependency is extracted to.
-        val jcefNativesTempDir = jcefNativesDir.dir("temp")
-
-        // Where the embedded jcef-natives tar.gz archive is extracted to.
-        val jcefNativesLibraryDir = jcefNativesDir.dir("lib")
-
-        // Name of the jcef-natives jar archive.
-        val jcefNativesDependencyFileName =
-            "${jcefNativesDependency.get().name}-${libs.versions.jcef.natives.get()}.jar"
-
-        // Name of the jcef-natives tar.gz archive.
-        val jcefNativesArchiveFileName =
-            "${jcefNativesDependency.get().name}-${libs.versions.jcef.natives.get()}.tar.gz"
-
         /**
          * Test, if a file should be signed.
          */
@@ -711,51 +621,46 @@ tasks {
                     .dir("compose/binaries/${releaseType}/app/${project.name}.app")
                     .get()
 
-                //val runtimeBundleDir = appBundleDir.dir("Contents/runtime")
-                val chromeBundleDir = appBundleDir.dir("Contents/chrome")
+                val frameworksDir = appBundleDir.dir("Contents/Frameworks")
 
                 val defaultEntitlements = rootProject.layout.projectDirectory
                     .dir("share").dir("apple").file("default.entitlements.plist")
-
-                // Extract native libraries.
-                dependsOn("extractNativeLibrariesForMacOS")
 
                 // Copy native libraries into the application bundle and sign the bundle again.
                 // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigner.kt
                 // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigningHelper.kt
                 doLast {
+                    val srcFrameworksDir = File(SystemUtils.JAVA_HOME).parentFile.resolve("Frameworks")
+                    if (!srcFrameworksDir.isDirectory) {
+                        throw GradleException("Frameworks folder not found in JAVA_HOME.")
+                    }
+
                     copy {
-                        from(jcefNativesLibraryDir)
-                        into(chromeBundleDir)
-                        eachFile {
-                            val notExecutableExtensions = listOf(
-                                "plist",
-                                "json",
-                                "pak",
-                                "bin",
-                                "dat",
-                            )
-                            if (notExecutableExtensions.contains(name.lowercase().substringAfterLast("."))) {
-                                permissions {
-                                    user { execute = false }
-                                    group { execute = false }
-                                    other { execute = false }
-                                }
+                        from(srcFrameworksDir) {
+                            exclude {
+                                it.name == "cef_server.app"
+                            }
+
+                            exclude {
+                                it.relativePath.parent.endsWith("Resources")
+                                        && it.name.endsWith(".lproj")
+                                        && !listOf("de.lproj", "en.lproj").contains(it.name)
                             }
                         }
+                        into(frameworksDir)
                     }
 
                     if (appleSign) {
-                        chromeBundleDir.asFile.walkBottomUp()
-                            .filter { it.isSignableFile() }
-                            .forEach {
-                                macSign(
-                                    fileToSign = it,
-                                    entitlements = defaultEntitlements.asFile,
-                                )
-                            }
+                        //frameworksDir.asFile.walkBottomUp()
+                        //    .filter { it.isSignableFile() }
+                        //    .forEach {
+                        //        macSign(
+                        //            fileToSign = it,
+                        //            entitlements = defaultEntitlements.asFile,
+                        //        )
+                        //    }
 
-                        chromeBundleDir.asFile.listFiles()
+                        frameworksDir.asFile.listFiles()
                             ?.filter { it.isDirectory }
                             ?.forEach {
                                 macSign(
@@ -764,92 +669,12 @@ tasks {
                                 )
                             }
 
-                        //
-                        // Runtime is already properly signed.
-                        //
-                        //runtimeBundleDir.asFile.walkBottomUp()
-                        //    .filter { it.isSignableFile() }
-                        //    .forEach {
-                        //        //macSign(fileToSign = it)
-                        //        macSign(
-                        //            fileToSign = it,
-                        //            entitlements = runtimeEntitlements.asFile,
-                        //            runtime = true,
-                        //        )
-                        //    }
-                        //
-                        //macSign(
-                        //    fileToSign = runtimeBundleDir.asFile,
-                        //    entitlements = runtimeEntitlements.asFile,
-                        //    runtime = true,
-                        //)
-
                         macSign(
                             fileToSign = appBundleDir.asFile,
                             entitlements = defaultEntitlements.asFile,
                         )
                     }
                 }
-            }
-        }
-
-        // Extract native libraries into macOS distributable.
-        // Otherwise, these libraries are not propery signed.
-        // see https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Signing_and_notarization_on_macOS/README.md#testflight
-        register("extractNativeLibrariesForMacOS") {
-            group = "OpenIndex"
-            description = "Extracting jcef-natives library for MacOS bundling."
-
-            doFirst {
-                // Copy jcef-natives dependency to build directory.
-                configurations.forEach {
-                    if (!it.isCanBeResolved) {
-                        return@forEach
-                    }
-                    copy {
-                        from(it)
-                        into(jcefNativesJarDir)
-                        include(jcefNativesDependencyFileName)
-                        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                    }
-                }
-
-                // Extract jcef-natives dependency to temp directory.
-                copy {
-                    from(zipTree(jcefNativesJarDir.file(jcefNativesDependencyFileName)))
-                    into(jcefNativesTempDir)
-                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                }
-
-                // Extract tar.gz from within jcef-natives dependency.
-                copy {
-                    from(tarTree(jcefNativesTempDir.file(jcefNativesArchiveFileName)))
-                    into(jcefNativesLibraryDir)
-                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                }
-
-                // Remove Apple quarantine attributes.
-                // Not sure if necessary, but it doesn't hurt.
-                exec {
-                    workingDir = jcefNativesLibraryDir.asFile.parentFile
-                    executable = "xattr"
-                    args = listOf(
-                        "-r",
-                        "-d",
-                        "com.apple.quarantine",
-                        jcefNativesLibraryDir.asFile.name,
-                    )
-                }
-            }
-
-            // Remove jcef-native dependency from runtime classpath
-            // to avoid bundling into the macOS application bundle.
-            configurations.named("desktopRuntimeClasspath") {
-                //println(this.name)
-                exclude(
-                    group = jcefNativesDependency.get().group,
-                    module = jcefNativesDependency.get().name,
-                )
             }
         }
     }
@@ -872,12 +697,4 @@ tasks {
             }
         }
     }
-}
-
-configurations.all {
-    // JCEF-Maven provides outdated versions for "Gluegen Runtime" and "OpenGL Bindings".
-    // Therefore, off-screen rendering is not possible on MacOS Silicon (maybe as well on other systems).
-    // We are ignoring their outdated dependencies and provide newer versions by ourselves.
-    exclude(group = "me.friwi", module = "gluegen-rt")
-    exclude(group = "me.friwi", module = "jogl-all")
 }

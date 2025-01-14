@@ -84,6 +84,7 @@ fun main() {
             Launching $APP_TITLE_FULL
             - version  : $APP_VERSION
             - platform : ${getPlatform().name}
+            - runtime  : ${SystemUtils.JAVA_HOME}
             - launcher : $APP_LAUNCHER
         """.trimIndent(),
     )
