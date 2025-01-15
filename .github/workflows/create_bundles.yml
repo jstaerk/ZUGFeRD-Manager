@@ -78,6 +78,11 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "${APPLE_KEYCHAIN_PASSWORD}" "${KEYCHAIN_PATH}"
           security list-keychain -d user -s "${KEYCHAIN_PATH}"
 
+      - name: Setup environment for Windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        shell: bash
+        run: choco install wget
+
       - name: Init JetBrains JDK
         shell: bash
         run: ./init-jdk.sh
