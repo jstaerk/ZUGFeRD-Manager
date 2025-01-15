@@ -23,6 +23,7 @@ package de.openindex.zugferd.manager.utils
 
 import com.jetbrains.cef.JCefAppConfig
 import de.openindex.zugferd.manager.APP_LOGGER
+import de.openindex.zugferd.manager.AppInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.SystemUtils
@@ -37,20 +38,41 @@ import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.exists
 
 private const val CEF_WINDOWLESS_RENDERING_ENABLED = false
 private const val CEF_OFFSCREEN_RENDERING_ENABLED = false
 private const val CEF_TRANSPARENCY_ENABLED = false
 private const val CEF_DISABLE_GPU = false
-private const val CEF_DEBUG = false
+
+@Suppress("KotlinConstantConditions")
+private const val CEF_DEBUG = AppInfo.Git.GIT_BRANCH != "master"
 
 private val CEF_CACHE_DIR: Path by lazy {
+    CACHE_DIR
+        .resolve("jcef")
+        .createDirectories()
+}
+
+private val CEF_LOG_FILE: Path by lazy {
+    LOGS_DIR
+        .resolve("jcef.log")
+}
+
+private val OLD_CEF_CACHE_DIR: Path by lazy {
     CACHE_DIR
         .resolve("chrome")
         .createDirectories()
 }
 
-private val CEF_LOG_FILE: Path by lazy {
+private val OLD_CEF_INSTALLATION_DIR: Path by lazy {
+    APP_WORK_DIR
+        .resolve("chrome")
+        .createDirectories()
+}
+
+private val OLD_CEF_LOG_FILE: Path by lazy {
     LOGS_DIR
         .resolve("chrome.log")
 }
@@ -106,6 +128,20 @@ suspend fun installWebView() {
     }
 
     //
+    // Cleanup some old JCEF files from user directory.
+    //
+    if (OLD_CEF_CACHE_DIR.exists()) {
+        OLD_CEF_CACHE_DIR.deleteRecursively()
+    }
+    if (OLD_CEF_INSTALLATION_DIR.exists()) {
+        OLD_CEF_INSTALLATION_DIR.deleteRecursively()
+    }
+    if (OLD_CEF_LOG_FILE.exists()) {
+        OLD_CEF_LOG_FILE.deleteRecursively()
+    }
+
+
+    //
     // Setup paths to bundled JCEF binaries.
     //
     // see org.cef.CefApp#startupAsync
@@ -156,7 +192,7 @@ suspend fun installWebView() {
         //}
 
         // Perform startup initialization on platforms that require it.
-        APP_LOGGER.info("CEF-STARTUP")
+        APP_LOGGER.debug("Starting up CEF application...")
         CefApp.startup(emptyArray())
 
         val config = JCefAppConfig.getInstance()
@@ -181,7 +217,8 @@ suspend fun installWebView() {
 
         val settings = config.cefSettings
         //settings.no_sandbox = true
-        settings.cache_path = CEF_CACHE_DIR.resolve("client").absolutePathString()
+        settings.locale = "de"
+        settings.cache_path = CEF_CACHE_DIR.absolutePathString()
         //settings.root_cache_path = CEF_CACHE_DIR.absolutePathString()
         settings.windowless_rendering_enabled = CEF_WINDOWLESS_RENDERING_ENABLED
         settings.log_file = CEF_LOG_FILE.absolutePathString()
@@ -189,25 +226,23 @@ suspend fun installWebView() {
             .takeIf { CEF_DEBUG }
             ?: CefSettings.LogSeverity.LOGSEVERITY_WARNING
 
-        // Locale file loading can be disabled completely.
-        //settings.pack_loading_disabled = true
-        settings.locale = "de"
-
         CefApp.addAppHandler(object : CefAppHandlerAdapter(emptyArray()) {
             override fun stateHasChanged(state: CefApp.CefAppState) {
                 // Shutdown the app if the native CEF part is terminated
                 //if (state == CefAppState.TERMINATED) System.exit(0)
-                APP_LOGGER.info("CEF state: $state")
+
+                @Suppress("LoggingStringTemplateAsArgument")
+                APP_LOGGER.debug("Changing CEF state to $state")
+                super.stateHasChanged(state)
             }
 
             override fun onBeforeChildProcessLaunch(commandLine: String) {
-                //CefLog.Info("Child process launched: $commandLine")
-                APP_LOGGER.info("CEF process launched: $commandLine")
+                APP_LOGGER.debug("Launching CEF process: $commandLine")
                 super.onBeforeChildProcessLaunch(commandLine)
             }
         })
 
-        APP_LOGGER.info("CEF-GET-INSTANCE")
+        APP_LOGGER.debug("Getting CEF application instance...")
         CefApp.getInstance(settings)
     }
 }
