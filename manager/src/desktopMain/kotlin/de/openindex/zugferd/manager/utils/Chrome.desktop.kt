@@ -201,16 +201,15 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
         // https://peter.sh/experiments/chromium-command-line-switches/
         //
 
-        val args = mutableListOf<String>()
-        args.addAll(config.appArgs)
+        val appArgs = config.appArgsAsList
 
         // Disable DRM / Widevine
         // https://magpcss.org/ceforum/viewtopic.php?f=6&t=19093
-        args.add("--disable-component-update")
+        appArgs.add("--disable-component-update")
 
         // Disable Hardware Acceleration
         if (!gpuEnabled) {
-            args.addAll(
+            appArgs.addAll(
                 listOf(
                     "--disable-gpu",
                     "--disable-gpu-compositing",
@@ -232,7 +231,7 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
             .takeIf { CEF_DEBUG }
             ?: CefSettings.LogSeverity.LOGSEVERITY_WARNING
 
-        CefApp.addAppHandler(object : CefAppHandlerAdapter(emptyArray()) {
+        CefApp.addAppHandler(object : CefAppHandlerAdapter(appArgs.toTypedArray()) {
             override fun stateHasChanged(state: CefApp.CefAppState) {
                 // Shutdown the app if the native CEF part is terminated
                 //if (state == CefAppState.TERMINATED) System.exit(0)
@@ -243,7 +242,7 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
             }
 
             override fun onBeforeChildProcessLaunch(commandLine: String) {
-                APP_LOGGER.debug("Launching CEF process: $commandLine")
+                APP_LOGGER.info("Launching CEF process: $commandLine")
                 super.onBeforeChildProcessLaunch(commandLine)
             }
         })
