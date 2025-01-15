@@ -248,7 +248,7 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
         })
 
         APP_LOGGER.debug("Getting CEF application instance...")
-        CefApp.getInstance(settings)
+        CefApp.getInstance(appArgs.toTypedArray(), settings)
     }
 }
 
