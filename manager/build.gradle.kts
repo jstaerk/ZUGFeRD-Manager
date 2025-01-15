@@ -12,6 +12,8 @@ import kotlin.io.path.name
 project.group = "de.openindex.zugferd"
 project.version = libs.versions.application.version.get()
 
+val applicationPackageName = "ZUGFeRD-Manager"
+
 val isLinux = SystemUtils.IS_OS_LINUX
 val isMac = SystemUtils.IS_OS_MAC
 val isWindows = SystemUtils.IS_OS_WINDOWS
@@ -221,10 +223,9 @@ compose.desktop {
         }
 
         nativeDistributions {
-            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-            val copyrightYear = "2024-$currentYear".takeIf { currentYear > 2024 } ?: "2024"
+            val copyrightYear = "2024-${Calendar.getInstance().get(Calendar.YEAR)}"
 
-            packageName = "ZUGFeRD-Manager"
+            packageName = applicationPackageName
             //packageVersion = project.version.toString()
             vendor = "OpenIndex"
             copyright = "© $copyrightYear OpenIndex. All rights reserved."
@@ -322,7 +323,7 @@ compose.desktop {
                 appCategory = "misc"
                 appRelease = libs.versions.application.revision.get()
                 menuGroup = "OpenIndex-ZUGFeRD"
-                installationPath = "/opt/OpenIndex-ZUGFeRD-Manager"
+                installationPath = "/opt/OpenIndex-${applicationPackageName}"
                 debMaintainer = "andy@openindex.de"
                 rpmLicenseType = "Apache-2.0"
                 packageVersion = project.version.toString()
@@ -331,7 +332,7 @@ compose.desktop {
 
             macOS {
                 bundleID = appleBundleId
-                dockName = "ZUGFeRD-Manager"
+                dockName = applicationPackageName
                 packageVersion = project.version.toString()
                 packageBuildVersion = project.version.toString()
                 appCategory = "public.app-category.business"
@@ -626,6 +627,13 @@ tasks {
                 val defaultEntitlements = rootProject.layout.projectDirectory
                     .dir("share").dir("apple").file("default.entitlements.plist")
 
+                val cefTranslations = listOf(
+                    "de.lproj",
+                    "en.lproj",
+                    "en-gb.lproj",
+                    "en-us.lproj",
+                )
+
                 // Copy native libraries into the application bundle and sign the bundle again.
                 // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigner.kt
                 // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigningHelper.kt
@@ -637,14 +645,16 @@ tasks {
 
                     copy {
                         from(srcFrameworksDir) {
+                            // Exclude unnecessary "cef_server" application.
                             exclude {
                                 it.name == "cef_server.app"
                             }
 
+                            // Exclude unnecessary translations.
                             exclude {
                                 it.relativePath.parent.endsWith("Resources")
                                         && it.name.endsWith(".lproj")
-                                        && !listOf("de.lproj", "en.lproj").contains(it.name)
+                                        && !cefTranslations.contains(it.name.lowercase())
                             }
                         }
                         into(frameworksDir)

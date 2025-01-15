@@ -25,7 +25,7 @@ interface Platform {
     val name: String
     val type: PlatformType
     val os: OsType
-    val isRunningInMacAppBundle: Boolean
+    val isRunningFromInstallation: Boolean
 }
 
 enum class PlatformType {

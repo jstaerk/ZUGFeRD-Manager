@@ -105,9 +105,14 @@ suspend fun installWebView() {
         return
     }
 
-    // org.cef.Startup
-    if (SystemUtils.IS_OS_MAC) {
-        if (getPlatform().isRunningInMacAppBundle) {
+    //
+    // Setup paths to bundled JCEF binaries.
+    //
+    // see org.cef.CefApp#startupAsync
+    // see org.cef.Startup
+    //
+    if (getPlatform().isRunningFromInstallation) {
+        if (SystemUtils.IS_OS_MAC) {
             val frameworksPath = APP_LAUNCHER!!.parent.parent.resolve("Frameworks")
 
             System.setProperty(
@@ -123,6 +128,12 @@ suspend fun installWebView() {
             //    "",
             //)
         }
+        //else {
+        //    System.setProperty(
+        //        "ALT_CEF_FRAMEWORK_DIR",
+        //        Path.of(SystemUtils.JAVA_HOME, "lib").absolutePathString(),
+        //    )
+        //}
     }
 
     CEF_APP = withContext(Dispatchers.IO) {

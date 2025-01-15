@@ -91,9 +91,16 @@ private class JvmPlatform(
         else if (SystemUtils.IS_OS_MAC) OsType.MAC
         else OsType.LINUX
 
-    override val isRunningInMacAppBundle: Boolean
-        get() = SystemUtils.IS_OS_MAC &&
+    override val isRunningFromInstallation: Boolean
+        get() {
+            return if (SystemUtils.IS_OS_MAC) {
                 APP_LAUNCHER?.parent?.pathString?.endsWith("/Contents/MacOS") == true
+            } else if (SystemUtils.IS_OS_LINUX) {
+                APP_LAUNCHER?.parent?.pathString?.endsWith("/bin") == true
+            } else {
+                false
+            }
+        }
 }
 
 
