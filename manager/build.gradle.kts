@@ -465,6 +465,78 @@ tasks {
                 "${project.name}-${libs.versions.application.pkg.get()}-linux-${arch}.rpm"
             }
         }
+
+        // Modify runtime image for Linux builds.
+        whenTaskAdded {
+            if (name != "createRuntimeImage") {
+                return@whenTaskAdded
+            }
+
+            val runtimeImageDir = project.layout.buildDirectory
+                .dir("compose/tmp/main/runtime")
+                .get()
+
+            val runtimeLibDir = runtimeImageDir
+                .dir("lib")
+
+            val cefLocalesDir = runtimeLibDir
+                .dir("locales")
+
+            val cefTranslations = listOf(
+                "de.pak",
+                "en.pak",
+                "en-gb.pak",
+                "en-us.pak",
+            )
+
+            doLast {
+                // Make JCEF binaries executable.
+                listOf("chrome-sandbox", "jcef_helper")
+                    .map { runtimeLibDir.file(it).asFile.absolutePath }
+                    .forEach {
+                        exec {
+                            commandLine("chmod", "ugo+x", it)
+                        }
+                    }
+
+                // Delete unnecessary "cef_server" binary.
+                runtimeLibDir.file("cef_server")
+                    .asFile.deleteRecursively()
+
+                // Delete unnecessary translations.
+                cefLocalesDir.asFile.listFiles()
+                    ?.filter { it.isFile }
+                    ?.filter { !cefTranslations.contains(it.name.lowercase()) }
+                    ?.forEach { it.delete() }
+            }
+        }
+
+        // Copy alternative launcher script into distribution directory.
+        whenTaskAdded {
+            val releaseType = if (name == "createReleaseDistributable")
+                "main-release"
+            else if (name == "createDistributable")
+                "main"
+            else
+                return@whenTaskAdded
+
+            val appBundleDir = project.layout.buildDirectory
+                .dir("compose/binaries/${releaseType}/app/${project.name}")
+                .get()
+
+            val appBinDir = appBundleDir
+                .dir("bin")
+
+            val launcherScript = rootProject.layout.projectDirectory
+                .dir("share").dir("linux").file("launcher.sh")
+
+            doLast {
+                copy {
+                    from(launcherScript)
+                    into(appBinDir.file("${applicationPackageName}.sh"))
+                }
+            }
+        }
     }
 
     if (isMac) {
