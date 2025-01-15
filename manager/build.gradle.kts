@@ -790,6 +790,9 @@ tasks {
                 .dir("compose/tmp/main/runtime")
                 .get()
 
+            val runtimeBinDir = runtimeImageDir
+                .dir("bin")
+
             val runtimeLibDir = runtimeImageDir
                 .dir("lib")
 
@@ -804,6 +807,16 @@ tasks {
             )
 
             doLast {
+                // Copy missing "icudtl.dat" from JAVA_HOME.
+                copy {
+                    from(
+                        File(SystemUtils.JAVA_HOME)
+                            .resolve("bin")
+                            .resolve("icudtl.dat")
+                    )
+                    into(runtimeBinDir)
+                }
+
                 // Delete unnecessary "cef_server" binary.
                 runtimeLibDir.file("cef_server.exe")
                     .asFile.deleteRecursively()
