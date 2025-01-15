@@ -36,6 +36,7 @@ import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Senders
 import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
+import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
 import de.openindex.zugferd.manager.utils.isPdfArchive
 import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.FileKit
@@ -58,9 +59,9 @@ class CreateSectionState : SectionState() {
     val selectedPdf: PlatformFile?
         get() = _selectedPdf.value ?: _originalSelectedPdf.value
 
-    private var _selectedPdfIsArchive = mutableStateOf(false)
-    val selectedPdfIsArchive: Boolean
-        get() = _selectedPdfIsArchive.value
+    private var _selectedPdfArchiveVersion = mutableStateOf(0)
+    val selectedPdfArchiveVersion: Int
+        get() = _selectedPdfArchiveVersion.value
 
     private var _selectedPdfArchiveError = mutableStateOf<String?>(null)
     val selectedPdfArchiveError: String?
@@ -98,21 +99,21 @@ class CreateSectionState : SectionState() {
 
         _originalSelectedPdf.value = pdf
         _selectedPdf.value = null
-        _selectedPdfIsArchive.value = false
+        _selectedPdfArchiveVersion.value = 0
         _selectedPdfArchiveError.value = null
 
-        val pdfIsArchive = isPdfArchive(pdf)
-        if (!pdfIsArchive && preferences.autoConvertToPdfA) {
+        val pdfArchiveVersion = getPdfArchiveVersion(pdf)
+        if (!isPdfArchive(pdfArchiveVersion) && preferences.autoConvertToPdfA) {
             try {
                 val convertedPdf = convertToPdfArchive(pdf)
                 _selectedPdf.value = convertedPdf
-                _selectedPdfIsArchive.value = isPdfArchive(convertedPdf)
+                _selectedPdfArchiveVersion.value = getPdfArchiveVersion(convertedPdf)
             } catch (e: Exception) {
-                _selectedPdfIsArchive.value = false
+                _selectedPdfArchiveVersion.value = -1
                 _selectedPdfArchiveError.value = e.localizedMessage ?: e.message
             }
         } else {
-            _selectedPdfIsArchive.value = pdfIsArchive
+            _selectedPdfArchiveVersion.value = pdfArchiveVersion
         }
 
         // Create empty invoice instance.
@@ -129,7 +130,7 @@ class CreateSectionState : SectionState() {
     }
 
     suspend fun convertToPdfArchive() {
-        if (selectedPdfIsArchive) {
+        if (isPdfArchive(selectedPdfArchiveVersion)) {
             return
         }
         val originalPdf = originalSelectedPdf ?: return
@@ -137,9 +138,9 @@ class CreateSectionState : SectionState() {
         try {
             val convertedPdf = convertToPdfArchive(originalPdf)
             _selectedPdf.value = convertedPdf
-            _selectedPdfIsArchive.value = isPdfArchive(convertedPdf)
+            _selectedPdfArchiveVersion.value = getPdfArchiveVersion(convertedPdf)
         } catch (e: Exception) {
-            _selectedPdfIsArchive.value = false
+            _selectedPdfArchiveVersion.value = -1
             _selectedPdfArchiveError.value = e.localizedMessage ?: e.message
         }
     }

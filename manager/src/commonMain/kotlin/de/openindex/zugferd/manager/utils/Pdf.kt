@@ -23,6 +23,15 @@ package de.openindex.zugferd.manager.utils
 
 import io.github.vinceglb.filekit.core.PlatformFile
 
-expect suspend fun isPdfArchive(pdfFile: PlatformFile): Boolean
+fun isPdfArchive(version: Int): Boolean =
+    version > 0
+
+fun isSupportedPdfArchiveVersion(version: Int): Boolean =
+    version == 1 || version == 3
+
+suspend fun isPdfArchive(pdfFile: PlatformFile): Boolean =
+    isPdfArchive(getPdfArchiveVersion(pdfFile))
+
+expect suspend fun getPdfArchiveVersion(pdfFile: PlatformFile): Int
 
 expect suspend fun convertToPdfArchive(pdfFile: PlatformFile): PlatformFile

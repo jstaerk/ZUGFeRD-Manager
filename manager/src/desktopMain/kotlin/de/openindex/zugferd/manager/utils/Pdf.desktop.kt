@@ -52,12 +52,12 @@ import java.time.temporal.ChronoUnit
 import java.util.Collections
 import java.util.GregorianCalendar
 
-actual suspend fun isPdfArchive(pdfFile: PlatformFile): Boolean {
+actual suspend fun getPdfArchiveVersion(pdfFile: PlatformFile): Int {
     return try {
-        getPDFAVersion(pdfFile.file) > 0
+        getPDFAVersion(pdfFile.file)
     } catch (e: Exception) {
-        APP_LOGGER.error("Can't check PDF/A version!", e)
-        false
+        APP_LOGGER.error("Can't extract PDF/A version!", e)
+        -1
     }
 }
 
