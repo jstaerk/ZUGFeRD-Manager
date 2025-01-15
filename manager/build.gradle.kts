@@ -513,12 +513,11 @@ tasks {
 
         // Copy alternative launcher script into distribution directory.
         whenTaskAdded {
-            val releaseType = if (name == "createReleaseDistributable")
-                "main-release"
-            else if (name == "createDistributable")
-                "main"
-            else
-                return@whenTaskAdded
+            val releaseType = when (name) {
+                "createReleaseDistributable" -> "main-release"
+                "createDistributable" -> "main"
+                else -> return@whenTaskAdded
+            }
 
             val appBundleDir = project.layout.buildDirectory
                 .dir("compose/binaries/${releaseType}/app/${project.name}")
@@ -687,78 +686,77 @@ tasks {
         // Extract and sign native libraries before the Mac distributable is created.
         // And finally sign the modified application bundle again.
         whenTaskAdded {
-            if (name == "createDistributable" || name == "createReleaseDistributable") {
-                val releaseType = if (name == "createReleaseDistributable")
-                    "main-release"
-                else
-                    "main"
+            val releaseType = when (name) {
+                "createReleaseDistributable" -> "main-release"
+                "createDistributable" -> "main"
+                else -> return@whenTaskAdded
+            }
 
-                val appBundleDir = project.layout.buildDirectory
-                    .dir("compose/binaries/${releaseType}/app/${project.name}.app")
-                    .get()
+            val appBundleDir = project.layout.buildDirectory
+                .dir("compose/binaries/${releaseType}/app/${project.name}.app")
+                .get()
 
-                val frameworksDir = appBundleDir.dir("Contents/Frameworks")
+            val frameworksDir = appBundleDir.dir("Contents/Frameworks")
 
-                val defaultEntitlements = rootProject.layout.projectDirectory
-                    .dir("share").dir("apple").file("default.entitlements.plist")
+            val defaultEntitlements = rootProject.layout.projectDirectory
+                .dir("share").dir("apple").file("default.entitlements.plist")
 
-                val cefTranslations = listOf(
-                    "de.lproj",
-                    "en.lproj",
-                    "en-gb.lproj",
-                    "en-us.lproj",
-                )
+            val cefTranslations = listOf(
+                "de.lproj",
+                "en.lproj",
+                "en-gb.lproj",
+                "en-us.lproj",
+            )
 
-                // Copy native libraries into the application bundle and sign the bundle again.
-                // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigner.kt
-                // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigningHelper.kt
-                doLast {
-                    val srcFrameworksDir = File(SystemUtils.JAVA_HOME).parentFile.resolve("Frameworks")
-                    if (!srcFrameworksDir.isDirectory) {
-                        throw GradleException("Frameworks folder not found in JAVA_HOME.")
-                    }
+            // Copy native libraries into the application bundle and sign the bundle again.
+            // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigner.kt
+            // https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/kotlin/org/jetbrains/compose/desktop/application/internal/MacSigningHelper.kt
+            doLast {
+                val srcFrameworksDir = File(SystemUtils.JAVA_HOME).parentFile.resolve("Frameworks")
+                if (!srcFrameworksDir.isDirectory) {
+                    throw GradleException("Frameworks folder not found in JAVA_HOME.")
+                }
 
-                    copy {
-                        from(srcFrameworksDir) {
-                            // Exclude unnecessary "cef_server" application.
-                            exclude {
-                                it.name == "cef_server.app"
-                            }
-
-                            // Exclude unnecessary translations.
-                            exclude {
-                                it.relativePath.parent.endsWith("Resources")
-                                        && it.name.endsWith(".lproj")
-                                        && !cefTranslations.contains(it.name.lowercase())
-                            }
+                copy {
+                    from(srcFrameworksDir) {
+                        // Exclude unnecessary "cef_server" application.
+                        exclude {
+                            it.name == "cef_server.app"
                         }
-                        into(frameworksDir)
+
+                        // Exclude unnecessary translations.
+                        exclude {
+                            it.relativePath.parent.endsWith("Resources")
+                                    && it.name.endsWith(".lproj")
+                                    && !cefTranslations.contains(it.name.lowercase())
+                        }
                     }
+                    into(frameworksDir)
+                }
 
-                    if (appleSign) {
-                        //frameworksDir.asFile.walkBottomUp()
-                        //    .filter { it.isSignableFile() }
-                        //    .forEach {
-                        //        macSign(
-                        //            fileToSign = it,
-                        //            entitlements = defaultEntitlements.asFile,
-                        //        )
-                        //    }
+                if (appleSign) {
+                    //frameworksDir.asFile.walkBottomUp()
+                    //    .filter { it.isSignableFile() }
+                    //    .forEach {
+                    //        macSign(
+                    //            fileToSign = it,
+                    //            entitlements = defaultEntitlements.asFile,
+                    //        )
+                    //    }
 
-                        frameworksDir.asFile.listFiles()
-                            ?.filter { it.isDirectory }
-                            ?.forEach {
-                                macSign(
-                                    fileToSign = it,
-                                    entitlements = defaultEntitlements.asFile,
-                                )
-                            }
+                    frameworksDir.asFile.listFiles()
+                        ?.filter { it.isDirectory }
+                        ?.forEach {
+                            macSign(
+                                fileToSign = it,
+                                entitlements = defaultEntitlements.asFile,
+                            )
+                        }
 
-                        macSign(
-                            fileToSign = appBundleDir.asFile,
-                            entitlements = defaultEntitlements.asFile,
-                        )
-                    }
+                    macSign(
+                        fileToSign = appBundleDir.asFile,
+                        entitlements = defaultEntitlements.asFile,
+                    )
                 }
             }
         }
