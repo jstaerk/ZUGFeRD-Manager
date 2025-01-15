@@ -533,7 +533,7 @@ tasks {
             doLast {
                 copy {
                     from(launcherScript)
-                    into(appBinDir.file("${applicationPackageName}.sh"))
+                    to(appBinDir.file("${applicationPackageName}.sh"))
                 }
             }
         }
