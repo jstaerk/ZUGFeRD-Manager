@@ -779,5 +779,41 @@ tasks {
                 "${project.name}-${libs.versions.application.pkg.get()}-windows-${arch}.exe"
             }
         }
+
+        // Modify runtime image for Windows builds.
+        whenTaskAdded {
+            if (name != "createRuntimeImage") {
+                return@whenTaskAdded
+            }
+
+            val runtimeImageDir = project.layout.buildDirectory
+                .dir("compose/tmp/main/runtime")
+                .get()
+
+            val runtimeLibDir = runtimeImageDir
+                .dir("lib")
+
+            val cefLocalesDir = runtimeLibDir
+                .dir("locales")
+
+            val cefTranslations = listOf(
+                "de.pak",
+                "en.pak",
+                "en-gb.pak",
+                "en-us.pak",
+            )
+
+            doLast {
+                // Delete unnecessary "cef_server" binary.
+                runtimeLibDir.file("cef_server.exe")
+                    .asFile.deleteRecursively()
+
+                // Delete unnecessary translations.
+                cefLocalesDir.asFile.listFiles()
+                    ?.filter { it.isFile }
+                    ?.filter { !cefTranslations.contains(it.name.lowercase()) }
+                    ?.forEach { it.delete() }
+            }
+        }
     }
 }
