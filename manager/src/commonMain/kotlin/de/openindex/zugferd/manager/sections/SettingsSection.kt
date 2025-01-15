@@ -83,6 +83,7 @@ fun SettingsSection(state: SettingsSectionState) {
             RecipientSettings(state)
             ProductSettings(state)
             PdfASettings(state)
+            ChromeSettings(state)
             ThemeSettings(state)
         }
     }
@@ -655,6 +656,48 @@ private fun PdfASettings(state: SettingsSectionState) {
             Text(
                 text = "PDF-Dateien automatisch in PDF/A umwandeln",
             )
+        }
+    }
+}
+
+@Composable
+@Suppress("UNUSED_PARAMETER")
+private fun ChromeSettings(state: SettingsSectionState) {
+    val scope = rememberCoroutineScope()
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier,
+    ) {
+        val preferences = LocalPreferences.current
+
+        SectionSubTitle(
+            text = "Integrierter Web-Browser",
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier,
+        ) {
+            Switch(
+                checked = preferences.chromeGpuEnabled,
+                onCheckedChange = {
+                    preferences.setChromeGpuEnabled(it)
+                    scope.launch {
+                        preferences.save()
+                    }
+                }
+            )
+
+            Column {
+                Text(
+                    text = "Hardware-Beschleunigung verwenden",
+                )
+                Text(
+                    text = "(Neustart bei Änderung nötig)",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
         }
     }
 }

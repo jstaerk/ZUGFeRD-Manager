@@ -157,6 +157,16 @@ class Preferences(data: PreferencesData) {
         _autoConvertToPdfA.value = enabled
     }
 
+    //
+    // Enable GPU acceleration in Chrome.
+    //
+
+    private var _chromeGpuEnabled = mutableStateOf(data.chromeGpuEnabled)
+    val chromeGpuEnabled get() = _chromeGpuEnabled.value
+    fun setChromeGpuEnabled(enabled: Boolean) {
+        _chromeGpuEnabled.value = enabled
+    }
+
     @Suppress("MemberVisibilityCanBePrivate")
     fun toData(): PreferencesData =
         PreferencesData(
@@ -171,6 +181,7 @@ class Preferences(data: PreferencesData) {
             previousSenderKey = _previousSenderKey,
             previousProductKey = _previousProductKey,
             autoConvertToPdfA = _autoConvertToPdfA.value,
+            chromeGpuEnabled = _chromeGpuEnabled.value,
         )
 
     suspend fun save() {
@@ -194,6 +205,7 @@ data class PreferencesData(
     val previousSenderKey: UInt? = null,
     val previousProductKey: UInt? = null,
     val autoConvertToPdfA: Boolean = false,
+    val chromeGpuEnabled: Boolean = true,
 )
 
 val LocalPreferences = compositionLocalOf { loadPreferences() }

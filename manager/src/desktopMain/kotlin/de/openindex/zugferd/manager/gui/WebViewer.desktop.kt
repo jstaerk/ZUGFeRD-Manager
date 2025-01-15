@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
+import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.getCefBrowser
 import de.openindex.zugferd.manager.utils.installWebView
 import kotlinx.coroutines.launch
@@ -47,10 +48,13 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 actual fun WebViewer(html: String, modifier: Modifier) {
     val scope = rememberCoroutineScope()
     var isInstalled by remember { mutableStateOf(false) }
+    val chromeGpuEnabled = LocalPreferences.current.chromeGpuEnabled
 
     LaunchedEffect(Unit) {
         scope.launch {
-            installWebView()
+            installWebView(
+                gpuEnabled = chromeGpuEnabled,
+            )
         }.invokeOnCompletion {
             isInstalled = true
         }

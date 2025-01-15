@@ -44,7 +44,6 @@ import kotlin.io.path.exists
 private const val CEF_WINDOWLESS_RENDERING_ENABLED = false
 private const val CEF_OFFSCREEN_RENDERING_ENABLED = false
 private const val CEF_TRANSPARENCY_ENABLED = false
-private const val CEF_DISABLE_GPU = false
 
 @Suppress("KotlinConstantConditions")
 private const val CEF_DEBUG = AppInfo.Git.GIT_BRANCH != "master"
@@ -122,7 +121,7 @@ fun uninstallWebView() {
 }
 
 @OptIn(ExperimentalPathApi::class)
-suspend fun installWebView() {
+suspend fun installWebView(gpuEnabled: Boolean = true) {
     if (CEF_APP != null) {
         return
     }
@@ -196,6 +195,12 @@ suspend fun installWebView() {
         CefApp.startup(emptyArray())
 
         val config = JCefAppConfig.getInstance()
+
+        //
+        // Chrome command line arguments.
+        // https://peter.sh/experiments/chromium-command-line-switches/
+        //
+
         val args = mutableListOf<String>()
         args.addAll(config.appArgs)
 
@@ -203,7 +208,8 @@ suspend fun installWebView() {
         // https://magpcss.org/ceforum/viewtopic.php?f=6&t=19093
         args.add("--disable-component-update")
 
-        if (CEF_DISABLE_GPU) {
+        // Disable Hardware Acceleration
+        if (!gpuEnabled) {
             args.addAll(
                 listOf(
                     "--disable-gpu",
