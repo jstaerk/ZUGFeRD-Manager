@@ -807,19 +807,21 @@ tasks {
             )
 
             doLast {
-                // Copy missing "icudtl.dat" from JAVA_HOME.
-                copy {
-                    from(
-                        File(SystemUtils.JAVA_HOME)
-                            .resolve("bin")
-                            .resolve("icudtl.dat")
-                    )
-                    into(runtimeBinDir)
+                // Copy required files from JAVA_HOME.
+                listOf(
+                    "icudtl.dat",
+                    "jcef_helper.exe",
+                    "v8_context_snapshot.bin",
+                ).forEach {
+                    copy {
+                        from(
+                            File(SystemUtils.JAVA_HOME)
+                                .resolve("bin")
+                                .resolve(it)
+                        )
+                        into(runtimeBinDir)
+                    }
                 }
-
-                // Delete unnecessary "cef_server" binary.
-                runtimeLibDir.file("cef_server.exe")
-                    .asFile.deleteRecursively()
 
                 // Delete unnecessary translations.
                 cefLocalesDir.asFile.listFiles()
