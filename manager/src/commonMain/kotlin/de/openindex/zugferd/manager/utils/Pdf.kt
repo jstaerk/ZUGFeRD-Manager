@@ -23,12 +23,15 @@ package de.openindex.zugferd.manager.utils
 
 import io.github.vinceglb.filekit.core.PlatformFile
 
+const val MAX_PDF_ARCHIVE_VERSION = 3
+
 fun isPdfArchive(version: Int): Boolean =
     version > 0
 
 fun isSupportedPdfArchiveVersion(version: Int): Boolean =
-    version == 1 || version == 3
+    version == 1 || version == MAX_PDF_ARCHIVE_VERSION
 
+@Suppress("unused")
 suspend fun isPdfArchive(pdfFile: PlatformFile): Boolean =
     isPdfArchive(getPdfArchiveVersion(pdfFile))
 

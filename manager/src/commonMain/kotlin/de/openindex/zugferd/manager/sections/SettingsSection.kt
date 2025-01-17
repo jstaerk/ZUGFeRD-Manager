@@ -626,16 +626,16 @@ private fun PdfASettings(state: SettingsSectionState) {
         val preferences = LocalPreferences.current
 
         SectionSubTitle(
-            text = "PDF/A-Format bei Erzeugung von E-Rechnungen",
+            text = "PDF/A Format bei Erzeugung von E-Rechnungen",
         )
 
         SectionInfo(
-            text = "Bei der Erzeugung von E-Rechnungen muss die gewählte Rechnungsdatei im PDF/A-Format vorliegen. " +
-                    "Im Optimalfall sollte dieses Dateiformat direkt aus Word / LibreOffice etc. heraus exportiert werden. " +
-                    "$APP_TITLE kann eine gewählte PDF-Datei automatisch umwandeln. Dies ist aber nicht 100%ig zuverlässig " +
-                    "und kann zu Fehlern in der erzeugten E-Rechnung führen. Falls eine Umwandlung innerhalb von $APP_TITLE " +
-                    "trotzdem gewünscht ist, kann diese bei Bedarf automatisch durchgeführt werden, wenn eine PDF-Rechnung " +
-                    "ausgewählt wird.",
+            text = "Bei der Erzeugung von E-Rechnungen muss die gewählte Rechnungsdatei im PDF/A-1 oder PDF/A-3 Format " +
+                    "vorliegen. Im Optimalfall sollte dieses Dateiformat direkt aus Word / LibreOffice etc. heraus " +
+                    "exportiert werden. $APP_TITLE kann eine gewählte PDF-Datei automatisch umwandeln. Dies ist aber " +
+                    "nicht 100%ig zuverlässig und kann zu Fehlern in der erzeugten E-Rechnung führen. Falls eine " +
+                    "Umwandlung innerhalb von $APP_TITLE trotzdem gewünscht ist, kann diese bei Bedarf automatisch " +
+                    "durchgeführt werden, wenn eine PDF-Rechnung ausgewählt wird.",
         )
 
         Row(
@@ -654,7 +654,7 @@ private fun PdfASettings(state: SettingsSectionState) {
             )
 
             Text(
-                text = "PDF-Dateien automatisch in PDF/A umwandeln",
+                text = "Nicht unterstützte PDF-Dateien automatisch in PDF/A-3 umwandeln.",
             )
         }
     }

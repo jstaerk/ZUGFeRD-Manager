@@ -89,6 +89,7 @@ import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
+import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.XmlVisualTransformation
 import de.openindex.zugferd.manager.utils.formatAsPercentage
 import de.openindex.zugferd.manager.utils.formatAsPrice
@@ -105,8 +106,9 @@ fun CreateSection(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
     val isValid = state.invoiceValid
     val selectedPdf = state.selectedPdf
-    val selectedPdfIsArchive = state.selectedPdfIsArchive
+    val selectedPdfArchiveVersion = state.selectedPdfArchiveVersion
     val selectedPdfArchiveError = state.selectedPdfArchiveError
+    val isSelectedPdfArchiveUsable = state.isSelectedPdfArchiveUsable
 
     if (selectedPdf == null) {
         EmptyView(state)
@@ -129,28 +131,36 @@ fun CreateSection(state: CreateSectionState) {
                     CreateView(state)
                 }
 
-                AnimatedVisibility(visible = !isValid && selectedPdfIsArchive) {
+                AnimatedVisibility(visible = !isValid && isSelectedPdfArchiveUsable) {
                     Notification(
                         text = "Die Angaben zur Rechnung sind unvollständig. Eine E-Rechnung kann erst erzeugt werden, " +
                                 "wenn alle nötigen Angaben vorhanden sind.",
                     )
                 }
 
-                AnimatedVisibility(visible = !selectedPdfIsArchive && selectedPdfArchiveError != null) {
+                AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion > MAX_PDF_ARCHIVE_VERSION) {
                     Notification(
-                        text = "Die PDF-Datei konnte nicht in das PDF/A Format umgewandelt werden. " +
+                        text = "Die PDF-Datei liegt im PDF/A-${selectedPdfArchiveVersion} Format vor. " +
+                                "Daraus kann keine ZUGFeRD-Rechnung erzeugt werden. Verwenden Sie bitte eine " +
+                                "reguläre PDF-Datei oder das PDF/A-1 bzw. PDF/A-3 Format.",
+                    )
+                }
+
+                AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveError != null) {
+                    Notification(
+                        text = "Die PDF-Datei konnte nicht in das PDF/A-3 Format umgewandelt werden. " +
                                 "$selectedPdfArchiveError",
                     )
                 }
 
-                AnimatedVisibility(visible = !selectedPdfIsArchive && selectedPdfArchiveError == null) {
+                AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION && selectedPdfArchiveError == null) {
                     Notification(
                         text = "Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. " +
                                 "Damit kann keine E-Rechnung erzeugt werden.",
                     ) {
                         Tooltip(
                             text = "Dies kann zu Fehlern in der erzeugten E-Rechnung führen.\n" +
-                                    "Besser ist es, die Rechnung z.B. aus Word heraus in PDF/A zu exportieren.\n" +
+                                    "Besser ist es, die Rechnung z.B. aus Word heraus in PDF/A-3 zu exportieren.\n" +
                                     "Bitte die erzeugte E-Rechnung nachträglich prüfen.",
                             tooltipPlacement = TooltipPlacement.CursorPoint(
                                 alignment = Alignment.TopCenter,
@@ -194,7 +204,7 @@ fun CreateSectionActions(state: CreateSectionState) {
     val senders = LocalSenders.current
     val products = LocalProducts.current
     val selectedPdf = state.selectedPdf
-    val selectedPdfIsArchive = state.selectedPdfIsArchive
+    val isSelectedPdfArchiveUsable = state.isSelectedPdfArchiveUsable
     val isValid = state.invoiceValid
 
     Row(
@@ -227,7 +237,7 @@ fun CreateSectionActions(state: CreateSectionState) {
             }
         }
 
-        AnimatedVisibility(visible = selectedPdf != null && selectedPdfIsArchive && isValid) {
+        AnimatedVisibility(visible = selectedPdf != null && isSelectedPdfArchiveUsable && isValid) {
             Tooltip(
                 text = "E-Rechnung mit gewählter PDF-Datei und eingetragenen Daten erzeugen."
             ) {

@@ -30,6 +30,7 @@ import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.model.export
 import de.openindex.zugferd.manager.model.isValid
 import de.openindex.zugferd.manager.model.toXml
+import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.Products
 import de.openindex.zugferd.manager.utils.SectionState
@@ -37,7 +38,7 @@ import de.openindex.zugferd.manager.utils.Senders
 import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
-import de.openindex.zugferd.manager.utils.isPdfArchive
+import de.openindex.zugferd.manager.utils.isSupportedPdfArchiveVersion
 import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
@@ -66,6 +67,9 @@ class CreateSectionState : SectionState() {
     private var _selectedPdfArchiveError = mutableStateOf<String?>(null)
     val selectedPdfArchiveError: String?
         get() = _selectedPdfArchiveError.value
+
+    val isSelectedPdfArchiveUsable: Boolean
+        get() = isSupportedPdfArchiveVersion(_selectedPdfArchiveVersion.value)
 
     suspend fun selectPdf(preferences: Preferences, senders: Senders, products: Products) {
         val pdf = FileKit.pickFile(
@@ -103,7 +107,7 @@ class CreateSectionState : SectionState() {
         _selectedPdfArchiveError.value = null
 
         val pdfArchiveVersion = getPdfArchiveVersion(pdf)
-        if (!isPdfArchive(pdfArchiveVersion) && preferences.autoConvertToPdfA) {
+        if (preferences.autoConvertToPdfA && !isSupportedPdfArchiveVersion(pdfArchiveVersion) && pdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION) {
             try {
                 val convertedPdf = convertToPdfArchive(pdf)
                 _selectedPdf.value = convertedPdf
@@ -130,7 +134,7 @@ class CreateSectionState : SectionState() {
     }
 
     suspend fun convertToPdfArchive() {
-        if (isPdfArchive(selectedPdfArchiveVersion)) {
+        if (isSupportedPdfArchiveVersion(selectedPdfArchiveVersion)) {
             return
         }
         val originalPdf = originalSelectedPdf ?: return
@@ -144,11 +148,6 @@ class CreateSectionState : SectionState() {
             _selectedPdfArchiveError.value = e.localizedMessage ?: e.message
         }
     }
-
-    //suspend fun setSelectedPdf(pdf: PlatformFile) {
-    //    _selectedPdf.value = pdf
-    //    _selectedPdfIsArchive.value = isPdfArchive(pdf)
-    //}
 
     suspend fun exportPdf(preferences: Preferences) {
         val sourceFile = selectedPdf ?: return
