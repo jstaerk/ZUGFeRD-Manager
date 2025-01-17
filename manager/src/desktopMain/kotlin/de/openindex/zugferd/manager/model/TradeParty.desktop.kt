@@ -31,7 +31,16 @@ fun TradeParty.build(): _TradeParty? {
         .setStreet(street?.trimToNull())
         .setLocation(location?.trimToNull())
         .setCountry(country?.trimToNull())
-        .setTaxID(taxID?.trimToNull())
+
+        //
+        // Avoid validation errors, when tax ID and VAT ID is used together.
+        //
+        // Currently, we should only provide a VAT ID
+        // and only use the tax ID, if the VAT ID is not present.
+        //
+        //.setTaxID(taxID?.trimToNull())
+        .setTaxID(taxID?.trimToNull()?.takeIf { vatID?.trimToNull() == null })
+
         .setVATID(vatID?.trimToNull())
         .setID(id?.trimToNull())
         .setDescription(description?.trimToNull())
