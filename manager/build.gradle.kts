@@ -411,6 +411,7 @@ tasks {
             dependsOn("bundleMacDmg")
         }
         if (isWindows) {
+            dependsOn("bundleWindowsArchive")
             dependsOn("bundleWindowsExe")
         }
     }
@@ -763,6 +764,21 @@ tasks {
     }
 
     if (isWindows) {
+        register<Zip>("bundleWindowsArchive") {
+            group = "OpenIndex"
+            description = "Create application archive for Windows."
+            dependsOn("createReleaseDistributable")
+
+            archiveExtension = "zip"
+            archiveVersion = libs.versions.application.pkg.get()
+            archiveClassifier = if (isArm64) "windows-arm64" else "windows-x64"
+            destinationDirectory = rootProject.layout.buildDirectory
+            from(project.layout.buildDirectory.dir("compose/binaries/main-release/app"))
+            from(rootProject.layout.projectDirectory.file("LICENSE.txt")) {
+                into(project.name)
+            }
+        }
+
         register<Copy>("bundleWindowsExe") {
             group = "OpenIndex"
             description = "Create exe installer for Windows."
