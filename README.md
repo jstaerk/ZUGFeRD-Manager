@@ -69,51 +69,57 @@ The application is written in [Kotlin / JVM](https://kotlinlang.org/) using [Com
 
 ### Development
 
-The application requires a certain version of the [Jetbrains JDK (bundled with JCEF)](https://github.com/JetBrains/JetBrainsRuntime). Download the JDK by launching:
+The application requires a certain version of the [Jetbrains JDK (bundled with JCEF)](https://github.com/JetBrains/JetBrainsRuntime). 
 
-```bash
-./init-jdk.sh
-```
+-  Download the *Jetbrains JDK* for your operating system via:
 
-This command extracts the JDK into the `jdk` folder and creates an `env.sh` file with preconfigured environment variables. Load these environment variables via:
+   ```bash
+   ./init-jdk.sh
+   ```
+   
+   This command downloads and extracts the *Jetbrains JDK* into the `jdk` folder and creates an `env.sh` file with preconfigured environment variables. 
 
-```bash
-source env.sh
-```
+-  Load environment variables for *Jetbrains JDK* via:
 
-Clean the development environment from previous builds via:
+   ```bash
+   source env.sh
+   ```
+   
+   In case you are using an IDE for development, make sure to register the downloaded JDK within your IDE properly.
 
-```bash
-./gradlew clean
-```
+-  Clean the development environment from previous builds via:
 
-Compile and run the application with the downloaded JDK via:
+   ```bash
+   ./gradlew clean
+   ```
 
-```bash
-./gradlew run
-```
+-  Compile and run the application with the downloaded JDK via:
 
-Create the application with a stripped down JRE via:
+   ```bash
+   ./gradlew run
+   ```
 
-```bash
-./gradlew createDistributable
-```
+-  Create the application with a stripped down JRE via:
 
-Generated files are written into the `manager/build/compose/binaries/main/app` folder.
+   ```bash
+   ./gradlew createDistributable
+   ```
+   
+   Generated files are written into the `manager/build/compose/binaries/main/app` folder.
 
-Compile and run the application with a stripped down JRE via:
+-  Compile and run the application with a stripped down JRE via:
 
-```bash
-./gradlew runDistributable
-```
+   ```bash
+   ./gradlew runDistributable
+   ```
 
-Package the application with a stripped down JRE for the current operating system via:
+-  Package the application with a stripped down JRE for the current operating system via:
 
-```bash
-./gradlew build
-```
-
-Generated files are written into the `build` folder.
+   ```bash
+   ./gradlew build
+   ```
+   
+   Generated files are written into the `build` folder.
 
 
 ### Translations
