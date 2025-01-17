@@ -790,6 +790,9 @@ tasks {
                 .dir("compose/tmp/main/runtime")
                 .get()
 
+            val runtimeBinDir = runtimeImageDir
+                .dir("bin")
+
             val runtimeLibDir = runtimeImageDir
                 .dir("lib")
 
@@ -804,9 +807,21 @@ tasks {
             )
 
             doLast {
-                // Delete unnecessary "cef_server" binary.
-                runtimeLibDir.file("cef_server.exe")
-                    .asFile.deleteRecursively()
+                // Copy required files from JAVA_HOME.
+                listOf(
+                    "icudtl.dat",
+                    "jcef_helper.exe",
+                    "v8_context_snapshot.bin",
+                ).forEach {
+                    copy {
+                        from(
+                            File(SystemUtils.JAVA_HOME)
+                                .resolve("bin")
+                                .resolve(it)
+                        )
+                        into(runtimeBinDir)
+                    }
+                }
 
                 // Delete unnecessary translations.
                 cefLocalesDir.asFile.listFiles()

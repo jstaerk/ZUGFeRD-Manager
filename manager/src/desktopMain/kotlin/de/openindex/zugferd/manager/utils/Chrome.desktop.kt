@@ -44,7 +44,6 @@ import kotlin.io.path.exists
 private const val CEF_WINDOWLESS_RENDERING_ENABLED = false
 private const val CEF_OFFSCREEN_RENDERING_ENABLED = false
 private const val CEF_TRANSPARENCY_ENABLED = false
-private const val CEF_DISABLE_GPU = false
 
 @Suppress("KotlinConstantConditions")
 private const val CEF_DEBUG = AppInfo.Git.GIT_BRANCH != "master"
@@ -122,7 +121,7 @@ fun uninstallWebView() {
 }
 
 @OptIn(ExperimentalPathApi::class)
-suspend fun installWebView() {
+suspend fun installWebView(gpuEnabled: Boolean = true) {
     if (CEF_APP != null) {
         return
     }
@@ -196,15 +195,21 @@ suspend fun installWebView() {
         CefApp.startup(emptyArray())
 
         val config = JCefAppConfig.getInstance()
-        val args = mutableListOf<String>()
-        args.addAll(config.appArgs)
+
+        //
+        // Chrome command line arguments.
+        // https://peter.sh/experiments/chromium-command-line-switches/
+        //
+
+        val appArgs = config.appArgsAsList
 
         // Disable DRM / Widevine
         // https://magpcss.org/ceforum/viewtopic.php?f=6&t=19093
-        args.add("--disable-component-update")
+        appArgs.add("--disable-component-update")
 
-        if (CEF_DISABLE_GPU) {
-            args.addAll(
+        // Disable Hardware Acceleration
+        if (!gpuEnabled) {
+            appArgs.addAll(
                 listOf(
                     "--disable-gpu",
                     "--disable-gpu-compositing",
@@ -226,7 +231,7 @@ suspend fun installWebView() {
             .takeIf { CEF_DEBUG }
             ?: CefSettings.LogSeverity.LOGSEVERITY_WARNING
 
-        CefApp.addAppHandler(object : CefAppHandlerAdapter(emptyArray()) {
+        CefApp.addAppHandler(object : CefAppHandlerAdapter(appArgs.toTypedArray()) {
             override fun stateHasChanged(state: CefApp.CefAppState) {
                 // Shutdown the app if the native CEF part is terminated
                 //if (state == CefAppState.TERMINATED) System.exit(0)
@@ -237,13 +242,13 @@ suspend fun installWebView() {
             }
 
             override fun onBeforeChildProcessLaunch(commandLine: String) {
-                APP_LOGGER.debug("Launching CEF process: $commandLine")
+                APP_LOGGER.info("Launching CEF process: $commandLine")
                 super.onBeforeChildProcessLaunch(commandLine)
             }
         })
 
         APP_LOGGER.debug("Getting CEF application instance...")
-        CefApp.getInstance(settings)
+        CefApp.getInstance(appArgs.toTypedArray(), settings)
     }
 }
 

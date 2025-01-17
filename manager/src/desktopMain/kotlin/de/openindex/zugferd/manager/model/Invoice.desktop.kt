@@ -26,9 +26,6 @@ import de.openindex.zugferd.manager.APP_TITLE_FULL
 import de.openindex.zugferd.manager.APP_VERSION
 import de.openindex.zugferd.manager.utils.toJavaDate
 import io.github.vinceglb.filekit.core.PlatformFile
-import org.dom4j.DocumentHelper
-import org.dom4j.Element
-import org.mustangproject.XMLTools
 import org.mustangproject.ZUGFeRD.IExportableTransaction
 import org.mustangproject.ZUGFeRD.Profiles
 import org.mustangproject.ZUGFeRD.ZUGFeRD2PullProvider
@@ -179,10 +176,7 @@ actual suspend fun Invoice.export(
 }
 
 /**
- * TODO: This workaround should not be necessary anymore, as the issue was fixed with Mustang 2.16.0.
- *       Needs further investigation.
- *       see https://github.com/ZUGFeRD/mustangproject/issues/565
- *       see https://github.com/ZUGFeRD/mustangproject/releases/tag/core-2.16.0
+ * Custom ZUGFeRD exporter.
  */
 private class CustomZUGFeRDExporterFromPDFA : ZUGFeRDExporterFromPDFA() {
     override fun determineAndSetExporter(pdfAVersion: Int) {
@@ -212,13 +206,29 @@ private class CustomZUGFeRDExporterFromPDFA : ZUGFeRDExporterFromPDFA() {
 }
 
 /**
- * TODO: This workaround should not be necessary anymore, as the issue was fixed with Mustang 2.16.0.
- *       Needs further investigation.
- *       see https://github.com/ZUGFeRD/mustangproject/issues/565
- *       see https://github.com/ZUGFeRD/mustangproject/releases/tag/core-2.16.0
+ * Custom ZUGFeRD XML generator.
  */
 private class CustomZUGFeRD2PullProvider : ZUGFeRD2PullProvider() {
-    companion object {
+    override fun generateXML(trans: IExportableTransaction?) {
+        super.generateXML(trans)
+
+        //val doc = DocumentHelper.parseText(
+        //    zugferdData.toString(Charsets.UTF_8)
+        //)
+
+        //
+        // This workaround should not be necessary anymore, as the issue was fixed with Mustang 2.16.0.
+        // see https://github.com/ZUGFeRD/mustangproject/issues/565
+        // see https://github.com/ZUGFeRD/mustangproject/releases/tag/core-2.16.0
+        //
+        //fixSpecifiedTradePaymentTerms(doc)
+
+        //zugferdData = XMLTools.removeBOM(
+        //    doc.asXML().toByteArray(charset = Charsets.UTF_8)
+        //)
+    }
+
+    /*private fun fixSpecifiedTradePaymentTerms(doc: Document) {
         val elementOrderForSpecifiedTradePaymentTerms = listOf(
             "ID",
             "FromEventCode",
@@ -235,44 +245,32 @@ private class CustomZUGFeRD2PullProvider : ZUGFeRD2PullProvider() {
             "ApplicableTradePaymentDiscountTerms",
             "PayeeTradeParty",
         )
-    }
-
-    override fun generateXML(trans: IExportableTransaction?) {
-        super.generateXML(trans)
-
-        val doc = DocumentHelper.parseText(
-            zugferdData.toString(Charsets.UTF_8)
-        )
 
         @Suppress("SpellCheckingInspection")
         val namespaceMap = mapOf(
             "ram" to "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
         )
 
-        val xpath = doc.createXPath("//ram:SpecifiedTradePaymentTerms")
-        xpath.setNamespaceURIs(namespaceMap)
-        xpath.selectNodes(doc)
-            .forEach { node -> fixSpecifiedTradePaymentTerms(node as Element) }
+        fun fixElement(element: Element) {
+            val childElements = buildList {
+                element.elements().forEach { child ->
+                    element.remove(child)
+                    add(child)
+                }
+            }
 
-        zugferdData = XMLTools.removeBOM(
-            doc.asXML().toByteArray(charset = Charsets.UTF_8)
-        )
-    }
-
-    private fun fixSpecifiedTradePaymentTerms(element: Element) {
-        val childElements = buildList {
-            element.elements().forEach { child ->
-                element.remove(child)
-                add(child)
+            elementOrderForSpecifiedTradePaymentTerms.forEach { childName ->
+                childElements
+                    .filter { it.name == childName }
+                    .forEach { child ->
+                        element.add(child)
+                    }
             }
         }
 
-        elementOrderForSpecifiedTradePaymentTerms.forEach { childName ->
-            childElements
-                .filter { it.name == childName }
-                .forEach { child ->
-                    element.add(child)
-                }
-        }
-    }
+        val xpath = doc.createXPath("//ram:SpecifiedTradePaymentTerms")
+        xpath.setNamespaceURIs(namespaceMap)
+        xpath.selectNodes(doc)
+            .forEach { node -> fixElement(node as Element) }
+    }*/
 }
