@@ -779,20 +779,24 @@ tasks {
             }
         }
 
-        register<Copy>("bundleWindowsExe") {
+        register("bundleWindowsExe") {
             group = "OpenIndex"
             description = "Create exe installer for Windows."
             dependsOn("packageReleaseDistributionForCurrentOS")
 
-            into(rootProject.layout.buildDirectory)
-            from(project.layout.buildDirectory.dir("compose/binaries/main-release/exe"))
-            rename { name ->
-                if (!name.endsWith(".exe")) {
-                    return@rename name
-                }
+            doLast {
+                copy {
+                    into(rootProject.layout.buildDirectory)
+                    from(project.layout.buildDirectory.dir("compose/binaries/main-release/exe"))
+                    rename { name ->
+                        if (!name.endsWith(".exe")) {
+                            return@rename name
+                        }
 
-                val arch = if (isArm64) "arm64" else "x64"
-                "${project.name}-${libs.versions.application.pkg.get()}-windows-${arch}.exe"
+                        val arch = if (isArm64) "arm64" else "x64"
+                        "${project.name}-${libs.versions.application.pkg.get()}-windows-${arch}.exe"
+                    }
+                }
             }
         }
 
