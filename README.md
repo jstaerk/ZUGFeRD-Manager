@@ -75,7 +75,7 @@ The application requires a certain version of the [Jetbrains JDK (bundled with J
 ./init-jdk.sh
 ```
 
-This command extracts the JDK into the `jdk` folder and creates an `env.sh` file with preconfigured environment variables. Load these environment variables via
+This command extracts the JDK into the `jdk` folder and creates an `env.sh` file with preconfigured environment variables. Load these environment variables via:
 
 ```bash
 source env.sh
