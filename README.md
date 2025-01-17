@@ -1,10 +1,22 @@
-# OpenIndex ZUGFeRD-Manager
+# OpenIndex ZUGFeRD-Manager 1.0.0
 
 <img src="./share/icons/application.svg" align="right" height="125" alt="OpenIndex ZUGFeRD-Manager">
 
 🇩🇪 Dies ist eine kostenfreie Desktop-Anwendung für Windows, MacOS & Linux zur Erstellung und Überprüfung von E-Rechnungen im ZUGFeRD-Format.
 
 🇺🇸 This is a free desktop application for Windows, MacOS & Linux, that creates and validates ZUGFeRD invoices. Please scroll down for information about development in English language.
+
+
+## Download
+
+| Windows                                                                                                                                  | MacOS                                                                                                                                        | Linux                                                                                                                                     |
+|------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| <img src="./share/os-logos/windows.png" width="100" alt="Windows">                                                                       | <img src="./share/os-logos/apple.png" width="90" alt="MacOS">                                                                                | <img src="./share/os-logos/linux.png" width="100" alt="Linux">                                                                            |
+| [EXE-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0/ZUGFeRD-Manager-1.0.0-windows-x64.exe)<br>(x86_64) | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0/ZUGFeRD-Manager-1.0.0-macos-arm64.dmg)<br>(M1 oder neuer) | [DEB-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0/ZUGFeRD-Manager-1.0.0-linux-x64.deb)<br>(x86_64)    |
+| [ZIP-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0/ZUGFeRD-Manager-1.0.0-windows-x64.zip)<br>(x86_64)    | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0/ZUGFeRD-Manager-1.0.0-macos-x64.dmg)<br>(Intel)           | [RPM-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0/ZUGFeRD-Manager-1.0.0-linux-x64.rpm)<br>(x86_64)    |
+|                                                                                                                                          |                                                                                                                                              | [TAR.GZ-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0/ZUGFeRD-Manager-1.0.0-linux-x64.tar.gz)<br>(x86_64) |
+
+Ältere Versionen sind in der [Release-Übersicht](https://github.com/OpenIndex/ZUGFeRD-Manager/releases) zu finden.
 
 
 ## Zielgruppe
