@@ -67,6 +67,55 @@ Die Software steht kostenfrei unter den Bedingungen der [Apache License 2.0](htt
 The application is written in [Kotlin / JVM](https://kotlinlang.org/) using [Compose Multiplatform for desktop applications](https://www.jetbrains.com/compose-multiplatform/). Common and JVM related code is separated, to make a future port to other platforms hopefully as easy as possible.
 
 
+### Development
+
+The application requires a certain version of the [Jetbrains JDK (bundled with JCEF)](https://github.com/JetBrains/JetBrainsRuntime). Download the JDK by launching:
+
+```bash
+./init-jdk.sh
+```
+
+This command extracts the JDK into the `jdk` folder and creates an `env.sh` file with preconfigured environment variables. Load these environment variables via
+
+```bash
+source env.sh
+```
+
+Clean the development environment from previous builds via:
+
+```bash
+./gradlew clean
+```
+
+Compile and run the application with the downloaded JDK via:
+
+```bash
+./gradlew run
+```
+
+Create the application with a stripped down JRE via:
+
+```bash
+./gradlew createDistributable
+```
+
+Generated files are written into the `manager/build/compose/binaries/main/app` folder.
+
+Compile and run the application with a stripped down JRE via:
+
+```bash
+./gradlew runDistributable
+```
+
+Package the application with a stripped down JRE for the current operating system via:
+
+```bash
+./gradlew build
+```
+
+Generated files are written into the `build` folder.
+
+
 ### Translations
 
 The application is currently only available in German language. Translation into other languages is currently not planned, but generally possible.
