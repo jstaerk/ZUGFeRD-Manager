@@ -66,5 +66,10 @@ subprojects {
                 version.contains(it, true)
             }
         }
+
+        rejectVersionIf {
+            isNonStable(this.candidate.version, this.candidate.group, this.candidate.module)
+                    && !isNonStable(this.currentVersion, this.candidate.group, this.candidate.module)
+        }
     }
 }
