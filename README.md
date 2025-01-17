@@ -16,7 +16,7 @@
 | [ZIP-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0-RC7/ZUGFeRD-Manager-1.0.0-RC7-windows-x64.zip)<br>(x86_64)    | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0-RC7/ZUGFeRD-Manager-1.0.0-RC7-macos-x64.dmg)<br>(Intel)           | [RPM-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0-RC7/ZUGFeRD-Manager-1.0.0-RC7-linux-x64.rpm)<br>(x86_64)    |
 |                                                                                                                                                  |                                                                                                                                                      | [TAR.GZ-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.0.0-RC7/ZUGFeRD-Manager-1.0.0-RC7-linux-x64.tar.gz)<br>(x86_64) |
 
-Ältere Versionen sind auf der [Release-Übersicht](https://github.com/OpenIndex/ZUGFeRD-Manager/releases) zu finden.
+Ältere Versionen sind in der [Release-Übersicht](https://github.com/OpenIndex/ZUGFeRD-Manager/releases) zu finden.
 
 
 ## Zielgruppe
