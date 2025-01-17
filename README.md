@@ -123,7 +123,7 @@ The application requires a certain version of the [Jetbrains JDK (bundled with J
 -  Package the application with a stripped down JRE for the current operating system via:
 
    ```bash
-   ./gradlew build
+   ./gradlew bundle
    ```
    
    Generated files are written into the `build` folder.
