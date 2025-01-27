@@ -697,7 +697,8 @@ tasks {
                 .dir("compose/binaries/${releaseType}/app/${project.name}.app")
                 .get()
 
-            val frameworksDir = appBundleDir.dir("Contents/Frameworks")
+            val runtimeDir = appBundleDir.dir("Contents/runtime")
+            val frameworksDir = runtimeDir.dir("Contents/Frameworks")
 
             val defaultEntitlements = rootProject.layout.projectDirectory
                 .dir("share").dir("apple").file("default.entitlements.plist")
@@ -745,18 +746,25 @@ tasks {
                     //        )
                     //    }
 
-                    frameworksDir.asFile.listFiles()
-                        ?.filter { it.isDirectory }
-                        ?.forEach {
-                            macSign(
-                                fileToSign = it,
-                                entitlements = defaultEntitlements.asFile,
-                            )
-                        }
+                    //frameworksDir.asFile.listFiles()
+                    //    ?.filter { it.isDirectory }
+                    //    ?.forEach {
+                    //        macSign(
+                    //            fileToSign = it,
+                    //            entitlements = defaultEntitlements.asFile,
+                    //        )
+                    //    }
+
+                    macSign(
+                        fileToSign = runtimeDir.asFile,
+                        entitlements = defaultEntitlements.asFile,
+                        runtime = true,
+                    )
 
                     macSign(
                         fileToSign = appBundleDir.asFile,
                         entitlements = defaultEntitlements.asFile,
+                        runtime = false,
                     )
                 }
             }

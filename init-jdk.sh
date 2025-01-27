@@ -26,15 +26,12 @@
 
 #
 # The application uses the Jetbrains JDK bundled with JCEF.
+#
 # see https://github.com/JetBrains/JetBrainsRuntime
 # see https://github.com/JetBrains/JetBrainsRuntime/releases
 #
-# Due to a build problem on MacOS,
-# we're currently using the older version "21.0.5b509.30".
-# see https://github.com/JetBrains/JetBrainsRuntime/issues/490
-#
 
-JBR_VERSION="21.0.5b509.30"
+JBR_VERSION="21.0.6b825.69"
 
 set -e
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
