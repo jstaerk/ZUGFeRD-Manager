@@ -127,13 +127,13 @@ private fun SenderSettings(state: SettingsSectionState) {
         modifier = Modifier,
     ) {
         SectionSubTitle(
-            text = "Absender",
+            text = "Ersteller",
             actions = {
                 ActionsButton { doClose ->
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "Absender importieren",
+                                text = "Ersteller importieren",
                                 softWrap = false,
                             )
                         },
@@ -146,14 +146,14 @@ private fun SenderSettings(state: SettingsSectionState) {
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "Absender exportieren",
+                                text = "Ersteller exportieren",
                                 softWrap = false,
                             )
                         },
                         onClick = {
                             doClose()
                             exporter.launch(
-                                baseName = "zugferd-absender",
+                                baseName = "zugferd-ersteller",
                                 extension = "json",
                             )
                         }
@@ -164,7 +164,7 @@ private fun SenderSettings(state: SettingsSectionState) {
                     DropdownMenuItem(
                         text = {
                             Text(
-                                text = "Alle Absender löschen",
+                                text = "Alle Ersteller löschen",
                                 softWrap = false,
                             )
                         },
@@ -178,7 +178,7 @@ private fun SenderSettings(state: SettingsSectionState) {
         )
 
         SectionInfo(
-            text = "Hier können die Absenderdaten für Rechnungen erfasst werden, damit diese nicht bei jeder Rechnungserstellung neu eingetragen werden müssen.",
+            text = "Hier können die Erstellerdaten für Rechnungen erfasst werden, damit diese nicht bei jeder Rechnungserstellung neu eingetragen werden müssen.",
         )
 
         TradePartyItemSettings(
@@ -200,16 +200,16 @@ private fun SenderSettings(state: SettingsSectionState) {
                 }
             },
             dialogTitle = { item ->
-                "Absender bearbeiten"
+                "Ersteller bearbeiten"
                     .takeIf { item?.isSaved == true }
-                    ?: "Absender hinzufügen"
+                    ?: "Ersteller hinzufügen"
             },
         )
     }
 
     if (showDeleteDialog) {
         QuestionDialog(
-            question = "Sollen wirklich alle Absender gelöscht werden?",
+            question = "Sollen wirklich alle Ersteller gelöscht werden?",
             onCancel = { showDeleteDialog = false },
             onAccept = {
                 showDeleteDialog = false

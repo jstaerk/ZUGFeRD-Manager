@@ -30,14 +30,8 @@
 # see https://github.com/JetBrains/JetBrainsRuntime
 # see https://github.com/JetBrains/JetBrainsRuntime/releases
 #
-# Due to a build problem on MacOS,
-# we're currently using the older version "21.0.5b509.30".
-#
-# see https://github.com/JetBrains/JetBrainsRuntime/issues/490
-# see https://youtrack.jetbrains.com/issue/JBR-8046/jlink-fails-on-JBR-21.0.5-for-Mac-with-mismatch-jmods-hashes-error
-#
 
-JBR_VERSION="21.0.5b509.30"
+JBR_VERSION="21.0.6b825.69"
 
 set -e
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
