@@ -453,9 +453,9 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 .weight(1f, fill = true),
         ) {
             TradePartySelectFieldWithAdd(
-                label = "Absender*",
-                addLabel = "Neuer Absender",
-                editLabel = "Absender bearbeiten",
+                label = "Ersteller der Rechnung*",
+                addLabel = "Neuer Ersteller",
+                editLabel = "Ersteller bearbeiten",
                 tradeParty = state.invoiceSender,
                 tradeParties = sendersList.value,
                 onSelect = { sender, savePermanently ->
@@ -473,7 +473,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             )
 
             TradePartySelectFieldWithAdd(
-                label = "Empfänger*",
+                label = "Empfänger der Rechnung*",
                 addLabel = "Neuer Empfänger",
                 editLabel = "Empfänger bearbeiten",
                 tradeParty = state.invoiceRecipient,
