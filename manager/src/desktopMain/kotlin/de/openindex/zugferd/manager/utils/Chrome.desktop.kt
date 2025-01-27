@@ -26,7 +26,6 @@ import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.AppInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.apache.commons.lang3.SystemUtils
 import org.cef.CefApp
 import org.cef.CefClient
 import org.cef.CefSettings
@@ -139,37 +138,52 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
         OLD_CEF_LOG_FILE.deleteRecursively()
     }
 
-
     //
     // Setup paths to bundled JCEF binaries.
     //
     // see org.cef.CefApp#startupAsync
     // see org.cef.Startup
     //
-    if (getPlatform().isRunningFromInstallation) {
-        if (SystemUtils.IS_OS_MAC) {
-            val frameworksPath = APP_LAUNCHER!!.parent.parent.resolve("Frameworks")
-
-            System.setProperty(
-                "ALT_CEF_FRAMEWORK_DIR",
-                frameworksPath.resolve("Chromium Embedded Framework.framework").absolutePathString(),
-            )
-            System.setProperty(
-                "ALT_CEF_HELPER_APP_DIR",
-                frameworksPath.resolve("jcef Helper.app").absolutePathString(),
-            )
-            //System.setProperty(
-            //    "ALT_JCEF_LIB_DIR",
-            //    "",
-            //)
-        }
-        //else {
-        //    System.setProperty(
-        //        "ALT_CEF_FRAMEWORK_DIR",
-        //        Path.of(SystemUtils.JAVA_HOME, "lib").absolutePathString(),
-        //    )
-        //}
-    }
+    //if (getPlatform().isRunningFromInstallation) {
+    //    if (SystemUtils.IS_OS_MAC) {
+    //        val frameworksPath = withContext(Dispatchers.IO) {
+    //            APP_LAUNCHER!!.parent.parent.resolve("Frameworks").toRealPath()
+    //        }
+    //
+    //        val cefFrameworkPath = frameworksPath.resolve("Chromium Embedded Framework.framework").absolute()
+    //        if (!cefFrameworkPath.isDirectory()) {
+    //            APP_LOGGER.error("Can't find bundled CEF Framework: $cefFrameworkPath")
+    //        } else {
+    //            APP_LOGGER.info("Using bundled CEF Framework: $cefFrameworkPath")
+    //            System.setProperty(
+    //                "ALT_CEF_FRAMEWORK_DIR",
+    //                cefFrameworkPath.pathString,
+    //            )
+    //        }
+    //
+    //        val cefHelperPath = frameworksPath.resolve("jcef Helper.app").absolute()
+    //        if (!cefHelperPath.isDirectory()) {
+    //            APP_LOGGER.error("Can't find bundled CEF Helper: $cefHelperPath")
+    //        } else {
+    //            APP_LOGGER.info("Using bundled CEF Helper: $cefHelperPath")
+    //            System.setProperty(
+    //                "ALT_CEF_HELPER_APP_DIR",
+    //                cefHelperPath.pathString,
+    //            )
+    //        }
+    //
+    //        //System.setProperty(
+    //        //    "ALT_JCEF_LIB_DIR",
+    //        //    "",
+    //        //)
+    //    }
+    //    //else {
+    //    //    System.setProperty(
+    //    //        "ALT_CEF_FRAMEWORK_DIR",
+    //    //        Path.of(SystemUtils.JAVA_HOME, "lib").absolutePathString(),
+    //    //    )
+    //    //}
+    //}
 
     CEF_APP = withContext(Dispatchers.IO) {
         CEF_LOG_FILE.deleteIfExists()
