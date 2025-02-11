@@ -51,6 +51,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.DatePicker
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -529,7 +530,40 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                     )
                 }
             }
-        }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                DateField(
+                    label = "Startdatum der Leistung*",
+                    value = state.deliveryStartDate,
+                    onValueChange = { state.deliveryStartDate = it ?: state.deliveryStartDate },
+                    modifier = Modifier
+                        .weight(0.5f, true),
+                )
+
+                DateField(
+                    label = "Enddatum der Leistung*",
+                    value = state.deliveryEndDate,
+                    onValueChange = { state.deliveryEndDate = it ?: state.deliveryEndDate },
+                    modifier = Modifier
+                        .weight(0.5f, true),
+                )
+
+                // HACK: Show hidden button to ensure equal width of input fields.
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier
+                        .alpha(0f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.QuestionMark,
+                        contentDescription = "Nichts zu tun",
+                    )
+                }
+            }        }
 
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
