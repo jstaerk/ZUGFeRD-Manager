@@ -51,7 +51,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.DatePicker
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -563,7 +562,8 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                         contentDescription = "Nichts zu tun",
                     )
                 }
-            }        }
+            }
+        }
 
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),

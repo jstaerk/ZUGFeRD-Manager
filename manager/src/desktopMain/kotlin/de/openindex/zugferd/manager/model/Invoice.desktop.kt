@@ -37,7 +37,6 @@ import java.text.DateFormat
 import java.util.Locale
 import org.mustangproject.Invoice as _Invoice
 
-
 const val INVOICE_PROFILE = "EXTENDED"
 
 private val DATE_FORMAT = DateFormat
