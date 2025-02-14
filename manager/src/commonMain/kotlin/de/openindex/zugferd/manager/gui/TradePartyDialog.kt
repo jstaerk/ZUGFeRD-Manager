@@ -577,16 +577,10 @@ private fun TradePartyFormContact(
             )
         }
 
-        TextField(
-            value = contact.country ?: "",
-            label = {
-                Text(
-                    text = "Land",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+        CountrySelectField(
+            country = contact.country ?: "",
+            label = "Land",
+            onSelect = {
                 onUpdate(
                     value.copy(contact = contact.copy(country = it))
                 )
