@@ -49,6 +49,8 @@ fun Invoice.build(method: PaymentMethod): _Invoice {
         .setNumber(number)
         .setIssueDate(issueDate.toJavaDate())
         .setDueDate(dueDate.toJavaDate())
+        .setDeliveryDate(deliveryEndDate.toJavaDate())
+        .setDetailedDeliveryPeriod(deliveryStartDate.toJavaDate(), deliveryEndDate.toJavaDate())
         .setPaymentTermDescription(
             if (method == PaymentMethod.SEPA_DIRECT_DEBIT)
                 "Abbuchung erfolgt am ${DATE_FORMAT.format(dueDate.toJavaDate())}."

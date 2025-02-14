@@ -40,6 +40,8 @@ data class Invoice(
     val number: String = "",
     val issueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     val dueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).plus(DatePeriod(days = 14)),
+    val deliveryStartDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+    val deliveryEndDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     val sender: TradeParty? = null,
     val recipient: TradeParty? = null,
     val currency: String = DEFAULT_CURRENCY,
