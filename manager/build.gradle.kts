@@ -291,7 +291,7 @@ compose.desktop {
                 //"jdk.jshell", // Provides the jshell tool for evaluating snippets of Java code, and defines a JDK-specific API for modeling and executing snippets.
                 //"jdk.jsobject", // Defines the API for the JavaScript Object.
                 //"jdk.jstatd", // Defines the jstatd tool for starting a daemon for the jstat tool to monitor JVM statistics remotely.
-                //"jdk.localedata", // Provides the locale data for locales other than US locale.
+                "jdk.localedata", // Provides the locale data for locales other than US locale.
                 //"jdk.management", // Defines JDK-specific management interfaces for the JVM.
                 //"jdk.management.agent", // Defines the JMX management agent.
                 //"jdk.management.jfr", // Defines the Management Interface for JDK Flight Recorder.
