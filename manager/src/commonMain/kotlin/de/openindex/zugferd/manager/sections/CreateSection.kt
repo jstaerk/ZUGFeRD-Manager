@@ -460,11 +460,11 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 tradeParties = sendersList.value,
                 onSelect = { sender, savePermanently ->
                     state.invoiceSender = sender
-                    if (savePermanently) {
+                    if (sender != null && savePermanently) {
                         scope.launch {
                             senders.put(sender, preferences)
                         }
-                    } else if (sender.isSaved) {
+                    } else if (sender?.isSaved == true) {
                         preferences.setPreviousSenderKey(sender._key)
                     }
                 },
@@ -480,8 +480,8 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 tradeParties = recipientsList.value,
                 onSelect = { recipient, savePermanently ->
                     state.invoiceRecipient = recipient
-                    state.invoicePaymentMethod = recipient._defaultPaymentMethod
-                    if (savePermanently) {
+                    state.invoicePaymentMethod = recipient?._defaultPaymentMethod ?: state.invoicePaymentMethod
+                    if (recipient != null && savePermanently) {
                         scope.launch {
                             recipients.put(recipient)
                         }
@@ -573,9 +573,11 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             CurrencySelectField(
                 label = "Währung*",
                 currency = state.invoiceCurrency,
-                onSelect = {
-                    state.invoiceCurrency = it
-                    preferences.setPreviousCurrency(it)
+                onSelect = { currency ->
+                    state.invoiceCurrency = currency
+                    if (currency != null) {
+                        preferences.setPreviousCurrency(currency)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -718,10 +720,10 @@ private fun ColumnScope.ItemForm(
                     onUpdate(
                         item.copy(
                             product = product,
-                            price = product._defaultPricePerUnit,
+                            price = product?._defaultPricePerUnit ?: 0.0,
                         )
                     )
-                    if (savePermanently) {
+                    if (product != null && savePermanently) {
                         scope.launch {
                             products.put(product)
                         }
@@ -858,7 +860,11 @@ private fun RowScope.ItemSummary(
     modifier: Modifier = Modifier,
 ) {
     val currency = remember(state.invoiceCurrency) {
-        getCurrencySymbol(state.invoiceCurrency) ?: state.invoiceCurrency
+        val c = state.invoiceCurrency
+        if (c != null)
+            getCurrencySymbol(c) ?: c
+        else
+            ""
     }
 
     Card(
@@ -926,7 +932,11 @@ private fun ColumnScope.AmountSummary(
     state: CreateSectionState,
 ) {
     val currency = remember(state.invoiceCurrency) {
-        getCurrencySymbol(state.invoiceCurrency) ?: state.invoiceCurrency
+        val c = state.invoiceCurrency
+        if (c != null)
+            getCurrencySymbol(c) ?: c
+        else
+            ""
     }
     val netSum = derivedStateOf {
         state.invoiceItems.sumOf { it.totalNetPrice }

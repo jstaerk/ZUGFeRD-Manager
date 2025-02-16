@@ -409,7 +409,7 @@ private fun TradePartyFormGeneral(
         }
 
         CountrySelectField(
-            country = value.country ?: "",
+            country = value.country,
             label = "Land",
             onSelect = {
                 onUpdate(
@@ -485,6 +485,7 @@ private fun TradePartyFormGeneral(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 private fun TradePartyFormContact(
     value: TradeParty,
     isCustomer: Boolean,
@@ -578,7 +579,7 @@ private fun TradePartyFormContact(
         }
 
         CountrySelectField(
-            country = contact.country ?: "",
+            country = contact.country,
             label = "Land",
             onSelect = {
                 onUpdate(
@@ -781,6 +782,7 @@ private fun TradePartyFormBankAccount(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 private fun TradePartyFormDescription(
     value: TradeParty,
     isCustomer: Boolean,

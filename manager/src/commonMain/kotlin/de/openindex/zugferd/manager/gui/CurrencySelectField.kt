@@ -30,7 +30,7 @@ import de.openindex.zugferd.manager.utils.getCurrencies
 fun CurrencySelectField(
     label: String = "Währung",
     currency: String? = null,
-    onSelect: (String) -> Unit,
+    onSelect: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val currencies = remember { getCurrencies() }

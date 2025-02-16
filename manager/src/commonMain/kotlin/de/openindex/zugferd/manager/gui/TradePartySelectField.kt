@@ -45,8 +45,7 @@ fun TradePartySelectField(
     label: String = "Partner",
     tradeParty: TradeParty? = null,
     tradeParties: List<TradeParty>,
-    onSelect: (TradeParty) -> Unit,
-    //actions: @Composable RowScope.() -> Unit = {},
+    onSelect: (TradeParty?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val options = remember(tradeParties) {
@@ -62,7 +61,6 @@ fun TradePartySelectField(
         entry = tradeParty,
         entries = options,
         onSelect = onSelect,
-        //actions = actions,
         modifier = modifier,
     )
 }
@@ -75,7 +73,7 @@ fun TradePartySelectFieldWithAdd(
     editLabel: String = "Partner bearbeiten",
     tradeParty: TradeParty? = null,
     tradeParties: List<TradeParty>,
-    onSelect: (tradeParty: TradeParty, savePermanently: Boolean) -> Unit,
+    onSelect: (tradeParty: TradeParty?, savePermanently: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var newTradeParty by remember { mutableStateOf<TradeParty?>(null) }
