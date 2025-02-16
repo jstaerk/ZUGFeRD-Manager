@@ -714,7 +714,7 @@ private fun ColumnScope.ItemForm(
                 label = "Rechnungsposten*",
                 addLabel = "Neuer Rechnungsposten",
                 editLabel = "Rechnungsposten bearbeiten",
-                product = item.product ?: Product(),
+                product = item.product,
                 products = productsList.value,
                 onSelect = { product, savePermanently ->
                     onUpdate(
