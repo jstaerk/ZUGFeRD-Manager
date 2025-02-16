@@ -25,6 +25,7 @@ import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.APP_TITLE_FULL
 import de.openindex.zugferd.manager.APP_VERSION
 import de.openindex.zugferd.manager.utils.toJavaDate
+import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.PlatformFile
 import org.mustangproject.ZUGFeRD.IExportableTransaction
 import org.mustangproject.ZUGFeRD.Profiles
@@ -59,6 +60,13 @@ fun Invoice.build(method: PaymentMethod): _Invoice {
         .setCreditorReferenceID(
             sender?.creditorReferenceId
         )
+        .let { invoice ->
+            val imprint = sender?.imprint?.trimToNull()
+            if (imprint != null) {
+                invoice.addRegulatoryNote(imprint)
+            }
+            invoice
+        }
         .let { invoice ->
             @Suppress("LocalVariableName")
             val _sender = if (method == PaymentMethod.SEPA_DIRECT_DEBIT) {
