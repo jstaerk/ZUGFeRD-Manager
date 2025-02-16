@@ -205,12 +205,17 @@ class CreateSectionState : SectionState() {
         set(value) {
             _invoice.value = _invoice.value.copy(dueDate = value)
         }
-    var deliveryStartDate: LocalDate
+    var deliveryDate: LocalDate?
+        get() = _invoice.value.deliveryDate
+        set(value) {
+            _invoice.value = _invoice.value.copy(deliveryDate = value)
+        }
+    var deliveryStartDate: LocalDate?
         get() = _invoice.value.deliveryStartDate
         set(value) {
             _invoice.value = _invoice.value.copy(deliveryStartDate = value)
         }
-    var deliveryEndDate: LocalDate
+    var deliveryEndDate: LocalDate?
         get() = _invoice.value.deliveryEndDate
         set(value) {
             _invoice.value = _invoice.value.copy(deliveryEndDate = value)

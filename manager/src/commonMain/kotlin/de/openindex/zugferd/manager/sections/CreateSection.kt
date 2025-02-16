@@ -83,7 +83,6 @@ import de.openindex.zugferd.manager.gui.Tooltip
 import de.openindex.zugferd.manager.gui.TradePartySelectFieldWithAdd
 import de.openindex.zugferd.manager.gui.VerticalScrollBox
 import de.openindex.zugferd.manager.model.Item
-import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
 import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
@@ -419,6 +418,7 @@ private fun DetailsView(state: CreateSectionState) {
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 @Suppress("UnusedReceiverParameter")
 private fun ColumnScope.GeneralForm(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
@@ -530,37 +530,51 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 }
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                DateField(
-                    label = "Startdatum der Leistung*",
-                    value = state.deliveryStartDate,
-                    onValueChange = { state.deliveryStartDate = it ?: state.deliveryStartDate },
+            Tooltip(
+                text = "Eine E-Rechnung benötigt ENTWEDER ein Lieferdatum " +
+                        "UND / ODER einen Zeitraum für die erbrachte Leistung."
+            )
+            {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
-                        .weight(0.5f, true),
-                )
-
-                DateField(
-                    label = "Enddatum der Leistung*",
-                    value = state.deliveryEndDate,
-                    onValueChange = { state.deliveryEndDate = it ?: state.deliveryEndDate },
-                    modifier = Modifier
-                        .weight(0.5f, true),
-                )
-
-                // HACK: Show hidden button to ensure equal width of input fields.
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .alpha(0f)
+                        .fillMaxWidth(),
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.QuestionMark,
-                        contentDescription = "Nichts zu tun",
+                    DateField(
+                        label = "Lieferdatum*",
+                        value = state.deliveryDate,
+                        onValueChange = { state.deliveryDate = it },
+                        modifier = Modifier
+                            .weight(0.3f, true),
                     )
+
+                    DateField(
+                        label = "Start der Leistung*",
+                        value = state.deliveryStartDate,
+                        onValueChange = { state.deliveryStartDate = it },
+                        modifier = Modifier
+                            .weight(0.3f, true),
+                    )
+
+                    DateField(
+                        label = "Ende der Leistung*",
+                        value = state.deliveryEndDate,
+                        onValueChange = { state.deliveryEndDate = it },
+                        modifier = Modifier
+                            .weight(0.3f, true),
+                    )
+
+                    // HACK: Show hidden button to ensure equal width of input fields.
+                    IconButton(
+                        onClick = {},
+                        modifier = Modifier
+                            .alpha(0f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QuestionMark,
+                            contentDescription = "Nichts zu tun",
+                        )
+                    }
                 }
             }
         }

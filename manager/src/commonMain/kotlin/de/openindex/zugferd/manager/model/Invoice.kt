@@ -41,8 +41,9 @@ data class Invoice(
     val number: String = "",
     val issueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     val dueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).plus(DatePeriod(days = 14)),
-    val deliveryStartDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    val deliveryEndDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+    val deliveryDate: LocalDate? = null,
+    val deliveryStartDate: LocalDate? = null,
+    val deliveryEndDate: LocalDate? = null,
     val sender: TradeParty? = null,
     val recipient: TradeParty? = null,
     val currency: String? = DEFAULT_CURRENCY,
@@ -60,6 +61,7 @@ fun Invoice.isValid(): Boolean {
             && (sender.vatID != null || sender.taxID != null)
             && recipient != null
             && recipient.name.isNotBlank()
+            && (deliveryDate != null || (deliveryStartDate != null && deliveryEndDate != null))
 }
 
 expect fun Invoice.toXml(
