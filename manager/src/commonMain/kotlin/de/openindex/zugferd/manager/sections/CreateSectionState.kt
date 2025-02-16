@@ -39,7 +39,6 @@ import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
 import de.openindex.zugferd.manager.utils.isSupportedPdfArchiveVersion
-import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -179,11 +178,11 @@ class CreateSectionState : SectionState() {
         get() = _invoice.value.isValid()
     val invoiceXml: String
         get() = _invoice.value.toXml(method = invoicePaymentMethod)
-    var invoiceCurrency: String
+    var invoiceCurrency: String?
         get() = _invoice.value.currency
         set(value) {
             _invoice.value = _invoice.value.copy(
-                currency = value.trimToNull() ?: DEFAULT_CURRENCY
+                currency = value
             )
         }
     var invoiceNumber: String
@@ -205,6 +204,21 @@ class CreateSectionState : SectionState() {
         get() = _invoice.value.dueDate
         set(value) {
             _invoice.value = _invoice.value.copy(dueDate = value)
+        }
+    var deliveryDate: LocalDate?
+        get() = _invoice.value.deliveryDate
+        set(value) {
+            _invoice.value = _invoice.value.copy(deliveryDate = value)
+        }
+    var deliveryStartDate: LocalDate?
+        get() = _invoice.value.deliveryStartDate
+        set(value) {
+            _invoice.value = _invoice.value.copy(deliveryStartDate = value)
+        }
+    var deliveryEndDate: LocalDate?
+        get() = _invoice.value.deliveryEndDate
+        set(value) {
+            _invoice.value = _invoice.value.copy(deliveryEndDate = value)
         }
     var invoiceSender: TradeParty?
         get() = _invoice.value.sender

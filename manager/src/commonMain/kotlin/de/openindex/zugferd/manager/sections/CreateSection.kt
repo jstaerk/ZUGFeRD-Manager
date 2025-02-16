@@ -83,7 +83,6 @@ import de.openindex.zugferd.manager.gui.Tooltip
 import de.openindex.zugferd.manager.gui.TradePartySelectFieldWithAdd
 import de.openindex.zugferd.manager.gui.VerticalScrollBox
 import de.openindex.zugferd.manager.model.Item
-import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
 import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
@@ -419,6 +418,7 @@ private fun DetailsView(state: CreateSectionState) {
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 @Suppress("UnusedReceiverParameter")
 private fun ColumnScope.GeneralForm(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
@@ -460,11 +460,11 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 tradeParties = sendersList.value,
                 onSelect = { sender, savePermanently ->
                     state.invoiceSender = sender
-                    if (savePermanently) {
+                    if (sender != null && savePermanently) {
                         scope.launch {
                             senders.put(sender, preferences)
                         }
-                    } else if (sender.isSaved) {
+                    } else if (sender?.isSaved == true) {
                         preferences.setPreviousSenderKey(sender._key)
                     }
                 },
@@ -480,8 +480,8 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 tradeParties = recipientsList.value,
                 onSelect = { recipient, savePermanently ->
                     state.invoiceRecipient = recipient
-                    state.invoicePaymentMethod = recipient._defaultPaymentMethod
-                    if (savePermanently) {
+                    state.invoicePaymentMethod = recipient?._defaultPaymentMethod ?: state.invoicePaymentMethod
+                    if (recipient != null && savePermanently) {
                         scope.launch {
                             recipients.put(recipient)
                         }
@@ -529,6 +529,54 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                     )
                 }
             }
+
+            Tooltip(
+                text = "Eine E-Rechnung benötigt ENTWEDER ein Lieferdatum " +
+                        "UND / ODER einen Zeitraum für die erbrachte Leistung."
+            )
+            {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    DateField(
+                        label = "Lieferdatum*",
+                        value = state.deliveryDate,
+                        onValueChange = { state.deliveryDate = it },
+                        modifier = Modifier
+                            .weight(0.3f, true),
+                    )
+
+                    DateField(
+                        label = "Start der Leistung*",
+                        value = state.deliveryStartDate,
+                        onValueChange = { state.deliveryStartDate = it },
+                        modifier = Modifier
+                            .weight(0.3f, true),
+                    )
+
+                    DateField(
+                        label = "Ende der Leistung*",
+                        value = state.deliveryEndDate,
+                        onValueChange = { state.deliveryEndDate = it },
+                        modifier = Modifier
+                            .weight(0.3f, true),
+                    )
+
+                    // HACK: Show hidden button to ensure equal width of input fields.
+                    IconButton(
+                        onClick = {},
+                        modifier = Modifier
+                            .alpha(0f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QuestionMark,
+                            contentDescription = "Nichts zu tun",
+                        )
+                    }
+                }
+            }
         }
 
         Column(
@@ -539,9 +587,11 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             CurrencySelectField(
                 label = "Währung*",
                 currency = state.invoiceCurrency,
-                onSelect = {
-                    state.invoiceCurrency = it
-                    preferences.setPreviousCurrency(it)
+                onSelect = { currency ->
+                    state.invoiceCurrency = currency
+                    if (currency != null) {
+                        preferences.setPreviousCurrency(currency)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -678,16 +728,16 @@ private fun ColumnScope.ItemForm(
                 label = "Rechnungsposten*",
                 addLabel = "Neuer Rechnungsposten",
                 editLabel = "Rechnungsposten bearbeiten",
-                product = item.product ?: Product(),
+                product = item.product,
                 products = productsList.value,
                 onSelect = { product, savePermanently ->
                     onUpdate(
                         item.copy(
                             product = product,
-                            price = product._defaultPricePerUnit,
+                            price = product?._defaultPricePerUnit ?: 0.0,
                         )
                     )
-                    if (savePermanently) {
+                    if (product != null && savePermanently) {
                         scope.launch {
                             products.put(product)
                         }
@@ -824,7 +874,11 @@ private fun RowScope.ItemSummary(
     modifier: Modifier = Modifier,
 ) {
     val currency = remember(state.invoiceCurrency) {
-        getCurrencySymbol(state.invoiceCurrency) ?: state.invoiceCurrency
+        val c = state.invoiceCurrency
+        if (c != null)
+            getCurrencySymbol(c) ?: c
+        else
+            ""
     }
 
     Card(
@@ -892,7 +946,11 @@ private fun ColumnScope.AmountSummary(
     state: CreateSectionState,
 ) {
     val currency = remember(state.invoiceCurrency) {
-        getCurrencySymbol(state.invoiceCurrency) ?: state.invoiceCurrency
+        val c = state.invoiceCurrency
+        if (c != null)
+            getCurrencySymbol(c) ?: c
+        else
+            ""
     }
     val netSum = derivedStateOf {
         state.invoiceItems.sumOf { it.totalNetPrice }

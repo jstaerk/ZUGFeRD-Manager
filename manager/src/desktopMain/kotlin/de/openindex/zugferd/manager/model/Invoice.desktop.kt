@@ -25,6 +25,7 @@ import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.APP_TITLE_FULL
 import de.openindex.zugferd.manager.APP_VERSION
 import de.openindex.zugferd.manager.utils.toJavaDate
+import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.PlatformFile
 import org.mustangproject.ZUGFeRD.IExportableTransaction
 import org.mustangproject.ZUGFeRD.Profiles
@@ -37,7 +38,6 @@ import java.text.DateFormat
 import java.util.Locale
 import org.mustangproject.Invoice as _Invoice
 
-
 const val INVOICE_PROFILE = "EXTENDED"
 
 private val DATE_FORMAT = DateFormat
@@ -49,6 +49,8 @@ fun Invoice.build(method: PaymentMethod): _Invoice {
         .setNumber(number)
         .setIssueDate(issueDate.toJavaDate())
         .setDueDate(dueDate.toJavaDate())
+        .setDeliveryDate(deliveryDate?.toJavaDate())
+        .setDetailedDeliveryPeriod(deliveryStartDate?.toJavaDate(), deliveryEndDate?.toJavaDate())
         .setPaymentTermDescription(
             if (method == PaymentMethod.SEPA_DIRECT_DEBIT)
                 "Abbuchung erfolgt am ${DATE_FORMAT.format(dueDate.toJavaDate())}."
@@ -58,6 +60,13 @@ fun Invoice.build(method: PaymentMethod): _Invoice {
         .setCreditorReferenceID(
             sender?.creditorReferenceId
         )
+        .let { invoice ->
+            val imprint = sender?.imprint?.trimToNull()
+            if (imprint != null) {
+                invoice.addRegulatoryNote(imprint)
+            }
+            invoice
+        }
         .let { invoice ->
             @Suppress("LocalVariableName")
             val _sender = if (method == PaymentMethod.SEPA_DIRECT_DEBIT) {
