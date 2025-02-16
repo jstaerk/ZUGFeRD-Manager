@@ -31,18 +31,22 @@ import kotlinx.datetime.todayIn
 import kotlinx.serialization.Serializable
 
 const val DEFAULT_CURRENCY = "EUR"
+val DEFAULT_PAYMENT_METHOD = PaymentMethod.SEPA_CREDIT_TRANSFER
 
 @Serializable
 data class Invoice(
     @Suppress("PropertyName")
-    val _paymentMethod: PaymentMethod = PaymentMethod.SEPA_CREDIT_TRANSFER,
+    val _paymentMethod: PaymentMethod = DEFAULT_PAYMENT_METHOD,
 
     val number: String = "",
     val issueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     val dueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()).plus(DatePeriod(days = 14)),
+    val deliveryDate: LocalDate? = null,
+    val deliveryStartDate: LocalDate? = null,
+    val deliveryEndDate: LocalDate? = null,
     val sender: TradeParty? = null,
     val recipient: TradeParty? = null,
-    val currency: String = DEFAULT_CURRENCY,
+    val currency: String? = DEFAULT_CURRENCY,
     val items: List<Item> = listOf(),
 )
 
@@ -51,11 +55,13 @@ data class Invoice(
 fun Invoice.isValid(): Boolean {
     return number.isNotBlank()
             //&& issueDate != null
+            && currency != null
             && sender != null
             && sender.name.isNotBlank()
             && (sender.vatID != null || sender.taxID != null)
             && recipient != null
             && recipient.name.isNotBlank()
+            && (deliveryDate != null || (deliveryStartDate != null && deliveryEndDate != null))
 }
 
 expect fun Invoice.toXml(

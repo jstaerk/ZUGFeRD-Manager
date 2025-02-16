@@ -30,7 +30,7 @@ import de.openindex.zugferd.manager.utils.getCountries
 fun CountrySelectField(
     label: String = "Land",
     country: String? = null,
-    onSelect: (String) -> Unit,
+    onSelect: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val countries = remember { getCountries() }

@@ -48,13 +48,17 @@ import de.openindex.zugferd.manager.model.UnitOfMeasurement
 @OptIn(ExperimentalMaterial3Api::class)
 fun <T> DropDown(
     label: String,
-    value: T,
+    value: T? = null,
     options: Map<T, String>,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var textFieldValue by remember(value) { mutableStateOf(options[value] ?: "") }
+    var textFieldValue by remember(value) {
+        mutableStateOf(
+            if (value != null) options[value] ?: "" else ""
+        )
+    }
     //val textFieldState = rememberTextFieldState(options.get(value) ?: "")
 
     ExposedDropdownMenuBox(
@@ -111,7 +115,7 @@ fun <T> DropDown(
 @Composable
 fun TaxCategoryCodeDropDown(
     label: String = "Besteuerung",
-    value: TaxCategoryCode,
+    value: TaxCategoryCode? = null,
     options: Map<TaxCategoryCode, String> = buildMap {
         TaxCategoryCode.entries.forEach { e -> put(e, e.description) }
     },
@@ -128,7 +132,7 @@ fun TaxCategoryCodeDropDown(
 @Composable
 fun UnitOfMeasurementDropDown(
     label: String = "Maßeinheit",
-    value: UnitOfMeasurement,
+    value: UnitOfMeasurement? = null,
     options: Map<UnitOfMeasurement, String> = buildMap {
         UnitOfMeasurement.entries.forEach { e -> put(e, e.description) }
     },
@@ -145,7 +149,7 @@ fun UnitOfMeasurementDropDown(
 @Composable
 fun PaymentMethodDropDown(
     label: String = "Zahlungsart",
-    value: PaymentMethod,
+    value: PaymentMethod? = null,
     options: Map<PaymentMethod, String> = buildMap {
         PaymentMethod.entries.forEach { e -> put(e, e.description) }
     },

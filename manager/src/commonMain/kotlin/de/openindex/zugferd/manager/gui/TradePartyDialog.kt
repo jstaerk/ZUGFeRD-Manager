@@ -23,6 +23,7 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -69,7 +70,7 @@ private enum class TradePartyForm {
         GENERAL -> "Allgemein"
         CONTACT -> "Kontakt"
         BANK_ACCOUNT -> "Konto"
-        DESCRIPTION -> "Beschreibung"
+        DESCRIPTION -> "Freitexte"
     }
 }
 
@@ -409,7 +410,7 @@ private fun TradePartyFormGeneral(
         }
 
         CountrySelectField(
-            country = value.country ?: "",
+            country = value.country,
             label = "Land",
             onSelect = {
                 onUpdate(
@@ -485,6 +486,7 @@ private fun TradePartyFormGeneral(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 private fun TradePartyFormContact(
     value: TradeParty,
     isCustomer: Boolean,
@@ -577,16 +579,10 @@ private fun TradePartyFormContact(
             )
         }
 
-        TextField(
-            value = contact.country ?: "",
-            label = {
-                Text(
-                    text = "Land",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+        CountrySelectField(
+            country = contact.country,
+            label = "Land",
+            onSelect = {
                 onUpdate(
                     value.copy(contact = contact.copy(country = it))
                 )
@@ -787,29 +783,68 @@ private fun TradePartyFormBankAccount(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun TradePartyFormDescription(
     value: TradeParty,
     isCustomer: Boolean,
     onUpdate: (tradeParty: TradeParty) -> Unit,
 ) {
-    TextField(
-        value = value.description ?: "",
-        label = {
-            Text(
-                text = "Beschreibung",
-                softWrap = false,
-            )
-        },
-        onValueChange = {
-            onUpdate(
-                value.copy(
-                    description = it
-                )
-            )
-        },
-        singleLine = false,
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
-            .heightIn(min = 150.dp, max = 300.dp)
             .fillMaxWidth(),
-    )
+    ) {
+        if (!isCustomer) {
+            Tooltip(
+                text = "Weitere Impressums-Angaben zum Unternehmen, die in der Regel im Briefkopf einer Rechnung stehen." +
+                        "Zum Beispiel: Gesellschafter, Vorstand, Handelsregister, zuständiges Registergericht, etc."
+            ) {
+                TextField(
+                    value = value.imprint ?: "",
+                    label = {
+                        Text(
+                            text = "Impressum",
+                            softWrap = false,
+                        )
+                    },
+                    onValueChange = {
+                        onUpdate(
+                            value.copy(
+                                imprint = it
+                            )
+                        )
+                    },
+                    singleLine = false,
+                    modifier = Modifier
+                        .heightIn(min = 150.dp, max = 200.dp)
+                        .fillMaxWidth(),
+                )
+            }
+        }
+
+        Tooltip(
+            text = "Hier können interne Notizen hinterlegt werden. Diese werden NICHT in E-Rechnungen veröffentlicht."
+        ) {
+            TextField(
+                value = value.description ?: "",
+                label = {
+                    Text(
+                        text = "Interne Notizen",
+                        softWrap = false,
+                    )
+                },
+                onValueChange = {
+                    onUpdate(
+                        value.copy(
+                            description = it
+                        )
+                    )
+                },
+                singleLine = false,
+                modifier = Modifier
+                    .heightIn(min = 150.dp, max = if (isCustomer) 300.dp else 200.dp)
+                    .fillMaxWidth(),
+            )
+        }
+    }
 }

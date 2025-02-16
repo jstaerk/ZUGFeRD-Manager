@@ -44,8 +44,7 @@ fun ProductSelectField(
     label: String = "Rechnungsposten",
     product: Product? = null,
     products: List<Product>,
-    onSelect: (Product) -> Unit,
-    //actions: @Composable RowScope.() -> Unit = {},
+    onSelect: (Product?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val options = remember(products) {
@@ -61,7 +60,6 @@ fun ProductSelectField(
         entry = product,
         entries = options,
         onSelect = onSelect,
-        //actions = actions,
         modifier = modifier,
     )
 }
@@ -74,7 +72,7 @@ fun ProductSelectFieldWithAdd(
     editLabel: String = "Rechnungsposten bearbeiten",
     product: Product? = null,
     products: List<Product>,
-    onSelect: (product: Product, savePermanently: Boolean) -> Unit,
+    onSelect: (product: Product?, savePermanently: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var newProduct by remember { mutableStateOf<Product?>(null) }
