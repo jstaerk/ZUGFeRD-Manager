@@ -40,6 +40,9 @@ import de.openindex.zugferd.manager.sections.CreateSectionActions
 import de.openindex.zugferd.manager.sections.CreateSectionState
 import de.openindex.zugferd.manager.sections.SettingsSection
 import de.openindex.zugferd.manager.sections.SettingsSectionState
+import de.openindex.zugferd.manager.sections.ViewSection
+import de.openindex.zugferd.manager.sections.ViewSectionState
+import de.openindex.zugferd.manager.sections.ViewSectionActions
 import de.openindex.zugferd.manager.utils.SectionState
 
 class AppState {
@@ -74,12 +77,14 @@ class AppState {
 enum class AppSection(
     private val state: SectionState
 ) {
+    VIEW(ViewSectionState()),
     CREATE(CreateSectionState()),
     CHECK(CheckSectionState()),
     SETTINGS(SettingsSectionState());
 
     val label: String
         get() = when (this) {
+            VIEW -> "Ansehen"
             CREATE -> "Erzeugen"
             CHECK -> "Prüfen"
             SETTINGS -> "Optionen"
@@ -87,6 +92,7 @@ enum class AppSection(
 
     val activeIcon: ImageVector
         get() = when (this) {
+            VIEW -> Icons.Default.EditNote
             CREATE -> Icons.Default.EditNote
             CHECK -> Icons.Default.Search
             SETTINGS -> Icons.Default.Settings
@@ -94,6 +100,7 @@ enum class AppSection(
 
     val inactiveIcon: ImageVector
         get() = when (this) {
+            VIEW -> Icons.Default.EditNote
             CREATE -> Icons.Default.EditNote
             CHECK -> Icons.Default.Search
             SETTINGS -> Icons.Default.Settings
@@ -102,6 +109,7 @@ enum class AppSection(
     @Composable
     fun content() {
         when (this) {
+            VIEW -> ViewSection(state = state as ViewSectionState)
             CREATE -> CreateSection(state = state as CreateSectionState)
             CHECK -> CheckSection(state = state as CheckSectionState)
             SETTINGS -> SettingsSection(state = state as SettingsSectionState)
@@ -111,6 +119,7 @@ enum class AppSection(
     @Composable
     fun actions() {
         when (this) {
+            VIEW -> ViewSectionActions(state = state as ViewSectionState)
             CREATE -> CreateSectionActions(state = state as CreateSectionState)
             CHECK -> CheckSectionActions(state = state as CheckSectionState)
             SETTINGS -> {}
