@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+General notes about translation strings.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#strings
+
+Be aware, that plural definitions are language specific.
+According to your language, you might need to set different quantity values.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#plurals
+-->
+
+<resources>
+    <plurals name="TaxCategory">
+        <item quantity="one">Besteuerung</item>
+        <item quantity="other">Besteuerungen</item>
+    </plurals>
+
+    <string name="TaxCategory_S">standard rate</string>
+    <string name="TaxCategory_Z">zero rated goods</string>
+    <string name="TaxCategory_E">exempt from tax</string>
+    <string name="TaxCategory_AE">VAT reverse charge</string>
+    <string name="TaxCategory_K">VAT exempt for EEA intra-community supply</string>
+    <string name="TaxCategory_G">free export item</string>
+    <string name="TaxCategory_O">services outside scope of tax</string>
+    <string name="TaxCategory_L">Canary Islands general indirect tax</string>
+    <string name="TaxCategory_M">production, services and importation in Ceuta and Melilla</string>
+</resources>

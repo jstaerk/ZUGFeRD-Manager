@@ -41,6 +41,11 @@ import de.openindex.zugferd.manager.sections.CreateSectionState
 import de.openindex.zugferd.manager.sections.SettingsSection
 import de.openindex.zugferd.manager.sections.SettingsSectionState
 import de.openindex.zugferd.manager.utils.SectionState
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCheck
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCreate
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarSettings
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.StringResource
 
 class AppState {
     private var _section = mutableStateOf(AppSection.CREATE)
@@ -78,11 +83,11 @@ enum class AppSection(
     CHECK(CheckSectionState()),
     SETTINGS(SettingsSectionState());
 
-    val label: String
+    val label: StringResource
         get() = when (this) {
-            CREATE -> "Erzeugen"
-            CHECK -> "Prüfen"
-            SETTINGS -> "Optionen"
+            CREATE -> Res.string.AppSidebarCreate
+            CHECK -> Res.string.AppSidebarCheck
+            SETTINGS -> Res.string.AppSidebarSettings
         }
 
     val activeIcon: ImageVector

@@ -35,9 +35,9 @@ data class Product(
     val name: String = "",
     val description: String? = null,
     val unit: String = UnitOfMeasurement.UNIT.code,
-    val vatPercent: Double = TaxCategoryCode.NORMAL_TAX.defaultPercentage,
+    val vatPercent: Double = TaxCategory.NORMAL_TAX.defaultPercentage,
     val taxExemptionReason: String? = null,
-    val taxCategoryCode: String = TaxCategoryCode.NORMAL_TAX.code,
+    val taxCategoryCode: String = TaxCategory.NORMAL_TAX.code,
 ) {
     val isSaved: Boolean
         get() = _key != null
@@ -55,10 +55,10 @@ data class Product(
                         append(" ")
                     }
                     append("pro ")
-                    append(UnitOfMeasurement.getByCode(unit)?.description ?: unit)
+                    append(UnitOfMeasurement.getByCode(unit)?.title ?: unit)
                 }
             )
 
-            add(TaxCategoryCode.getByCode(taxCategoryCode)?.description ?: taxCategoryCode)
+            add(TaxCategory.getByCode(taxCategoryCode)?.title ?: taxCategoryCode)
         }.joinToString(" | ")
 }

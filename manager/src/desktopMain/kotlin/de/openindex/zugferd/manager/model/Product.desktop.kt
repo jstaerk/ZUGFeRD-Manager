@@ -32,7 +32,7 @@ fun Product.build(): _Product? {
         .setUnit(unit.trimToNull() ?: UnitOfMeasurement.UNIT.code)
         .setVATPercent(vatPercent.toBigDecimal().setScale(1, RoundingMode.HALF_EVEN))
         .setTaxExemptionReason(taxExemptionReason?.trimToNull())
-        .setTaxCategoryCode(taxCategoryCode.trimToNull() ?: TaxCategoryCode.NORMAL_TAX.code)
+        .setTaxCategoryCode(taxCategoryCode.trimToNull() ?: TaxCategory.NORMAL_TAX.code)
         //.let { product ->
         //    if (product.taxCategoryCode.equals(TaxCategoryCode.INTRA_COMMUNITY_SUPPLY.code, true)) {
         //        product.setIntraCommunitySupply()

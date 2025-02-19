@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+General notes about translation strings.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#strings
+
+Be aware, that plural definitions are language specific.
+According to your language, you might need to set different quantity values.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#plurals
+-->
+
+<resources>
+    <plurals name="TaxCategory">
+        <item quantity="one">Besteuerung</item>
+        <item quantity="other">Besteuerungen</item>
+    </plurals>
+
+    <string name="TaxCategory_S">normale Besteuerung</string>
+    <string name="TaxCategory_Z">keine Besteuerung</string>
+    <string name="TaxCategory_Z_DefaultExemptionReason">Ware ist nach dem Nullsatz besteuert</string>
+    <string name="TaxCategory_E">steuerbefreit (z.B. Kleinunternehmer)</string>
+    <string name="TaxCategory_E_DefaultExemptionReason">Kleinunternehmer gemäß §19 UStG</string>
+    <string name="TaxCategory_AE">Umkehrung der Steuerschuldnerschaft</string>
+    <string name="TaxCategory_K">innergemeinschaftliche Transaktion</string>
+    <string name="TaxCategory_K_DefaultExemptionReason">Lieferung ins EU-Ausland</string>
+    <string name="TaxCategory_G">Export außerhalb der EU</string>
+    <string name="TaxCategory_G_DefaultExemptionReason">Export ins Nicht-EU-Ausland</string>
+    <string name="TaxCategory_O">unversteuerte Leistung</string>
+    <string name="TaxCategory_O_DefaultExemptionReason">Leistung außerhalb des Steueranwendungsbereichs</string>
+    <string name="TaxCategory_L">indirekte Besteuerung auf Kanarischen Inseln</string>
+    <string name="TaxCategory_M">Produktion / Dienstleistung / Import nach Ceuta und Melilla</string>
+</resources>

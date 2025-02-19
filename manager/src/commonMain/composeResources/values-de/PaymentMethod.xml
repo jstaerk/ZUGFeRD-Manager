@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+General notes about translation strings.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#strings
+
+Be aware, that plural definitions are language specific.
+According to your language, you might need to set different quantity values.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#plurals
+-->
+
+<resources>
+    <plurals name="PaymentMethod">
+        <item quantity="one">Zahlungsart</item>
+        <item quantity="other">Zahlungsarten</item>
+    </plurals>
+
+    <string name="PaymentMethod_10">Barzahlung</string>
+    <string name="PaymentMethod_30">Überweisung</string>
+    <string name="PaymentMethod_31">Bankeinzug</string>
+    <string name="PaymentMethod_42">Einzahlung auf Konto</string>
+    <string name="PaymentMethod_48">Kartenzahlung</string>
+    <string name="PaymentMethod_49">Abbuchung</string>
+    <string name="PaymentMethod_57">Dauerauftrag</string>
+    <string name="PaymentMethod_58">SEPA-Überweisung</string>
+    <string name="PaymentMethod_59">SEPA-Lastschrift</string>
+    <string name="PaymentMethod_97">partnerschaftliche Verrechnung</string>
+</resources>

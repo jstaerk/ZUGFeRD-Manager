@@ -750,7 +750,7 @@ private fun TradePartyFormBankAccount(
             ) {
                 PaymentMethodDropDown(
                     value = value._defaultPaymentMethod,
-                    label = "Bevorzugte Zahlungsart",
+                    //label = "Bevorzugte Zahlungsart",
                     onSelect = {
                         onUpdate(
                             value.copy(_defaultPaymentMethod = it)

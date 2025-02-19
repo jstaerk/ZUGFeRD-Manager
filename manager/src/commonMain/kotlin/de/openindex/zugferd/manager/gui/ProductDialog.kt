@@ -50,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,12 +60,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
-import de.openindex.zugferd.manager.model.TaxCategoryCode
+import de.openindex.zugferd.manager.model.TaxCategory
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
 import de.openindex.zugferd.manager.utils.formatAsPercentage
 import de.openindex.zugferd.manager.utils.formatAsPrice
 import de.openindex.zugferd.manager.utils.parsePercentage
 import de.openindex.zugferd.manager.utils.parsePrice
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 private enum class ProductForm {
     GENERAL,
@@ -127,7 +130,7 @@ fun ProductDialog(
 }
 
 @Composable
-@Suppress("SameParameterValue")
+@Suppress("SameParameterValue", "DuplicatedCode")
 private fun ProductDialogContent(
     title: String?,
     value: Product,
@@ -288,6 +291,8 @@ private fun ProductFormGeneral(
     value: Product,
     onUpdate: (product: Product) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
@@ -301,9 +306,9 @@ private fun ProductFormGeneral(
             TextField(
                 value = value.name,
                 label = {
-                    Text(
-                        text = "Name*",
-                        softWrap = false,
+                    InputLabel(
+                        text = "Name",
+                        requiredIndicator = true,
                     )
                 },
                 singleLine = true,
@@ -318,7 +323,7 @@ private fun ProductFormGeneral(
 
             UnitOfMeasurementDropDown(
                 value = UnitOfMeasurement.getByCode(value.unit) ?: UnitOfMeasurement.UNIT,
-                label = "Maßeinheit*",
+                requiredIndicator = true,
                 onSelect = {
                     onUpdate(
                         value.copy(unit = it.code)
@@ -331,9 +336,9 @@ private fun ProductFormGeneral(
             TextField(
                 value = value._defaultPricePerUnit.formatAsPrice,
                 label = {
-                    Text(
-                        text = "Preis pro Einheit*",
-                        softWrap = false,
+                    InputLabel(
+                        text = "Preis pro Einheit",
+                        requiredIndicator = true,
                     )
                 },
                 singleLine = true,
@@ -357,17 +362,24 @@ private fun ProductFormGeneral(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            TaxCategoryCodeDropDown(
-                value = TaxCategoryCode.getByCode(value.taxCategoryCode) ?: TaxCategoryCode.NORMAL_TAX,
-                label = "Besteuerung*",
+            TaxCategoryDropDown(
+                value = TaxCategory.getByCode(value.taxCategoryCode) ?: TaxCategory.NORMAL_TAX,
+                requiredIndicator = true,
                 onSelect = {
-                    onUpdate(
-                        value.copy(
-                            taxCategoryCode = it.code,
-                            vatPercent = it.defaultPercentage,
-                            taxExemptionReason = it.defaultExemptionReason,
+                    scope.launch {
+                        val taxExemptionReason = if (it.defaultExemptionReason != null)
+                            getString(it.defaultExemptionReason)
+                        else
+                            null
+
+                        onUpdate(
+                            value.copy(
+                                taxCategoryCode = it.code,
+                                vatPercent = it.defaultPercentage,
+                                taxExemptionReason = taxExemptionReason,
+                            )
                         )
-                    )
+                    }
                 },
                 modifier = Modifier
                     .weight(1f, fill = true),
@@ -376,9 +388,9 @@ private fun ProductFormGeneral(
             TextField(
                 value = value.vatPercent.formatAsPercentage,
                 label = {
-                    Text(
-                        text = "Steuersatz in %*",
-                        softWrap = false,
+                    InputLabel(
+                        text = "Steuersatz in %",
+                        requiredIndicator = true,
                     )
                 },
                 singleLine = true,
@@ -404,9 +416,9 @@ private fun ProductFormGeneral(
             TextField(
                 value = value.taxExemptionReason ?: "",
                 label = {
-                    Text(
-                        text = "Begründung für fehlende Besteuerung*",
-                        softWrap = false,
+                    InputLabel(
+                        text = "Begründung für fehlende Besteuerung",
+                        requiredIndicator = true,
                     )
                 },
                 onValueChange = {

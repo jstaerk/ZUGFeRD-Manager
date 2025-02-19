@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+General notes about translation strings.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#strings
+
+Be aware, that plural definitions are language specific.
+According to your language, you might need to set different quantity values.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#plurals
+-->
+
+<resources>
+    <string name="AppCreateErrorInvalid">Die Angaben zur Rechnung sind unvollständig. Eine E-Rechnung kann erst erzeugt werden, wenn alle nötigen Angaben vorhanden sind.</string>
+</resources>

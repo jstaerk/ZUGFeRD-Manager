@@ -96,8 +96,21 @@ import de.openindex.zugferd.manager.utils.formatAsQuantity
 import de.openindex.zugferd.manager.utils.getCurrencySymbol
 import de.openindex.zugferd.manager.utils.parsePrice
 import de.openindex.zugferd.manager.utils.parseQuantity
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvert
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvertInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorConversion
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorFormat
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorIncompatible
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorInvalid
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerate
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerateInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelect
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectMessage
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -132,35 +145,32 @@ fun CreateSection(state: CreateSectionState) {
 
                 AnimatedVisibility(visible = !isValid && isSelectedPdfArchiveUsable) {
                     Notification(
-                        text = "Die Angaben zur Rechnung sind unvollständig. Eine E-Rechnung kann erst erzeugt werden, " +
-                                "wenn alle nötigen Angaben vorhanden sind.",
+                        text = stringResource(Res.string.AppCreateErrorInvalid).trim(),
                     )
                 }
 
                 AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion > MAX_PDF_ARCHIVE_VERSION) {
                     Notification(
-                        text = "Die PDF-Datei liegt im PDF/A-${selectedPdfArchiveVersion} Format vor. " +
-                                "Daraus kann keine ZUGFeRD-Rechnung erzeugt werden. Verwenden Sie bitte eine " +
-                                "reguläre PDF-Datei oder das PDF/A-1 bzw. PDF/A-3 Format.",
+                        text = stringResource(
+                            Res.string.AppCreateErrorIncompatible,
+                            "PDF/A-${selectedPdfArchiveVersion}",
+                        ).trim(),
                     )
                 }
 
                 AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveError != null) {
                     Notification(
-                        text = "Die PDF-Datei konnte nicht in das PDF/A-3 Format umgewandelt werden. " +
-                                "$selectedPdfArchiveError",
+                        text = stringResource(Res.string.AppCreateErrorConversion).trim()
+                            .plus(" ").plus(selectedPdfArchiveError),
                     )
                 }
 
                 AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION && selectedPdfArchiveError == null) {
                     Notification(
-                        text = "Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. " +
-                                "Damit kann keine E-Rechnung erzeugt werden.",
+                        text = stringResource(Res.string.AppCreateErrorFormat).trim()
                     ) {
                         Tooltip(
-                            text = "Dies kann zu Fehlern in der erzeugten E-Rechnung führen.\n" +
-                                    "Besser ist es, die Rechnung z.B. aus Word heraus in PDF/A-3 zu exportieren.\n" +
-                                    "Bitte die erzeugte E-Rechnung nachträglich prüfen.",
+                            text = stringResource(Res.string.AppCreateConvertInfo).trim(),
                             tooltipPlacement = TooltipPlacement.CursorPoint(
                                 alignment = Alignment.TopCenter,
                                 offset = DpOffset(8.dp, (-16).dp)
@@ -176,7 +186,7 @@ fun CreateSection(state: CreateSectionState) {
                                     .padding(all = 8.dp),
                             ) {
                                 Text(
-                                    text = "in PDF/A-3 umwandeln",
+                                    text = stringResource(Res.string.AppCreateConvert),
                                     softWrap = false,
                                 )
                             }
@@ -212,7 +222,7 @@ fun CreateSectionActions(state: CreateSectionState) {
             .padding(end = 8.dp),
     ) {
         Tooltip(
-            text = "Eine PDF-Rechnung zur Bearbeitung auswählen."
+            text = stringResource(Res.string.AppCreateSelectInfo).trim(),
         ) {
             TextButton(
                 onClick = {
@@ -230,7 +240,7 @@ fun CreateSectionActions(state: CreateSectionState) {
                 )
             ) {
                 Text(
-                    text = "PDF wählen",
+                    text = stringResource(Res.string.AppCreateSelect),
                     softWrap = false,
                 )
             }
@@ -238,7 +248,7 @@ fun CreateSectionActions(state: CreateSectionState) {
 
         AnimatedVisibility(visible = selectedPdf != null && isSelectedPdfArchiveUsable && isValid) {
             Tooltip(
-                text = "E-Rechnung mit gewählter PDF-Datei und eingetragenen Daten erzeugen."
+                text = stringResource(Res.string.AppCreateGenerateInfo).trim(),
             ) {
                 TextButton(
                     onClick = {
@@ -254,7 +264,7 @@ fun CreateSectionActions(state: CreateSectionState) {
                     )
                 ) {
                     Text(
-                        text = "E-Rechnung erzeugen",
+                        text = stringResource(Res.string.AppCreateGenerate),
                         softWrap = false,
                     )
                 }
@@ -278,7 +288,7 @@ private fun EmptyView(state: CreateSectionState) {
         )
         {
             Text(
-                text = "Bitte wähle eine PDF-Rechnung aus.",
+                text = stringResource(Res.string.AppCreateSelectMessage).trim(),
                 softWrap = false,
             )
         }
@@ -510,7 +520,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 )
 
                 PaymentMethodDropDown(
-                    label = "Zahlungsart*",
+                    //label = "Zahlungsart*",
                     value = state.invoicePaymentMethod,
                     onSelect = { state.invoicePaymentMethod = it },
                     modifier = Modifier

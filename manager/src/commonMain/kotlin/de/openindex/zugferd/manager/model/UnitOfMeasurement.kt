@@ -21,102 +21,326 @@
 
 package de.openindex.zugferd.manager.model
 
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_ANN
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_ANN_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_C62
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_C62_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_DAY
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_DAY_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_H87
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_H87_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_HAR
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_HAR_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_HUR
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_HUR_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_KGM
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_KGM_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_KMT
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_KMT_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_KWH
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_KWH_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_LS
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_LS_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_LTR
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_LTR_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MIN
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MIN_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MMK
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MMK_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MMT
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MMT_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MON
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MON_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MTK
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MTK_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MTQ
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MTQ_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MTR
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_MTR_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_NAR
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_NAR_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_NPR
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_NPR_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_P1
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_P1_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_SEC
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_SEC_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_SET
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_SET_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_SMI
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_SMI_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_TNE
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_TNE_Value
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_WEE
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_WEE_Value
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.StringResource
+
 /**
- * The Unit Of Measurement Enumeration
- *
- * Based on Recommendation N°. 20 - Codes for Units of Measure Used in International Trade
- *
- * https://www.xrepository.de/details/urn:xoev-de:kosit:codeliste:rec20_3
+ * BT-130
  */
 enum class UnitOfMeasurement(
     val code: String,
-    val description: String,
-    val pluralDescription: String,
+    val symbol: String? = null,
+    val title: StringResource,
+    val value: PluralStringResource,
 ) {
     /** The lump sum. */
-    LUMP_SUM("LS", "Pauschale", "Pauschalen"),
+    LUMP_SUM(
+        code = "LS",
+        title = Res.string.UnitOfMeasurement_LS,
+        value = Res.plurals.UnitOfMeasurement_LS_Value,
+        //description = "Pauschale",
+        //pluralDescription = "Pauschalen",
+    ),
 
     /** The Percent (%). */
-    PERCENT("P1", "Prozent", "Prozent"),
+    PERCENT(
+        code = "P1",
+        symbol = "%",
+        title = Res.string.UnitOfMeasurement_P1,
+        value = Res.plurals.UnitOfMeasurement_P1_Value,
+        //description = "Prozent",
+        //pluralDescription = "Prozent",
+    ),
 
-
-    /** piece */
-    PIECE("H87", "Stück (Anzahl)", "Stücke (Anzahl)"),
 
     /** A unit of count defining the number of pieces */
-    UNIT("C62", "Einheit (Anzahl)", "Einheiten (Anzahl)"),
+    UNIT(
+        code = "C62",
+        title = Res.string.UnitOfMeasurement_C62,
+        value = Res.plurals.UnitOfMeasurement_C62_Value,
+        //description = "Einheit",
+        //pluralDescription = "Einheiten",
+    ),
+
+    /** piece */
+    PIECE(
+        code = "H87",
+        title = Res.string.UnitOfMeasurement_H87,
+        value = Res.plurals.UnitOfMeasurement_H87_Value,
+        //description = "Stück",
+        //pluralDescription = "Stücke",
+    ),
 
     /** A unit of count defining the number of articles (items). */
-    ARTICLE("NAR", "Artikel (Anzahl)", "Artikel (Anzahl)"),
-
-    /** A number of objects grouped together to a set */
-    SET("SET", "Set", "Sets"),
+    ARTICLE(
+        code = "NAR",
+        title = Res.string.UnitOfMeasurement_NAR,
+        value = Res.plurals.UnitOfMeasurement_NAR_Value,
+        //description = "Artikel",
+        //pluralDescription = "Artikel",
+    ),
 
     /** The number of pairs. */
-    PAIR("NPR", "Paar", "Paare"),
+    PAIR(
+        code = "NPR",
+        title = Res.string.UnitOfMeasurement_NPR,
+        value = Res.plurals.UnitOfMeasurement_NPR_Value,
+        //description = "Paar",
+        //pluralDescription = "Paare",
+    ),
+
+    /** A number of objects grouped together to a set */
+    SET(
+        code = "SET",
+        title = Res.string.UnitOfMeasurement_SET,
+        value = Res.plurals.UnitOfMeasurement_SET_Value,
+        //description = "Set",
+        //pluralDescription = "Sets",
+    ),
 
 
     /** The Year. */
-    YEAR("ANN", "Jahr", "Jahre"),
+    YEAR(
+        code = "ANN",
+        title = Res.string.UnitOfMeasurement_ANN,
+        value = Res.plurals.UnitOfMeasurement_ANN_Value,
+        //description = "Jahr",
+        //pluralDescription = "Jahre",
+    ),
 
     /** The Month. */
-    MONTH("MON", "Monat", "Monate"),
+    MONTH(
+        code = "MON",
+        title = Res.string.UnitOfMeasurement_MON,
+        value = Res.plurals.UnitOfMeasurement_MON_Value,
+        //description = "Monat",
+        //pluralDescription = "Monate",
+    ),
 
     /** The week. */
-    WEEK("WEE", "Woche", "Wochen"),
+    WEEK(
+        code = "WEE",
+        title = Res.string.UnitOfMeasurement_WEE,
+        value = Res.plurals.UnitOfMeasurement_WEE_Value,
+        //description = "Woche",
+        //pluralDescription = "Wochen",
+    ),
 
     /** The day count */
-    DAY("DAY", "Tag", "Tage"),
+    DAY(
+        code = "DAY",
+        title = Res.string.UnitOfMeasurement_DAY,
+        value = Res.plurals.UnitOfMeasurement_DAY_Value,
+        //description = "Tag",
+        //pluralDescription = "Tage",
+    ),
 
     /** The Hour (h). */
-    HOUR("HUR", "Stunde", "Stunden"),
+    HOUR(
+        code = "HUR",
+        symbol = "h",
+        title = Res.string.UnitOfMeasurement_HUR,
+        value = Res.plurals.UnitOfMeasurement_HUR_Value,
+        //description = "Stunde",
+        //pluralDescription = "Stunden",
+    ),
 
     /** The Minute (min). */
-    MINUTE("MIN", "Minute", "Minuten"),
+    MINUTE(
+        code = "MIN",
+        symbol = "min",
+        title = Res.string.UnitOfMeasurement_MIN,
+        value = Res.plurals.UnitOfMeasurement_MIN_Value,
+        //description = "Minute",
+        //pluralDescription = "Minuten",
+    ),
 
     /** The Second (s). */
-    SECOND("SEC", "Sekunde", "Sekunden"),
+    SECOND(
+        code = "SEC",
+        symbol = "s",
+        title = Res.string.UnitOfMeasurement_SEC,
+        value = Res.plurals.UnitOfMeasurement_SEC_Value,
+        //description = "Sekunde",
+        //pluralDescription = "Sekunden",
+    ),
 
 
     /** The Hectare (ha). */
-    HECTARE("HAR", "Hektar", "Hektar"),
+    HECTARE(
+        code = "HAR",
+        symbol = "ha",
+        title = Res.string.UnitOfMeasurement_HAR,
+        value = Res.plurals.UnitOfMeasurement_HAR_Value,
+        //description = "Hektar",
+        //pluralDescription = "Hektar",
+    ),
 
     /** The square meter (m2). */
-    METER_SQUARE("MTK", "Quadratmeter", "Quadratmeter"),
+    METER_SQUARE(
+        code = "MTK",
+        symbol = "m²",
+        title = Res.string.UnitOfMeasurement_MTK,
+        value = Res.plurals.UnitOfMeasurement_MTK_Value,
+        //description = "Quadratmeter",
+        //pluralDescription = "Quadratmeter",
+    ),
 
     /** The square millimeter (mm2). */
-    MILLIMETER_SQUARE("MMK", "Quadratmillimeter", "Quadratmillimeter"),
+    MILLIMETER_SQUARE(
+        code = "MMK",
+        symbol = "mm²",
+        title = Res.string.UnitOfMeasurement_MMK,
+        value = Res.plurals.UnitOfMeasurement_MMK_Value,
+        //description = "Quadratmillimeter",
+        //pluralDescription = "Quadratmillimeter",
+    ),
 
 
     /** The Mile. 1609,344 m */
-    MILE("SMI", "Meile", "Meilen"),
+    MILE(
+        code = "SMI",
+        title = Res.string.UnitOfMeasurement_SMI,
+        value = Res.plurals.UnitOfMeasurement_SMI_Value,
+        //description = "Meile",
+        //pluralDescription = "Meilen",
+    ),
 
     /** The Kilometer (km). */
-    KILOMETER("KMT", "Kilometer", "Kilometer"),
+    KILOMETER(
+        code = "KMT",
+        symbol = "km",
+        title = Res.string.UnitOfMeasurement_KMT,
+        value = Res.plurals.UnitOfMeasurement_KMT_Value,
+        //description = "Kilometer",
+        //pluralDescription = "Kilometer",
+    ),
 
     /** The Meter (m). */
-    METER("MTR", "Meter", "Meter"),
+    METER(
+        code = "MTR",
+        symbol = "m",
+        title = Res.string.UnitOfMeasurement_MTR,
+        value = Res.plurals.UnitOfMeasurement_MTR_Value,
+        //description = "Meter",
+        //pluralDescription = "Meter",
+    ),
 
     /** The Millimeter (mm). */
-    MILLIMETER("MMT", "Millimeter", "Millimeter"),
+    MILLIMETER(
+        code = "MMT",
+        symbol = "mm",
+        title = Res.string.UnitOfMeasurement_MMT,
+        value = Res.plurals.UnitOfMeasurement_MMT_Value,
+        //description = "Millimeter",
+        //pluralDescription = "Millimeter",
+    ),
 
 
     /** The cubic meter (m3). */
-    METER_CUBIC("MTQ", "Kubikmeter", "Kubikmeter"),
+    METER_CUBIC(
+        code = "MTQ",
+        symbol = "m³",
+        title = Res.string.UnitOfMeasurement_MTQ,
+        value = Res.plurals.UnitOfMeasurement_MTQ_Value,
+        //description = "Kubikmeter",
+        //pluralDescription = "Kubikmeter",
+    ),
 
     /** The Liter (l). */
-    LITRE("LTR", "Liter", "Liter"),
+    LITRE(
+        code = "LTR",
+        symbol = "l",
+        title = Res.string.UnitOfMeasurement_LTR,
+        value = Res.plurals.UnitOfMeasurement_LTR_Value,
+        //description = "Liter",
+        //pluralDescription = "Liter",
+    ),
 
 
     /** The metric ton (t). */
-    TON_METRIC("TNE", "Tonne (metrisch)", "Tonnen (metrisch)"),
+    TON_METRIC(
+        code = "TNE",
+        symbol = "t",
+        title = Res.string.UnitOfMeasurement_TNE,
+        value = Res.plurals.UnitOfMeasurement_TNE_Value,
+        //description = "Tonne",
+        //pluralDescription = "Tonnen",
+    ),
 
     /** The Kilogram (kg). */
-    KILOGRAM("KGM", "Kilogramm", "Kilogramm"),
+    KILOGRAM(
+        code = "KGM",
+        symbol = "kg",
+        title = Res.string.UnitOfMeasurement_KGM,
+        value = Res.plurals.UnitOfMeasurement_KGM_Value,
+        //description = "Kilogramm",
+        //pluralDescription = "Kilogramm",
+    ),
 
 
     /** The Kilowatt hour (kWh). */
-    KILOWATT_HOUR("KWH", "Kilowattstunde", "Kilowattstunden"),
+    KILOWATT_HOUR(
+        code = "KWH",
+        symbol = "kWh",
+        title = Res.string.UnitOfMeasurement_KWH,
+        value = Res.plurals.UnitOfMeasurement_KWH_Value,
+        //description = "Kilowattstunde",
+        //pluralDescription = "Kilowattstunden",
+    ),
 
     ;
 

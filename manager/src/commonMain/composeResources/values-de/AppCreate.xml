@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+General notes about translation strings.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#strings
+
+Be aware, that plural definitions are language specific.
+According to your language, you might need to set different quantity values.
+https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#plurals
+-->
+
+<resources>
+    <string name="AppCreateErrorInvalid">
+        Die Angaben zur Rechnung sind unvollständig. Eine E-Rechnung kann erst erzeugt werden, wenn alle nötigen Angaben
+        vorhanden sind.
+    </string>
+    <string name="AppCreateErrorIncompatible">
+        Die PDF-Datei liegt im %1$s Format vor. Daraus kann keine ZUGFeRD-Rechnung erzeugt werden. Verwenden Sie bitte
+        eine reguläre PDF-Datei oder das PDF/A-1 bzw. PDF/A-3 Format.
+    </string>
+    <string name="AppCreateErrorConversion">
+        Die PDF-Datei konnte nicht in das PDF/A-3 Format umgewandelt werden.
+    </string>
+    <string name="AppCreateErrorFormat">
+        Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. Damit kann keine E-Rechnung erzeugt
+        werden.
+    </string>
+
+    <string name="AppCreateConvert">in PDF/A-3 umwandeln</string>
+    <string name="AppCreateConvertInfo">
+        Dies kann zu Fehlern in der erzeugten E-Rechnung führen.\n
+        Besser ist es, die Rechnung z.B. aus Word heraus in PDF/A-3 zu exportieren.\n
+        Bitte die erzeugte E-Rechnung nachträglich prüfen.
+    </string>
+
+    <string name="AppCreateSelect">PDF wählen</string>
+    <string name="AppCreateSelectInfo">
+        Eine PDF-Rechnung zur Bearbeitung auswählen.
+    </string>
+    <string name="AppCreateSelectMessage">
+        Bitte wähle eine PDF-Rechnung aus.
+    </string>
+
+    <string name="AppCreateGenerate">E-Rechnung erzeugen</string>
+    <string name="AppCreateGenerateInfo">
+        E-Rechnung mit gewählter PDF-Datei und eingetragenen Daten erzeugen.
+    </string>
+</resources>
