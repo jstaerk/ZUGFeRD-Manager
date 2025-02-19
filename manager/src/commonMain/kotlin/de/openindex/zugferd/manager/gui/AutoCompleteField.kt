@@ -47,14 +47,21 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.utils.title
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.Resource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun <T> AutoCompleteField(
     label: String,
     entry: T? = null,
     entries: Map<T, String>,
     onSelect: (T?) -> Unit,
+    requiredIndicator: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val isEntrySelected by remember(entry) {
@@ -85,9 +92,9 @@ fun <T> AutoCompleteField(
                 .fillMaxWidth(),
             singleLine = true,
             label = {
-                Text(
-                    text = label,
-                    softWrap = false,
+                Label(
+                    text = label.title(),
+                    requiredIndicator = requiredIndicator,
                 )
             },
             trailingIcon = {
@@ -153,9 +160,9 @@ fun <T> AutoCompleteField(
                     .menuAnchor(MenuAnchorType.PrimaryEditable),
                 singleLine = true,
                 label = {
-                    Text(
-                        text = label,
-                        softWrap = false,
+                    Label(
+                        text = label.title(),
+                        requiredIndicator = requiredIndicator,
                     )
                 },
                 trailingIcon = {
@@ -207,3 +214,26 @@ fun <T> AutoCompleteField(
         }
     }
 }
+
+@Composable
+fun <T> AutoCompleteField(
+    label: Resource,
+    entry: T? = null,
+    entries: Map<T, StringResource>,
+    onSelect: (T?) -> Unit,
+    requiredIndicator: Boolean = false,
+    modifier: Modifier = Modifier,
+) = AutoCompleteField(
+    label = when (label) {
+        is PluralStringResource -> pluralStringResource(label, 1)
+        is StringResource -> stringResource(label)
+        else -> "???"
+    },
+    entry = entry,
+    entries = buildMap<T, String> {
+        entries.entries.forEach { e -> put(e.key, stringResource(e.value)) }
+    },
+    onSelect = onSelect,
+    requiredIndicator = requiredIndicator,
+    modifier = modifier,
+)

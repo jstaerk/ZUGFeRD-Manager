@@ -27,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,13 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import de.openindex.zugferd.manager.model.PaymentMethod
-import de.openindex.zugferd.manager.model.TaxCategory
-import de.openindex.zugferd.manager.model.UnitOfMeasurement
-import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory
-import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement
+import de.openindex.zugferd.manager.utils.title
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.Resource
 import org.jetbrains.compose.resources.StringResource
@@ -81,8 +74,8 @@ fun <T> DropDown(
             onValueChange = { textFieldValue = it },
             readOnly = true,
             label = {
-                InputLabel(
-                    text = label,
+                Label(
+                    text = label.title(),
                     requiredIndicator = requiredIndicator,
                 )
             },
@@ -105,9 +98,8 @@ fun <T> DropDown(
                 .forEach { option ->
                     DropdownMenuItem(
                         text = {
-                            Text(
+                            Label(
                                 text = option.value,
-                                softWrap = false,
                             )
                         },
                         onClick = {
@@ -130,75 +122,16 @@ fun <T> DropDown(
     onSelect: (T) -> Unit,
     requiredIndicator: Boolean = false,
     modifier: Modifier = Modifier,
-) {
-    DropDown(
-        label = when (label) {
-            is PluralStringResource -> pluralStringResource(label, 1)
-            is StringResource -> stringResource(label)
-            else -> "???"
-        },
-        value = value,
-        options = buildMap<T, String> {
-            options.entries.forEach { e -> put(e.key, stringResource(e.value)) }
-        },
-        onSelect = onSelect,
-        requiredIndicator = requiredIndicator,
-        modifier = modifier,
-    )
-}
-
-@Composable
-fun TaxCategoryDropDown(
-    label: PluralStringResource = Res.plurals.TaxCategory,
-    value: TaxCategory? = null,
-    options: Map<TaxCategory, StringResource> = buildMap {
-        TaxCategory.entries.forEach { e -> put(e, e.title) }
-    },
-    onSelect: (TaxCategory) -> Unit,
-    requiredIndicator: Boolean = false,
-    modifier: Modifier = Modifier,
 ) = DropDown(
-    label = label,
-    value = value,
-    options = options,
-    onSelect = onSelect,
-    requiredIndicator = requiredIndicator,
-    modifier = modifier,
-)
-
-@Composable
-fun UnitOfMeasurementDropDown(
-    label: PluralStringResource = Res.plurals.UnitOfMeasurement,
-    value: UnitOfMeasurement? = null,
-    options: Map<UnitOfMeasurement, StringResource> = buildMap {
-        UnitOfMeasurement.entries.forEach { e -> put(e, e.title) }
+    label = when (label) {
+        is PluralStringResource -> pluralStringResource(label, 1)
+        is StringResource -> stringResource(label)
+        else -> "???"
     },
-    onSelect: (UnitOfMeasurement) -> Unit,
-    requiredIndicator: Boolean = false,
-    modifier: Modifier = Modifier,
-) = DropDown(
-    label = label,
     value = value,
-    options = options,
-    onSelect = onSelect,
-    requiredIndicator = requiredIndicator,
-    modifier = modifier,
-)
-
-@Composable
-fun PaymentMethodDropDown(
-    label: PluralStringResource = Res.plurals.PaymentMethod,
-    value: PaymentMethod? = null,
-    options: Map<PaymentMethod, StringResource> = buildMap {
-        PaymentMethod.entries.forEach { e -> put(e, e.title) }
+    options = buildMap<T, String> {
+        options.entries.forEach { e -> put(e.key, stringResource(e.value)) }
     },
-    onSelect: (PaymentMethod) -> Unit,
-    requiredIndicator: Boolean = false,
-    modifier: Modifier = Modifier,
-) = DropDown(
-    label = label,
-    value = value,
-    options = options,
     onSelect = onSelect,
     requiredIndicator = requiredIndicator,
     modifier = modifier,

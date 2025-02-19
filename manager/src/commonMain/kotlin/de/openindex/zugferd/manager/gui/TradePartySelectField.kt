@@ -39,13 +39,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.utils.getDefaultCountryCode
+import de.openindex.zugferd.manager.utils.title
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun TradePartySelectField(
-    label: String = "Partner",
+    label: StringResource,
     tradeParty: TradeParty? = null,
     tradeParties: List<TradeParty>,
     onSelect: (TradeParty?) -> Unit,
+    requiredIndicator: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val options = remember(tradeParties) {
@@ -57,10 +61,11 @@ fun TradePartySelectField(
     }
 
     AutoCompleteField(
-        label = label,
+        label = stringResource(label),
         entry = tradeParty,
         entries = options,
         onSelect = onSelect,
+        requiredIndicator = requiredIndicator,
         modifier = modifier,
     )
 }
@@ -68,12 +73,13 @@ fun TradePartySelectField(
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun TradePartySelectFieldWithAdd(
-    label: String = "Partner",
-    addLabel: String = "Neuer Partner",
-    editLabel: String = "Partner bearbeiten",
+    label: StringResource,
+    addLabel: StringResource,
+    editLabel: StringResource,
     tradeParty: TradeParty? = null,
     tradeParties: List<TradeParty>,
     onSelect: (tradeParty: TradeParty?, savePermanently: Boolean) -> Unit,
+    requiredIndicator: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     var newTradeParty by remember { mutableStateOf<TradeParty?>(null) }
@@ -92,11 +98,12 @@ fun TradePartySelectFieldWithAdd(
             onSelect = { selection ->
                 onSelect(selection, false)
             },
+            requiredIndicator = requiredIndicator,
             modifier = Modifier.weight(1f, fill = true),
         )
 
         Tooltip(
-            text = addLabel.takeIf { unsavedTradeParty == null } ?: editLabel,
+            text = stringResource(addLabel.takeIf { unsavedTradeParty == null } ?: editLabel).title(),
         ) {
             IconButton(
                 onClick = {
@@ -109,12 +116,12 @@ fun TradePartySelectFieldWithAdd(
                 if (unsavedTradeParty == null) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = addLabel,
+                        contentDescription = stringResource(addLabel),
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = editLabel,
+                        contentDescription = stringResource(editLabel),
                     )
                 }
             }
@@ -123,7 +130,7 @@ fun TradePartySelectFieldWithAdd(
 
     if (newTradeParty != null) {
         TradePartyDialog(
-            title = addLabel.takeIf { unsavedTradeParty == null } ?: editLabel,
+            title = stringResource(addLabel.takeIf { unsavedTradeParty == null } ?: editLabel).title(),
             value = newTradeParty!!,
             permanentSaveOption = true,
             onDismissRequest = { newTradeParty = null },

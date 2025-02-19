@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import de.openindex.zugferd.manager.gui.CurrencySelectField
 import de.openindex.zugferd.manager.gui.DateField
+import de.openindex.zugferd.manager.gui.Label
 import de.openindex.zugferd.manager.gui.PaymentMethodDropDown
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.ProductSelectFieldWithAdd
@@ -96,17 +97,36 @@ import de.openindex.zugferd.manager.utils.formatAsQuantity
 import de.openindex.zugferd.manager.utils.getCurrencySymbol
 import de.openindex.zugferd.manager.utils.parsePrice
 import de.openindex.zugferd.manager.utils.parseQuantity
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreate
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvert
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvertInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvertWarning
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateDetailsPdf
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateDetailsXml
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorConversion
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorFormat
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorIncompatible
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateErrorInvalid
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneral
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralDeliveryDate
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralDeliveryDateEnd
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralDeliveryDateInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralDeliveryDateStart
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralInvoiceNumber
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralIssuer
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralIssuerAdd
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralIssuerEdit
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralRecipient
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralRecipientAdd
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGeneralRecipientEdit
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerate
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerateInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateItems
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateItemsAdd
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelect
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectInfo
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectMessage
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateTotals
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -167,7 +187,7 @@ fun CreateSection(state: CreateSectionState) {
 
                 AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION && selectedPdfArchiveError == null) {
                     Notification(
-                        text = stringResource(Res.string.AppCreateErrorFormat).trim()
+                        text = stringResource(Res.string.AppCreateConvertWarning).trim()
                     ) {
                         Tooltip(
                             text = stringResource(Res.string.AppCreateConvertInfo).trim(),
@@ -186,7 +206,7 @@ fun CreateSection(state: CreateSectionState) {
                                     .padding(all = 8.dp),
                             ) {
                                 Text(
-                                    text = stringResource(Res.string.AppCreateConvert),
+                                    text = stringResource(Res.string.AppCreateConvert).title(),
                                     softWrap = false,
                                 )
                             }
@@ -240,7 +260,7 @@ fun CreateSectionActions(state: CreateSectionState) {
                 )
             ) {
                 Text(
-                    text = stringResource(Res.string.AppCreateSelect),
+                    text = stringResource(Res.string.AppCreateSelect).title(),
                     softWrap = false,
                 )
             }
@@ -264,7 +284,7 @@ fun CreateSectionActions(state: CreateSectionState) {
                     )
                 ) {
                     Text(
-                        text = stringResource(Res.string.AppCreateGenerate),
+                        text = stringResource(Res.string.AppCreateGenerate).title(),
                         softWrap = false,
                     )
                 }
@@ -306,7 +326,7 @@ private fun CreateView(state: CreateSectionState) {
             .padding(vertical = 16.dp, horizontal = 20.dp)
     ) {
         SectionTitle(
-            text = "E-Rechnung mit „${selectedPdfName}“ erstellen",
+            text = stringResource(Res.string.AppCreate, selectedPdfName).title(),
         )
 
         Column(
@@ -316,7 +336,7 @@ private fun CreateView(state: CreateSectionState) {
         ) {
 
             SectionSubTitle(
-                text = "Eckdaten bearbeiten",
+                text = stringResource(Res.string.AppCreateGeneral).title(),
             )
 
             GeneralForm(state)
@@ -329,7 +349,7 @@ private fun CreateView(state: CreateSectionState) {
         ) {
 
             SectionSubTitle(
-                text = "Rechnungsposten bearbeiten",
+                text = stringResource(Res.string.AppCreateItems).title(),
             ) {
                 Button(
                     onClick = {
@@ -339,7 +359,7 @@ private fun CreateView(state: CreateSectionState) {
                     modifier = Modifier,
                 ) {
                     Text(
-                        text = "Hinzufügen",
+                        text = stringResource(Res.string.AppCreateItemsAdd).title(),
                         softWrap = false,
                     )
                 }
@@ -355,7 +375,7 @@ private fun CreateView(state: CreateSectionState) {
         ) {
 
             SectionSubTitle(
-                text = "Gesamtsumme",
+                text = stringResource(Res.string.AppCreateTotals).title(),
             )
 
             AmountSummary(state)
@@ -388,7 +408,7 @@ private fun DetailsView(state: CreateSectionState) {
             onClick = { tabState = 0 },
             text = {
                 Text(
-                    text = "Gewählte PDF",
+                    text = stringResource(Res.string.AppCreateDetailsPdf).title(),
                     softWrap = false,
                 )
             },
@@ -401,7 +421,7 @@ private fun DetailsView(state: CreateSectionState) {
                 onClick = { tabState = 1 },
                 text = {
                     Text(
-                        text = "XML-Rohdaten",
+                        text = stringResource(Res.string.AppCreateDetailsXml).title(),
                         softWrap = false,
                     )
                 },
@@ -463,11 +483,12 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 .weight(1f, fill = true),
         ) {
             TradePartySelectFieldWithAdd(
-                label = "Ersteller der Rechnung*",
-                addLabel = "Neuer Ersteller",
-                editLabel = "Ersteller bearbeiten",
+                label = Res.string.AppCreateGeneralIssuer,
+                addLabel = Res.string.AppCreateGeneralIssuerAdd,
+                editLabel = Res.string.AppCreateGeneralIssuerEdit,
                 tradeParty = state.invoiceSender,
                 tradeParties = sendersList.value,
+                requiredIndicator = true,
                 onSelect = { sender, savePermanently ->
                     state.invoiceSender = sender
                     if (sender != null && savePermanently) {
@@ -483,11 +504,12 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             )
 
             TradePartySelectFieldWithAdd(
-                label = "Empfänger der Rechnung*",
-                addLabel = "Neuer Empfänger",
-                editLabel = "Empfänger bearbeiten",
+                label = Res.string.AppCreateGeneralRecipient,
+                addLabel = Res.string.AppCreateGeneralRecipientAdd,
+                editLabel = Res.string.AppCreateGeneralRecipientEdit,
                 tradeParty = state.invoiceRecipient,
                 tradeParties = recipientsList.value,
+                requiredIndicator = true,
                 onSelect = { recipient, savePermanently ->
                     state.invoiceRecipient = recipient
                     state.invoicePaymentMethod = recipient?._defaultPaymentMethod ?: state.invoicePaymentMethod
@@ -508,9 +530,9 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             ) {
                 TextField(
                     label = {
-                        Text(
-                            text = "Rechnungsnummer*",
-                            softWrap = false,
+                        Label(
+                            text = stringResource(Res.string.AppCreateGeneralInvoiceNumber).title(),
+                            requiredIndicator = true,
                         )
                     },
                     value = state.invoiceNumber,
@@ -520,7 +542,6 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 )
 
                 PaymentMethodDropDown(
-                    //label = "Zahlungsart*",
                     value = state.invoicePaymentMethod,
                     onSelect = { state.invoicePaymentMethod = it },
                     modifier = Modifier
@@ -535,14 +556,13 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.QuestionMark,
-                        contentDescription = "Nichts zu tun",
+                        contentDescription = "",
                     )
                 }
             }
 
             Tooltip(
-                text = "Eine E-Rechnung benötigt ENTWEDER ein Lieferdatum " +
-                        "UND / ODER einen Zeitraum für die erbrachte Leistung."
+                text = stringResource(Res.string.AppCreateGeneralDeliveryDateInfo).trim()
             )
             {
                 Row(
@@ -551,24 +571,27 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                         .fillMaxWidth(),
                 ) {
                     DateField(
-                        label = "Lieferdatum*",
+                        label = stringResource(Res.string.AppCreateGeneralDeliveryDate).title(),
                         value = state.deliveryDate,
+                        requiredIndicator = state.deliveryStartDate == null || state.deliveryEndDate == null,
                         onValueChange = { state.deliveryDate = it },
                         modifier = Modifier
                             .weight(0.3f, true),
                     )
 
                     DateField(
-                        label = "Start der Leistung*",
+                        label = stringResource(Res.string.AppCreateGeneralDeliveryDateStart).title(),
                         value = state.deliveryStartDate,
+                        requiredIndicator = state.deliveryDate == null,
                         onValueChange = { state.deliveryStartDate = it },
                         modifier = Modifier
                             .weight(0.3f, true),
                     )
 
                     DateField(
-                        label = "Ende der Leistung*",
+                        label = stringResource(Res.string.AppCreateGeneralDeliveryDateEnd).title(),
                         value = state.deliveryEndDate,
+                        requiredIndicator = state.deliveryDate == null,
                         onValueChange = { state.deliveryEndDate = it },
                         modifier = Modifier
                             .weight(0.3f, true),
@@ -582,7 +605,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.QuestionMark,
-                            contentDescription = "Nichts zu tun",
+                            contentDescription = "",
                         )
                     }
                 }
@@ -861,7 +884,7 @@ private fun ColumnScope.ItemForm(
                 ) {
                     Icon(
                         imageVector = Icons.Default.QuestionMark,
-                        contentDescription = "Nichts zu tun",
+                        contentDescription = "",
                     )
                 }
             }

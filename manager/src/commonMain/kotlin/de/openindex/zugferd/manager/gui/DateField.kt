@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,10 +36,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import de.openindex.zugferd.manager.utils.title
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val DATE_FORMAT = LocalDate.Format {
     dayOfMonth()
@@ -55,6 +57,7 @@ fun DateField(
     label: String,
     value: LocalDate?,
     clearable: Boolean = false,
+    requiredIndicator: Boolean = false,
     supportingText: @Composable (() -> Unit)? = null,
     onValueChange: (LocalDate?) -> Unit,
     modifier: Modifier = Modifier,
@@ -64,9 +67,9 @@ fun DateField(
 
     TextField(
         label = {
-            Text(
-                text = label,
-                softWrap = false,
+            Label(
+                text = label.title(),
+                requiredIndicator = requiredIndicator,
             )
         },
         supportingText = supportingText,
@@ -120,3 +123,22 @@ fun DateField(
         )
     }
 }
+
+@Composable
+fun DateField(
+    label: StringResource,
+    value: LocalDate?,
+    clearable: Boolean = false,
+    requiredIndicator: Boolean = false,
+    supportingText: @Composable (() -> Unit)? = null,
+    onValueChange: (LocalDate?) -> Unit,
+    modifier: Modifier = Modifier,
+) = DateField(
+    label = stringResource(label),
+    value = value,
+    clearable = clearable,
+    requiredIndicator = requiredIndicator,
+    supportingText = supportingText,
+    onValueChange = onValueChange,
+    modifier = modifier,
+)

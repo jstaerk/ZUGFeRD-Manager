@@ -21,15 +21,12 @@
 
 package de.openindex.zugferd.manager.utils
 
-fun String.trimToNull(): String? =
-    trim().takeIf { it.isNotBlank() }
+import java.util.Locale
 
-//fun String.title(): String =
-//    replaceFirstChar {
-//        if (it.isLowerCase())
-//            it.uppercase()
-//        else
-//            it.toString()
-//    }
-
-expect fun String.title(): String
+actual fun String.title(): String =
+    replaceFirstChar {
+        if (it.isLowerCase())
+            it.titlecase(Locale.getDefault())
+        else
+            it.toString()
+    }

@@ -21,16 +21,16 @@ https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-re
     <string name="AppCreateErrorConversion">
         Die PDF-Datei konnte nicht in das PDF/A-3 Format umgewandelt werden.
     </string>
-    <string name="AppCreateErrorFormat">
-        Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. Damit kann keine E-Rechnung erzeugt
-        werden.
-    </string>
 
     <string name="AppCreateConvert">in PDF/A-3 umwandeln</string>
     <string name="AppCreateConvertInfo">
         Dies kann zu Fehlern in der erzeugten E-Rechnung führen.\n
         Besser ist es, die Rechnung z.B. aus Word heraus in PDF/A-3 zu exportieren.\n
         Bitte die erzeugte E-Rechnung nachträglich prüfen.
+    </string>
+    <string name="AppCreateConvertWarning">
+        Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. Damit kann keine E-Rechnung erzeugt
+        werden.
     </string>
 
     <string name="AppCreateSelect">PDF wählen</string>
@@ -45,4 +45,29 @@ https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-re
     <string name="AppCreateGenerateInfo">
         E-Rechnung mit gewählter PDF-Datei und eingetragenen Daten erzeugen.
     </string>
+
+    <string name="AppCreate">E-Rechnung mit „%1$s“ erstellen</string>
+
+    <string name="AppCreateGeneral">Eckdaten bearbeiten</string>
+    <string name="AppCreateGeneralIssuer">Ersteller der Rechnung</string>
+    <string name="AppCreateGeneralIssuerAdd">neuer Ersteller</string>
+    <string name="AppCreateGeneralIssuerEdit">Ersteller bearbeiten</string>
+    <string name="AppCreateGeneralRecipient">Empfänger der Rechnung</string>
+    <string name="AppCreateGeneralRecipientAdd">neuer Empfänger</string>
+    <string name="AppCreateGeneralRecipientEdit">Empfänger bearbeiten</string>
+    <string name="AppCreateGeneralInvoiceNumber">Rechnungsnummer</string>
+    <string name="AppCreateGeneralDeliveryDate">Lieferdatum</string>
+    <string name="AppCreateGeneralDeliveryDateStart">Start der Leistung</string>
+    <string name="AppCreateGeneralDeliveryDateEnd">Ende der Leistung</string>
+    <string name="AppCreateGeneralDeliveryDateInfo">
+        Eine E-Rechnung benötigt ENTWEDER ein Lieferdatum UND / ODER einen Zeitraum für die erbrachte Leistung.
+    </string>
+
+    <string name="AppCreateItems">Rechnungsposten bearbeiten</string>
+    <string name="AppCreateItemsAdd">hinzufügen</string>
+
+    <string name="AppCreateTotals">Rechnungsposten bearbeiten</string>
+
+    <string name="AppCreateDetailsPdf">gewählte PDF</string>
+    <string name="AppCreateDetailsXml">XML-Rohdaten</string>
 </resources>

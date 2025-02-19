@@ -306,7 +306,7 @@ private fun ProductFormGeneral(
             TextField(
                 value = value.name,
                 label = {
-                    InputLabel(
+                    Label(
                         text = "Name",
                         requiredIndicator = true,
                     )
@@ -336,7 +336,7 @@ private fun ProductFormGeneral(
             TextField(
                 value = value._defaultPricePerUnit.formatAsPrice,
                 label = {
-                    InputLabel(
+                    Label(
                         text = "Preis pro Einheit",
                         requiredIndicator = true,
                     )
@@ -388,7 +388,7 @@ private fun ProductFormGeneral(
             TextField(
                 value = value.vatPercent.formatAsPercentage,
                 label = {
-                    InputLabel(
+                    Label(
                         text = "Steuersatz in %",
                         requiredIndicator = true,
                     )
@@ -416,7 +416,7 @@ private fun ProductFormGeneral(
             TextField(
                 value = value.taxExemptionReason ?: "",
                 label = {
-                    InputLabel(
+                    Label(
                         text = "Begründung für fehlende Besteuerung",
                         requiredIndicator = true,
                     )

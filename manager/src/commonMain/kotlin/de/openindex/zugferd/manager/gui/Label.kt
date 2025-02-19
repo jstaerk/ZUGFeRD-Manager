@@ -31,7 +31,7 @@ import org.jetbrains.compose.resources.stringResource
 const val REQUIRED_INDICATOR = "*"
 
 @Composable
-fun InputLabel(
+fun Label(
     text: String,
     requiredIndicator: Boolean = false,
 ) {
@@ -46,23 +46,23 @@ fun InputLabel(
 }
 
 @Composable
-fun InputLabel(
+fun Label(
     text: StringResource,
     requiredIndicator: Boolean = false,
 ) {
-    InputLabel(
+    Label(
         text = stringResource(text),
         requiredIndicator = requiredIndicator,
     )
 }
 
 @Composable
-fun InputLabel(
+fun Label(
     text: PluralStringResource,
     quantity: Int = 1,
     requiredIndicator: Boolean = false,
 ) {
-    InputLabel(
+    Label(
         text = pluralStringResource(text, quantity),
         requiredIndicator = requiredIndicator,
     )
