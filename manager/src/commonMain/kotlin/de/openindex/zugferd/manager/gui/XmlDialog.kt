@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -58,13 +57,13 @@ fun XmlDialog(
     xml: String,
     onDismissRequest: () -> Unit,
 ) {
-    val appState = LocalAppState.current
-    appState.setLocked(true)
+    //val appState = LocalAppState.current
+    //appState.setLocked(true)
 
     DialogWindow(
         onCloseRequest = {
             onDismissRequest()
-            appState.setLocked(false)
+            //appState.setLocked(false)
         },
         title = title,
         width = 700.dp,
@@ -76,7 +75,7 @@ fun XmlDialog(
             xml = xml,
             onDismissRequest = {
                 onDismissRequest()
-                appState.setLocked(false)
+                //appState.setLocked(false)
             },
         )
     }

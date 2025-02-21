@@ -28,10 +28,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.sections.CheckSection
 import de.openindex.zugferd.manager.sections.CheckSectionActions
 import de.openindex.zugferd.manager.sections.CheckSectionState
@@ -58,22 +55,20 @@ class AppState {
         _section.value = section
     }
 
-    private var _locked = mutableStateOf(false)
-    val locked get() = _locked.value
-    val lockedModifier
-        get() = if (_locked.value)
-            Modifier
-                .blur(10.dp)
-        else
-            Modifier
-
-    fun isLocked(): Boolean {
-        return _locked.value
-    }
-
-    fun setLocked(locked: Boolean) {
-        _locked.value = locked
-    }
+    //private var _locked = mutableStateOf(false)
+    //val locked get() = _locked.value
+    //val lockedModifier
+    //    get() = if (_locked.value)
+    //        Modifier
+    //            .blur(10.dp)
+    //    else
+    //        Modifier
+    //fun isLocked(): Boolean {
+    //    return _locked.value
+    //}
+    //fun setLocked(locked: Boolean) {
+    //    _locked.value = locked
+    //}
 }
 
 enum class AppSection(

@@ -54,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.BankDetails
 import de.openindex.zugferd.manager.model.Contact
 import de.openindex.zugferd.manager.model.TradeParty
@@ -121,13 +120,13 @@ fun TradePartyDialog(
     onDismissRequest: () -> Unit,
     onSubmitRequest: (tradeParty: TradeParty, savePermanently: Boolean) -> Unit,
 ) {
-    val appState = LocalAppState.current
-    appState.setLocked(true)
+    //val appState = LocalAppState.current
+    //appState.setLocked(true)
 
     DialogWindow(
         onCloseRequest = {
             onDismissRequest()
-            appState.setLocked(false)
+            //appState.setLocked(false)
         },
         title = title,
         width = 700.dp,
@@ -141,11 +140,11 @@ fun TradePartyDialog(
             permanentSaveOption = permanentSaveOption,
             onDismissRequest = {
                 onDismissRequest()
-                appState.setLocked(false)
+                //appState.setLocked(false)
             },
             onSubmitRequest = { tradeParty, savePermanently ->
                 onSubmitRequest(tradeParty, savePermanently)
-                appState.setLocked(false)
+                //appState.setLocked(false)
             },
         )
     }

@@ -55,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.model.TaxCategory
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
@@ -96,13 +95,13 @@ fun ProductDialog(
     onDismissRequest: () -> Unit,
     onSubmitRequest: (product: Product, savePermanently: Boolean) -> Unit,
 ) {
-    val appState = LocalAppState.current
-    appState.setLocked(true)
+    //val appState = LocalAppState.current
+    //appState.setLocked(true)
 
     DialogWindow(
         onCloseRequest = {
             onDismissRequest()
-            appState.setLocked(false)
+            //appState.setLocked(false)
         },
         title = title,
         width = 700.dp,
@@ -115,11 +114,11 @@ fun ProductDialog(
             permanentSaveOption = permanentSaveOption,
             onDismissRequest = {
                 onDismissRequest()
-                appState.setLocked(false)
+                //appState.setLocked(false)
             },
             onSubmitRequest = { product, savePermanently ->
                 onSubmitRequest(product, savePermanently)
-                appState.setLocked(false)
+                //appState.setLocked(false)
             },
         )
     }

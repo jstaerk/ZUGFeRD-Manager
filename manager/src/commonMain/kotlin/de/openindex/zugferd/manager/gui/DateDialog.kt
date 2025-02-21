@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionDialogTitle
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.datetime.Instant
@@ -51,8 +50,8 @@ fun DateDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val appState = LocalAppState.current
-    appState.setLocked(true)
+    //val appState = LocalAppState.current
+    //appState.setLocked(true)
 
     val dateState = rememberDatePickerState(
         initialSelectedDateMillis = value
@@ -79,7 +78,7 @@ fun DateDialog(
                     .date
             )
         }
-        appState.setLocked(false)
+        //appState.setLocked(false)
     }
 
     DialogWindow(
@@ -89,7 +88,7 @@ fun DateDialog(
         resizable = false,
         onCloseRequest = {
             onDismiss()
-            appState.setLocked(false)
+            //appState.setLocked(false)
         },
     ) {
         DatePicker(
