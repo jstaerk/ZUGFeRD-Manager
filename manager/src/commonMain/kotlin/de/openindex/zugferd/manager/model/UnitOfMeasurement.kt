@@ -21,6 +21,8 @@
 
 package de.openindex.zugferd.manager.model
 
+import de.openindex.zugferd.manager.utils.getPluralString
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_ANN
 import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement_ANN_Value
@@ -85,12 +87,15 @@ enum class UnitOfMeasurement(
     val symbol: String? = null,
     val title: StringResource,
     val value: PluralStringResource,
+    val minPrecision: Int = 0,
+    val maxPrecision: Int = 2,
 ) {
     /** The lump sum. */
     LUMP_SUM(
         code = "LS",
         title = Res.string.UnitOfMeasurement_LS,
         value = Res.plurals.UnitOfMeasurement_LS_Value,
+        maxPrecision = 0,
         //description = "Pauschale",
         //pluralDescription = "Pauschalen",
     ),
@@ -225,6 +230,7 @@ enum class UnitOfMeasurement(
         symbol = "ha",
         title = Res.string.UnitOfMeasurement_HAR,
         value = Res.plurals.UnitOfMeasurement_HAR_Value,
+        maxPrecision = 5,
         //description = "Hektar",
         //pluralDescription = "Hektar",
     ),
@@ -235,6 +241,7 @@ enum class UnitOfMeasurement(
         symbol = "m²",
         title = Res.string.UnitOfMeasurement_MTK,
         value = Res.plurals.UnitOfMeasurement_MTK_Value,
+        maxPrecision = 5,
         //description = "Quadratmeter",
         //pluralDescription = "Quadratmeter",
     ),
@@ -245,6 +252,7 @@ enum class UnitOfMeasurement(
         symbol = "mm²",
         title = Res.string.UnitOfMeasurement_MMK,
         value = Res.plurals.UnitOfMeasurement_MMK_Value,
+        maxPrecision = 5,
         //description = "Quadratmillimeter",
         //pluralDescription = "Quadratmillimeter",
     ),
@@ -255,6 +263,7 @@ enum class UnitOfMeasurement(
         code = "SMI",
         title = Res.string.UnitOfMeasurement_SMI,
         value = Res.plurals.UnitOfMeasurement_SMI_Value,
+        maxPrecision = 5,
         //description = "Meile",
         //pluralDescription = "Meilen",
     ),
@@ -265,6 +274,7 @@ enum class UnitOfMeasurement(
         symbol = "km",
         title = Res.string.UnitOfMeasurement_KMT,
         value = Res.plurals.UnitOfMeasurement_KMT_Value,
+        maxPrecision = 5,
         //description = "Kilometer",
         //pluralDescription = "Kilometer",
     ),
@@ -275,6 +285,7 @@ enum class UnitOfMeasurement(
         symbol = "m",
         title = Res.string.UnitOfMeasurement_MTR,
         value = Res.plurals.UnitOfMeasurement_MTR_Value,
+        maxPrecision = 5,
         //description = "Meter",
         //pluralDescription = "Meter",
     ),
@@ -285,6 +296,7 @@ enum class UnitOfMeasurement(
         symbol = "mm",
         title = Res.string.UnitOfMeasurement_MMT,
         value = Res.plurals.UnitOfMeasurement_MMT_Value,
+        maxPrecision = 5,
         //description = "Millimeter",
         //pluralDescription = "Millimeter",
     ),
@@ -296,6 +308,7 @@ enum class UnitOfMeasurement(
         symbol = "m³",
         title = Res.string.UnitOfMeasurement_MTQ,
         value = Res.plurals.UnitOfMeasurement_MTQ_Value,
+        maxPrecision = 5,
         //description = "Kubikmeter",
         //pluralDescription = "Kubikmeter",
     ),
@@ -306,6 +319,7 @@ enum class UnitOfMeasurement(
         symbol = "l",
         title = Res.string.UnitOfMeasurement_LTR,
         value = Res.plurals.UnitOfMeasurement_LTR_Value,
+        maxPrecision = 5,
         //description = "Liter",
         //pluralDescription = "Liter",
     ),
@@ -317,6 +331,7 @@ enum class UnitOfMeasurement(
         symbol = "t",
         title = Res.string.UnitOfMeasurement_TNE,
         value = Res.plurals.UnitOfMeasurement_TNE_Value,
+        maxPrecision = 5,
         //description = "Tonne",
         //pluralDescription = "Tonnen",
     ),
@@ -327,6 +342,7 @@ enum class UnitOfMeasurement(
         symbol = "kg",
         title = Res.string.UnitOfMeasurement_KGM,
         value = Res.plurals.UnitOfMeasurement_KGM_Value,
+        maxPrecision = 5,
         //description = "Kilogramm",
         //pluralDescription = "Kilogramm",
     ),
@@ -338,15 +354,24 @@ enum class UnitOfMeasurement(
         symbol = "kWh",
         title = Res.string.UnitOfMeasurement_KWH,
         value = Res.plurals.UnitOfMeasurement_KWH_Value,
+        maxPrecision = 5,
         //description = "Kilowattstunde",
         //pluralDescription = "Kilowattstunden",
     ),
 
     ;
 
+    @Suppress("unused")
+    suspend fun translateTitle(): String = getString(title)
+
+    @Suppress("unused")
+    suspend fun translateValue(quantity: Int = 1): String = getPluralString(value, quantity)
+
     companion object {
-        fun getByCode(code: String?): UnitOfMeasurement? {
-            return entries.firstOrNull { it.code == code }
-        }
+        fun getByCode(code: String?): UnitOfMeasurement? =
+            if (code != null)
+                entries.firstOrNull { it.code == code }
+            else
+                null
     }
 }

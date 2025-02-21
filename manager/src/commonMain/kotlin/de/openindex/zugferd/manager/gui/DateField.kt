@@ -36,13 +36,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import de.openindex.zugferd.manager.utils.pluralStringResource
+import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionFieldClear
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionFieldSelect
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 
 private val DATE_FORMAT = LocalDate.Format {
     dayOfMonth()
@@ -65,6 +70,7 @@ fun DateField(
     //val dateState = rememberDatePickerState()
     var showDialog by remember { mutableStateOf(false) }
 
+    // Text field for date value.
     TextField(
         label = {
             Label(
@@ -80,6 +86,7 @@ fun DateField(
                 //horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier,
             ) {
+                // Button for date selection via dialog.
                 IconButton(
                     onClick = { showDialog = true },
                     modifier = Modifier
@@ -87,10 +94,11 @@ fun DateField(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Datum wählen",
+                        contentDescription = stringResource(Res.string.AppDateSelectionFieldSelect),
                     )
                 }
 
+                // Button to clear input.
                 if (clearable && value != null) {
                     IconButton(
                         onClick = { onValueChange(null) },
@@ -99,7 +107,7 @@ fun DateField(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Datum leeren",
+                            contentDescription = stringResource(Res.string.AppDateSelectionFieldClear),
                         )
                     }
                 }
@@ -110,6 +118,7 @@ fun DateField(
         modifier = modifier,
     )
 
+    // Show dialog, if requested.
     if (showDialog) {
         DateDialog(
             value = value,
@@ -134,7 +143,28 @@ fun DateField(
     onValueChange: (LocalDate?) -> Unit,
     modifier: Modifier = Modifier,
 ) = DateField(
-    label = stringResource(label),
+    label = stringResource(label).title(),
+    value = value,
+    clearable = clearable,
+    requiredIndicator = requiredIndicator,
+    supportingText = supportingText,
+    onValueChange = onValueChange,
+    modifier = modifier,
+)
+
+@Composable
+@Suppress("unused")
+fun DateField(
+    label: PluralStringResource,
+    labelQuantity: Int = 1,
+    value: LocalDate?,
+    clearable: Boolean = false,
+    requiredIndicator: Boolean = false,
+    supportingText: @Composable (() -> Unit)? = null,
+    onValueChange: (LocalDate?) -> Unit,
+    modifier: Modifier = Modifier,
+) = DateField(
+    label = pluralStringResource(label, labelQuantity).title(),
     value = value,
     clearable = clearable,
     requiredIndicator = requiredIndicator,

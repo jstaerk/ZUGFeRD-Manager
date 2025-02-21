@@ -26,7 +26,12 @@ import de.openindex.zugferd.manager.APP_TITLE_FULL
 import de.openindex.zugferd.manager.APP_VERSION
 import de.openindex.zugferd.manager.utils.toJavaDate
 import de.openindex.zugferd.manager.utils.trimToNull
+import de.openindex.zugferd.zugferd_manager.generated.resources.InvoicePaymentTermDescriptionSepaCreditTransfer
+import de.openindex.zugferd.zugferd_manager.generated.resources.InvoicePaymentTermDescriptionSepaDirectDebit
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.core.PlatformFile
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.getString
 import org.mustangproject.ZUGFeRD.IExportableTransaction
 import org.mustangproject.ZUGFeRD.Profiles
 import org.mustangproject.ZUGFeRD.ZUGFeRD2PullProvider
@@ -41,10 +46,10 @@ import org.mustangproject.Invoice as _Invoice
 const val INVOICE_PROFILE = "EXTENDED"
 
 private val DATE_FORMAT = DateFormat
-    .getDateInstance(DateFormat.MEDIUM, Locale.GERMANY)
+    .getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
 
-fun Invoice.build(method: PaymentMethod): _Invoice {
-    return _Invoice()
+fun Invoice.build(method: PaymentMethod): _Invoice =
+    _Invoice()
         .setCurrency(currency)
         .setNumber(number)
         .setIssueDate(issueDate.toJavaDate())
@@ -52,10 +57,21 @@ fun Invoice.build(method: PaymentMethod): _Invoice {
         .setDeliveryDate(deliveryDate?.toJavaDate())
         .setDetailedDeliveryPeriod(deliveryStartDate?.toJavaDate(), deliveryEndDate?.toJavaDate())
         .setPaymentTermDescription(
-            if (method == PaymentMethod.SEPA_DIRECT_DEBIT)
-                "Abbuchung erfolgt am ${DATE_FORMAT.format(dueDate.toJavaDate())}."
-            else
-                "Bitte bis ${DATE_FORMAT.format(dueDate.toJavaDate())} überweisen."
+            runBlocking {
+                when (method) {
+                    PaymentMethod.SEPA_DIRECT_DEBIT -> getString(
+                        Res.string.InvoicePaymentTermDescriptionSepaDirectDebit,
+                        DATE_FORMAT.format(dueDate.toJavaDate()),
+                    )
+
+                    PaymentMethod.SEPA_CREDIT_TRANSFER -> getString(
+                        Res.string.InvoicePaymentTermDescriptionSepaCreditTransfer,
+                        DATE_FORMAT.format(dueDate.toJavaDate()),
+                    )
+
+                    else -> null
+                }
+            }
         )
         .setCreditorReferenceID(
             sender?.creditorReferenceId
@@ -114,7 +130,6 @@ fun Invoice.build(method: PaymentMethod): _Invoice {
 
             invoice
         }
-}
 
 /*actual fun Invoice.isValid(): Boolean {
     return build().isValid

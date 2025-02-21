@@ -44,7 +44,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,18 +58,57 @@ import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.BankDetails
 import de.openindex.zugferd.manager.model.Contact
 import de.openindex.zugferd.manager.model.TradeParty
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.manager.utils.translate
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogAccount
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogAccountBIC
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogAccountCreditorReferenceId
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogAccountDirectDebitMandateId
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogAccountIBAN
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogAccountName
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogAccountPreferredPaymentMethod
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogCancel
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContact
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactCountry
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactEmail
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactFax
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactLocation
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactName
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactPhone
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactStreet
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogContactZip
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneral
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralAdditionalAddress
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralCountry
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralCustomerId
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralLocation
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralName
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralStreet
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralTaxId
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralVatId
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogGeneralZip
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogNotes
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogNotesDescription
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogNotesImprint
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogNotesImprintInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogSavePermanently
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppTradePartyDialogSubmit
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.Resource
+import org.jetbrains.compose.resources.StringResource
 
 private enum class TradePartyForm {
     GENERAL,
     CONTACT,
-    BANK_ACCOUNT,
-    DESCRIPTION;
+    ACCOUNT,
+    NOTES;
 
-    fun title(): String = when (this) {
-        GENERAL -> "Allgemein"
-        CONTACT -> "Kontakt"
-        BANK_ACCOUNT -> "Konto"
-        DESCRIPTION -> "Freitexte"
+    fun title(): StringResource = when (this) {
+        GENERAL -> Res.string.AppTradePartyDialogGeneral
+        CONTACT -> Res.string.AppTradePartyDialogContact
+        ACCOUNT -> Res.string.AppTradePartyDialogAccount
+        NOTES -> Res.string.AppTradePartyDialogNotes
     }
 }
 
@@ -127,6 +165,27 @@ fun TradePartyDialog(
 }
 
 @Composable
+@Suppress("unused")
+fun TradePartyDialog(
+    title: Resource,
+    value: TradeParty,
+    isCustomer: Boolean = false,
+    permanentSaveOption: Boolean = false,
+    onDismissRequest: () -> Unit,
+    onSubmitRequest: (tradeParty: TradeParty, savePermanently: Boolean) -> Unit,
+) = TradePartyDialog(
+    title = title.translate().title(),
+    value = value,
+    isCustomer = isCustomer,
+    permanentSaveOption = permanentSaveOption,
+    onDismissRequest = onDismissRequest,
+    onSubmitRequest = onSubmitRequest,
+)
+
+/**
+ * Contents of the trade party dialog.
+ */
+@Composable
 @Suppress("SameParameterValue")
 private fun TradePartyDialogContent(
     title: String?,
@@ -154,6 +213,7 @@ private fun TradePartyDialogContent(
                 modifier = Modifier
                     .fillMaxSize(),
             ) {
+                // Dialog title, if available.
                 if (title != null) {
                     Row(
                         Modifier
@@ -163,13 +223,14 @@ private fun TradePartyDialogContent(
                     ) {
                         Text(
                             text = title,
+                            softWrap = false,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             style = MaterialTheme.typography.titleLarge,
-                            softWrap = false,
                         )
                     }
                 }
 
+                // Trade party form.
                 TradePartyForm(
                     value = tradeParty,
                     isCustomer = isCustomer,
@@ -178,6 +239,7 @@ private fun TradePartyDialogContent(
 
                 Spacer(Modifier.weight(1f, true))
 
+                // Bottom row.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
@@ -185,6 +247,7 @@ private fun TradePartyDialogContent(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                 ) {
+                    // Submit button.
                     Button(
                         onClick = {
                             onSubmitRequest(
@@ -197,12 +260,12 @@ private fun TradePartyDialogContent(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     ) {
-                        Text(
-                            text = "Übernehmen",
-                            softWrap = false,
+                        Label(
+                            text = Res.string.AppTradePartyDialogSubmit,
                         )
                     }
 
+                    // Save permanently toggle.
                     if (permanentSaveOption) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -214,9 +277,10 @@ private fun TradePartyDialogContent(
                                 checked = savePermanently,
                                 onCheckedChange = { savePermanently = it },
                             )
-                            Text(
-                                text = "dauerhaft speichern",
-                                softWrap = false,
+                            Label(
+                                // Evaluate translation string immediately,
+                                // to avoid title conversion within the label component.
+                                text = stringResource(Res.string.AppTradePartyDialogSavePermanently),
                             )
                         }
                     }
@@ -226,12 +290,12 @@ private fun TradePartyDialogContent(
                             .weight(1f, true),
                     )
 
+                    // Cancel button.
                     Button(
                         onClick = { onDismissRequest() },
                     ) {
-                        Text(
-                            text = "Abbrechen",
-                            softWrap = false,
+                        Label(
+                            text = Res.string.AppTradePartyDialogCancel,
                         )
                     }
                 }
@@ -240,7 +304,9 @@ private fun TradePartyDialogContent(
     }
 }
 
-
+/**
+ * Trade party form within the dialog.
+ */
 @Composable
 private fun TradePartyForm(
     value: TradeParty,
@@ -249,6 +315,7 @@ private fun TradePartyForm(
 ) {
     var state by remember { mutableStateOf(0) }
 
+    // Available tabs.
     TabRow(
         selectedTabIndex = state,
     ) {
@@ -257,20 +324,21 @@ private fun TradePartyForm(
                 selected = state == index,
                 onClick = { state = index },
                 text = {
-                    Text(
+                    Label(
                         text = form.title(),
-                        softWrap = false,
                     )
                 },
             )
         }
     }
 
+    // Contents for each tab.
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth()
     ) {
+        // General form.
         AnimatedVisibility(visible = state == 0) {
             TradePartyFormGeneral(
                 value = value,
@@ -278,6 +346,8 @@ private fun TradePartyForm(
                 onUpdate = onUpdate,
             )
         }
+
+        // Contact form.
         AnimatedVisibility(visible = state == 1) {
             TradePartyFormContact(
                 value = value,
@@ -285,15 +355,19 @@ private fun TradePartyForm(
                 onUpdate = onUpdate,
             )
         }
+
+        // Account form.
         AnimatedVisibility(visible = state == 2) {
-            TradePartyFormBankAccount(
+            TradePartyFormAccount(
                 value = value,
                 isCustomer = isCustomer,
                 onUpdate = onUpdate,
             )
         }
+
+        // Notes form.
         AnimatedVisibility(visible = state == 3) {
-            TradePartyFormDescription(
+            TradePartyFormNotes(
                 value = value,
                 isCustomer = isCustomer,
                 onUpdate = onUpdate,
@@ -302,6 +376,9 @@ private fun TradePartyForm(
     }
 }
 
+/**
+ * Trade party general form.
+ */
 @Composable
 private fun TradePartyFormGeneral(
     value: TradeParty,
@@ -313,54 +390,39 @@ private fun TradePartyFormGeneral(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
+        // Trade party name field.
         TextField(
+            label = Res.string.AppTradePartyDialogGeneralName,
             value = value.name,
-            label = {
-                Text(
-                    text = "Name",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newName ->
                 onUpdate(
-                    value.copy(name = it)
+                    value.copy(name = newName)
                 )
             },
             modifier = Modifier
                 .fillMaxWidth(),
         )
 
+        // Trade party street field.
         TextField(
+            label = Res.string.AppTradePartyDialogGeneralStreet,
             value = value.street ?: "",
-            label = {
-                Text(
-                    text = "Straße",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newStreet ->
                 onUpdate(
-                    value.copy(street = it)
+                    value.copy(street = newStreet)
                 )
             },
             modifier = Modifier
                 .fillMaxWidth(),
         )
 
+        // Trade party additional address field.
         TextField(
+            label = Res.string.AppTradePartyDialogGeneralAdditionalAddress,
             value = value.additionalAddress ?: "",
-            label = {
-                Text(
-                    text = "Adresszusatz",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newAdditionalAddress ->
                 onUpdate(
-                    value.copy(additionalAddress = it)
+                    value.copy(additionalAddress = newAdditionalAddress)
                 )
             },
             modifier = Modifier
@@ -372,36 +434,26 @@ private fun TradePartyFormGeneral(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
+            // Trade party zip field.
             TextField(
+                label = Res.string.AppTradePartyDialogGeneralZip,
                 value = value.zip ?: "",
-                label = {
-                    Text(
-                        text = "PLZ",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newZip ->
                     onUpdate(
-                        value.copy(zip = it)
+                        value.copy(zip = newZip)
                     )
                 },
                 modifier = Modifier
                     .weight(0.3f),
             )
 
+            // Trade party location field.
             TextField(
+                label = Res.string.AppTradePartyDialogGeneralLocation,
                 value = value.location ?: "",
-                label = {
-                    Text(
-                        text = "Ort",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newLocation ->
                     onUpdate(
-                        value.copy(location = it)
+                        value.copy(location = newLocation)
                     )
                 },
                 modifier = Modifier
@@ -409,12 +461,13 @@ private fun TradePartyFormGeneral(
             )
         }
 
-        CountrySelectField(
+        // Trade party country field.
+        CountryField(
+            label = Res.string.AppTradePartyDialogGeneralCountry,
             country = value.country,
-            label = "Land",
-            onSelect = {
+            onSelect = { newCountry ->
                 onUpdate(
-                    value.copy(country = it)
+                    value.copy(country = newCountry)
                 )
             },
             modifier = Modifier
@@ -426,36 +479,26 @@ private fun TradePartyFormGeneral(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
+            // Trade party VAT ID field.
             TextField(
+                label = Res.string.AppTradePartyDialogGeneralVatId,
                 value = value.vatID ?: "",
-                label = {
-                    Text(
-                        text = "USt-Id-Nr",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newVatID ->
                     onUpdate(
-                        value.copy(vatID = it)
+                        value.copy(vatID = newVatID)
                     )
                 },
                 modifier = Modifier
                     .weight(0.33f),
             )
 
+            // Trade party tax ID field.
             TextField(
+                label = Res.string.AppTradePartyDialogGeneralTaxId,
                 value = value.taxID ?: "",
-                label = {
-                    Text(
-                        text = "Steuer-Nr",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newTaxID ->
                     onUpdate(
-                        value.copy(taxID = it)
+                        value.copy(taxID = newTaxID)
                     )
                 },
                 modifier = Modifier
@@ -463,18 +506,13 @@ private fun TradePartyFormGeneral(
             )
 
             if (isCustomer) {
+                // Trade party customer ID field.
                 TextField(
+                    label = Res.string.AppTradePartyDialogGeneralCustomerId,
                     value = value.id ?: "",
-                    label = {
-                        Text(
-                            text = "Kunden-Nr",
-                            softWrap = false,
-                        )
-                    },
-                    singleLine = true,
-                    onValueChange = {
+                    onValueChange = { newID ->
                         onUpdate(
-                            value.copy(id = it)
+                            value.copy(id = newID)
                         )
                     },
                     modifier = Modifier
@@ -485,6 +523,9 @@ private fun TradePartyFormGeneral(
     }
 }
 
+/**
+ * Trade party contact form.
+ */
 @Composable
 @Suppress("UNUSED_PARAMETER")
 private fun TradePartyFormContact(
@@ -501,36 +542,26 @@ private fun TradePartyFormContact(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
+        // Contact name field.
         TextField(
+            label = Res.string.AppTradePartyDialogContactName,
             value = contact.name,
-            label = {
-                Text(
-                    text = "Name",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newName ->
                 onUpdate(
-                    value.copy(contact = contact.copy(name = it))
+                    value.copy(contact = contact.copy(name = newName))
                 )
             },
             modifier = Modifier
                 .fillMaxWidth(),
         )
 
+        // Contact street field.
         TextField(
+            label = Res.string.AppTradePartyDialogContactStreet,
             value = contact.street ?: "",
-            label = {
-                Text(
-                    text = "Straße",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newStreet ->
                 onUpdate(
-                    value.copy(contact = contact.copy(street = it))
+                    value.copy(contact = contact.copy(street = newStreet))
                 )
             },
             modifier = Modifier
@@ -542,36 +573,26 @@ private fun TradePartyFormContact(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
+            // Contact zip field.
             TextField(
+                label = Res.string.AppTradePartyDialogContactZip,
                 value = contact.zip ?: "",
-                label = {
-                    Text(
-                        text = "PLZ",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newZip ->
                     onUpdate(
-                        value.copy(contact = contact.copy(zip = it))
+                        value.copy(contact = contact.copy(zip = newZip))
                     )
                 },
                 modifier = Modifier
                     .weight(0.3f),
             )
 
+            // Contact location field.
             TextField(
+                label = Res.string.AppTradePartyDialogContactLocation,
                 value = contact.location ?: "",
-                label = {
-                    Text(
-                        text = "Ort",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newLocation ->
                     onUpdate(
-                        value.copy(contact = contact.copy(location = it))
+                        value.copy(contact = contact.copy(location = newLocation))
                     )
                 },
                 modifier = Modifier
@@ -579,12 +600,13 @@ private fun TradePartyFormContact(
             )
         }
 
-        CountrySelectField(
+        // Contact country field.
+        CountryField(
+            label = Res.string.AppTradePartyDialogContactCountry,
             country = contact.country,
-            label = "Land",
-            onSelect = {
+            onSelect = { newCountry ->
                 onUpdate(
-                    value.copy(contact = contact.copy(country = it))
+                    value.copy(contact = contact.copy(country = newCountry))
                 )
             },
             modifier = Modifier
@@ -596,54 +618,39 @@ private fun TradePartyFormContact(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
+            // Contact email field.
             TextField(
+                label = Res.string.AppTradePartyDialogContactEmail,
                 value = contact.email ?: "",
-                label = {
-                    Text(
-                        text = "E-Mail",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newEmail ->
                     onUpdate(
-                        value.copy(contact = contact.copy(email = it))
+                        value.copy(contact = contact.copy(email = newEmail))
                     )
                 },
                 modifier = Modifier
                     .weight(0.33f),
             )
 
+            // Contact phone field.
             TextField(
+                label = Res.string.AppTradePartyDialogContactPhone,
                 value = contact.phone ?: "",
-                label = {
-                    Text(
-                        text = "Telefon",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newPhone ->
                     onUpdate(
-                        value.copy(contact = contact.copy(phone = it))
+                        value.copy(contact = contact.copy(phone = newPhone))
                     )
                 },
                 modifier = Modifier
                     .weight(0.33f),
             )
 
+            // Contact fax field.
             TextField(
+                label = Res.string.AppTradePartyDialogContactFax,
                 value = contact.fax ?: "",
-                label = {
-                    Text(
-                        text = "Fax",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newFax ->
                     onUpdate(
-                        value.copy(contact = contact.copy(fax = it))
+                        value.copy(contact = contact.copy(fax = newFax))
                     )
                 },
                 modifier = Modifier
@@ -653,8 +660,11 @@ private fun TradePartyFormContact(
     }
 }
 
+/**
+ * Trade party account form.
+ */
 @Composable
-private fun TradePartyFormBankAccount(
+private fun TradePartyFormAccount(
     value: TradeParty,
     isCustomer: Boolean,
     onUpdate: (tradeParty: TradeParty) -> Unit,
@@ -668,73 +678,54 @@ private fun TradePartyFormBankAccount(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
+        // Account name field.
         TextField(
+            label = Res.string.AppTradePartyDialogAccountName,
             value = account.accountName ?: "",
-            label = {
-                Text(
-                    text = "Kontoinhaber",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newAccountName ->
                 onUpdate(
-                    value.copy(bankDetails = listOf(account.copy(accountName = it)))
+                    value.copy(bankDetails = listOf(account.copy(accountName = newAccountName)))
                 )
             },
             modifier = Modifier
                 .fillMaxWidth(),
         )
 
+        // Account IBAN field.
         TextField(
+            label = Res.string.AppTradePartyDialogAccountIBAN,
             value = account.iban,
-            label = {
-                Text(
-                    text = "IBAN",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newIban ->
                 onUpdate(
-                    value.copy(bankDetails = listOf(account.copy(iban = it)))
+                    value.copy(bankDetails = listOf(account.copy(iban = newIban)))
                 )
             },
             modifier = Modifier
                 .fillMaxWidth(),
         )
 
+        // Account BIC field.
         TextField(
+            label = Res.string.AppTradePartyDialogAccountBIC,
             value = account.bic ?: "",
-            label = {
-                Text(
-                    text = "BIC",
-                    softWrap = false,
-                )
-            },
-            singleLine = true,
-            onValueChange = {
+            onValueChange = { newBic ->
                 onUpdate(
-                    value.copy(bankDetails = listOf(account.copy(bic = it)))
+                    value.copy(bankDetails = listOf(account.copy(bic = newBic)))
                 )
             },
             modifier = Modifier
                 .fillMaxWidth(),
         )
 
+        // Following fields are only valid for trade parties, that issue an e-invoice.
         if (!isCustomer) {
+            // Account creditor reference ID field.
             TextField(
+                label = Res.string.AppTradePartyDialogAccountCreditorReferenceId,
                 value = value.creditorReferenceId ?: "",
-                label = {
-                    Text(
-                        text = "SEPA-Gläubigerkennung",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                onValueChange = { newCreditorReferenceId ->
                     onUpdate(
-                        value.copy(creditorReferenceId = it)
+                        value.copy(creditorReferenceId = newCreditorReferenceId)
                     )
                 },
                 modifier = Modifier
@@ -742,36 +733,33 @@ private fun TradePartyFormBankAccount(
             )
         }
 
+        // Following fields are only valid for trade parties, that receive an e-invoice.
         if (isCustomer) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                PaymentMethodDropDown(
+                // Account preferred payment method field.
+                PaymentMethodField(
+                    label = Res.string.AppTradePartyDialogAccountPreferredPaymentMethod,
                     value = value._defaultPaymentMethod,
-                    //label = "Bevorzugte Zahlungsart",
-                    onSelect = {
+                    onSelect = { newDefaultPaymentMethod ->
                         onUpdate(
-                            value.copy(_defaultPaymentMethod = it)
+                            value.copy(_defaultPaymentMethod = newDefaultPaymentMethod)
                         )
                     },
                     modifier = Modifier
                         .weight(0.5f, fill = true),
                 )
 
+                // Account direct debit mandate field.
                 TextField(
+                    label = Res.string.AppTradePartyDialogAccountDirectDebitMandateId,
                     value = account.directDebitMandateId ?: "",
-                    label = {
-                        Text(
-                            text = "SEPA-Mandatsreferenz",
-                            softWrap = false,
-                        )
-                    },
-                    singleLine = true,
-                    onValueChange = {
+                    onValueChange = { newDirectDebitMandateId ->
                         onUpdate(
-                            value.copy(bankDetails = listOf(account.copy(directDebitMandateId = it)))
+                            value.copy(bankDetails = listOf(account.copy(directDebitMandateId = newDirectDebitMandateId)))
                         )
                     },
                     modifier = Modifier
@@ -782,9 +770,12 @@ private fun TradePartyFormBankAccount(
     }
 }
 
+/**
+ * Trade party notes form.
+ */
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-private fun TradePartyFormDescription(
+private fun TradePartyFormNotes(
     value: TradeParty,
     isCustomer: Boolean,
     onUpdate: (tradeParty: TradeParty) -> Unit,
@@ -794,19 +785,31 @@ private fun TradePartyFormDescription(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
+        // Description field.
+        TextField(
+            label = Res.string.AppTradePartyDialogNotesDescription,
+            value = value.description ?: "",
+            singleLine = false,
+            onValueChange = { newDescription ->
+                onUpdate(
+                    value.copy(description = newDescription)
+                )
+            },
+            modifier = Modifier
+                .heightIn(min = 150.dp, max = 300.dp.takeIf { isCustomer } ?: 200.dp)
+                .fillMaxWidth(),
+        )
+
+        // Following fields are only valid for trade parties, that issue an e-invoice.
         if (!isCustomer) {
+            // Imprint field.
             Tooltip(
-                text = "Weitere Impressums-Angaben zum Unternehmen, die in der Regel im Briefkopf einer Rechnung stehen." +
-                        "Zum Beispiel: Gesellschafter, Vorstand, Handelsregister, zuständiges Registergericht, etc."
+                text = Res.string.AppTradePartyDialogNotesImprintInfo,
             ) {
                 TextField(
+                    label = Res.string.AppTradePartyDialogNotesImprint,
                     value = value.imprint ?: "",
-                    label = {
-                        Text(
-                            text = "Impressum",
-                            softWrap = false,
-                        )
-                    },
+                    singleLine = false,
                     onValueChange = {
                         onUpdate(
                             value.copy(
@@ -814,37 +817,11 @@ private fun TradePartyFormDescription(
                             )
                         )
                     },
-                    singleLine = false,
                     modifier = Modifier
                         .heightIn(min = 150.dp, max = 200.dp)
                         .fillMaxWidth(),
                 )
             }
-        }
-
-        Tooltip(
-            text = "Hier können interne Notizen hinterlegt werden. Diese werden NICHT in E-Rechnungen veröffentlicht."
-        ) {
-            TextField(
-                value = value.description ?: "",
-                label = {
-                    Text(
-                        text = "Interne Notizen",
-                        softWrap = false,
-                    )
-                },
-                onValueChange = {
-                    onUpdate(
-                        value.copy(
-                            description = it
-                        )
-                    )
-                },
-                singleLine = false,
-                modifier = Modifier
-                    .heightIn(min = 150.dp, max = if (isCustomer) 300.dp else 200.dp)
-                    .fillMaxWidth(),
-            )
         }
     }
 }

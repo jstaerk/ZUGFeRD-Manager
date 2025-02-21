@@ -22,43 +22,43 @@
 package de.openindex.zugferd.manager.utils
 
 import java.text.NumberFormat
+import java.text.ParseException
 import java.util.Locale
 
-private val PERCENTAGE_FORMAT by lazy {
+actual fun Number.format(
+    minPrecision: Int,
+    maxPrecision: Int,
+    grouped: Boolean,
+): String = NumberFormat
+    .getInstance(Locale.getDefault())
+    .apply {
+        isGroupingUsed = grouped
+        if (maxPrecision >= 0) {
+            maximumFractionDigits = maxPrecision
+        }
+        if (minPrecision >= 0) {
+            minimumFractionDigits = minPrecision
+        }
+    }
+    .format(this)
+
+actual fun String.parseNumber(
+    minPrecision: Int,
+    maxPrecision: Int,
+    grouped: Boolean
+): Number? = try {
     NumberFormat
         .getInstance(Locale.getDefault())
         .apply {
-            isGroupingUsed = false
-            maximumFractionDigits = 1
-            minimumFractionDigits = 1
+            isGroupingUsed = grouped
+            if (maxPrecision >= 0) {
+                maximumFractionDigits = maxPrecision
+            }
+            if (minPrecision >= 0) {
+                minimumFractionDigits = minPrecision
+            }
         }
+        .parse(this.trim())
+} catch (e: ParseException) {
+    null
 }
-
-private val PRICE_FORMAT by lazy {
-    NumberFormat
-        .getInstance(Locale.getDefault())
-        .apply {
-            isGroupingUsed = false
-            maximumFractionDigits = 2
-            minimumFractionDigits = 2
-        }
-}
-
-private val QUANTITY_FORMAT by lazy {
-    NumberFormat
-        .getInstance(Locale.getDefault())
-        .apply {
-            isGroupingUsed = false
-            maximumFractionDigits = 2
-            minimumFractionDigits = 1
-        }
-}
-
-actual val Number.formatAsPercentage: String
-    get() = PERCENTAGE_FORMAT.format(this)
-
-actual val Number.formatAsPrice: String
-    get() = PRICE_FORMAT.format(this)
-
-actual val Number.formatAsQuantity: String
-    get() = QUANTITY_FORMAT.format(this)

@@ -40,59 +40,77 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppQuestionDialogNo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppQuestionDialogYes
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun QuestionDialog(
     question: String,
-    acceptText: String = "Ja",
-    cancelText: String = "Nein",
+    acceptText: String = "👍",
+    cancelText: String = "👎",
     onAccept: () -> Unit,
     onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+) = BasicAlertDialog(
+    onDismissRequest = onCancel,
+    modifier = modifier,
 ) {
-    BasicAlertDialog(
-        onDismissRequest = onCancel,
-        modifier = Modifier,
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = AlertDialogDefaults.TonalElevation,
+        modifier = Modifier
+            .wrapContentWidth()
+            .wrapContentHeight(),
     ) {
-        Surface(
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
+        Column(
             modifier = Modifier
-                .wrapContentWidth()
-                .wrapContentHeight(),
+                .padding(16.dp),
         ) {
-            Column(
+            Text(
+                text = question,
+            )
+            Spacer(
                 modifier = Modifier
-                    .padding(16.dp),
+                    .height(24.dp),
+            )
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier
+                    .fillMaxWidth(),
             ) {
-                Text(
-                    text = question,
-                )
-                Spacer(
-                    modifier = Modifier
-                        .height(24.dp),
-                )
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                TextButton(
+                    onClick = { onAccept() },
                 ) {
-                    TextButton(
-                        onClick = { onAccept() },
-                        modifier = Modifier,
-                    ) {
-                        Text(text = acceptText)
-                    }
+                    Text(text = acceptText)
+                }
 
-                    TextButton(
-                        onClick = { onCancel() },
-                        modifier = Modifier,
-                    ) {
-                        Text(text = cancelText)
-                    }
+                TextButton(
+                    onClick = { onCancel() },
+                ) {
+                    Text(text = cancelText)
                 }
             }
         }
-
     }
 }
+
+@Composable
+fun QuestionDialog(
+    question: StringResource,
+    acceptText: StringResource = Res.string.AppQuestionDialogYes,
+    cancelText: StringResource = Res.string.AppQuestionDialogNo,
+    onAccept: () -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+) = QuestionDialog(
+    question = stringResource(question),
+    acceptText = stringResource(acceptText),
+    cancelText = stringResource(cancelText),
+    onAccept = onAccept,
+    onCancel = onCancel,
+    modifier = modifier,
+)

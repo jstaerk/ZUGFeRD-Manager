@@ -25,8 +25,8 @@ import de.openindex.zugferd.manager.utils.trimToNull
 import java.math.RoundingMode
 import org.mustangproject.Product as _Product
 
-fun Product.build(): _Product? {
-    return _Product()
+fun Product.build(): _Product? =
+    _Product()
         .setName(name.trim())
         .setDescription(description?.trimToNull() ?: "")
         .setUnit(unit.trimToNull() ?: UnitOfMeasurement.UNIT.code)
@@ -40,4 +40,3 @@ fun Product.build(): _Product? {
         //    product
         //}
         .takeIf { it.name.isNotBlank() && it.unit.isNotBlank() }
-}

@@ -21,29 +21,76 @@
 
 package de.openindex.zugferd.manager.utils
 
-expect val Number.formatAsPercentage: String
+expect fun Number.format(
+    minPrecision: Int = 0,
+    maxPrecision: Int = 2,
+    grouped: Boolean = false,
+): String
 
-expect val Number.formatAsPrice: String
+val Number.formatAsPercentage: String
+    get() = format(
+        minPrecision = 0,
+        //minPrecision = 1,
+        maxPrecision = 1,
+        grouped = false,
+    )
 
-expect val Number.formatAsQuantity: String
+val Number.formatAsPrice: String
+    get() = format(
+        minPrecision = 2,
+        maxPrecision = 2,
+        grouped = false,
+    )
 
-private fun parseDouble(value: String): Double? =
-    value
-        .trimToNull()
-        ?.replace(" ", "")
-        ?.replace(',', '.')
-        ?.let { txt ->
-            return@let if (txt.endsWith(".")) {
-                txt.plus("0")
-            } else {
-                txt
-            }
-        }
-        ?.toDoubleOrNull()
+@Suppress("unused")
+val Number.formatAsQuantity: String
+    get() = format(
+        minPrecision = 1,
+        maxPrecision = 2,
+        grouped = false,
+    )
 
+expect fun String.parseNumber(
+    minPrecision: Int = -1,
+    maxPrecision: Int = -1,
+    grouped: Boolean = false,
+): Number?
 
-fun parsePercentage(value: String): Double? = parseDouble(value)
+fun String.parseDouble(
+    minPrecision: Int = -1,
+    maxPrecision: Int = -1,
+    grouped: Boolean = false,
+): Double? = parseNumber(
+    minPrecision = minPrecision,
+    maxPrecision = maxPrecision,
+    grouped = grouped,
+)?.toDouble()
 
-fun parsePrice(value: String): Double? = parseDouble(value)
+@Suppress("unused")
+fun String.parseFloat(
+    minPrecision: Int = -1,
+    maxPrecision: Int = -1,
+    grouped: Boolean = false,
+): Float? = parseNumber(
+    minPrecision = minPrecision,
+    maxPrecision = maxPrecision,
+    grouped = grouped,
+)?.toFloat()
 
-fun parseQuantity(value: String): Double? = parseDouble(value)
+@Suppress("unused")
+fun String.parseLong(
+    grouped: Boolean = false,
+): Long? = parseNumber(
+    minPrecision = 0,
+    maxPrecision = 0,
+    grouped = grouped,
+)?.toLong()
+
+@Suppress("unused")
+fun String.parseInt(
+    grouped: Boolean = false,
+): Int? = parseNumber(
+    minPrecision = 0,
+    maxPrecision = 0,
+    grouped = grouped,
+)?.toInt()

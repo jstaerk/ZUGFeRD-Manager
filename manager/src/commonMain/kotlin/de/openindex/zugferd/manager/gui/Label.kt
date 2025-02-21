@@ -23,47 +23,54 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import de.openindex.zugferd.manager.utils.pluralStringResource
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
 
-const val REQUIRED_INDICATOR = "*"
+private const val REQUIRED_FIELD_INDICATOR = "*"
 
 @Composable
 fun Label(
     text: String,
     requiredIndicator: Boolean = false,
-) {
-    Text(
-        text = if (requiredIndicator)
-            "${text}${REQUIRED_INDICATOR}"
-        else
-            text,
-
-        softWrap = false,
-    )
-}
+    softWrap: Boolean = false,
+    modifier: Modifier = Modifier,
+) = Text(
+    text = if (requiredIndicator)
+        "${text}${REQUIRED_FIELD_INDICATOR}"
+    else
+        text,
+    softWrap = softWrap,
+    modifier = modifier,
+)
 
 @Composable
 fun Label(
     text: StringResource,
     requiredIndicator: Boolean = false,
-) {
-    Label(
-        text = stringResource(text),
-        requiredIndicator = requiredIndicator,
-    )
-}
+    softWrap: Boolean = false,
+    modifier: Modifier = Modifier,
+) = Label(
+    text = stringResource(text).title(),
+    requiredIndicator = requiredIndicator,
+    softWrap = softWrap,
+    modifier = modifier,
+)
 
 @Composable
+@Suppress("unused")
 fun Label(
     text: PluralStringResource,
     quantity: Int = 1,
     requiredIndicator: Boolean = false,
-) {
-    Label(
-        text = pluralStringResource(text, quantity),
-        requiredIndicator = requiredIndicator,
-    )
-}
+    softWrap: Boolean = false,
+    modifier: Modifier = Modifier,
+) = Label(
+    text = pluralStringResource(text, quantity).title(),
+    requiredIndicator = requiredIndicator,
+    softWrap = softWrap,
+    modifier = modifier,
+)

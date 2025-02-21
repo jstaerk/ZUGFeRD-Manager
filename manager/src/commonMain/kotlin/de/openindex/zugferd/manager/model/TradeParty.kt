@@ -54,6 +54,7 @@ data class TradeParty(
     val isSaved: Boolean
         get() = _key != null
 
+    @Suppress("DuplicatedCode")
     val summary: String
         get() = buildList {
             add(name.trim().takeIf { it.isNotBlank() } ?: "???")
@@ -76,6 +77,7 @@ data class TradeParty(
             }
         }.joinToString(" | ")
 
+    @Suppress("DuplicatedCode")
     val summaryShort: String
         get() = buildList {
             add(name.trim().takeIf { it.isNotBlank() } ?: "???")

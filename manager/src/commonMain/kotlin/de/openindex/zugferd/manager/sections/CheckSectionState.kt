@@ -27,9 +27,13 @@ import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Validation
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
+import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.trimToNull
 import de.openindex.zugferd.manager.utils.validatePdf
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectFile
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -59,7 +63,7 @@ class CheckSectionState : SectionState() {
         val pdf = FileKit.pickFile(
             type = PickerType.File(extensions = listOf("pdf")),
             mode = PickerMode.Single,
-            title = "Wähle eine E-Rechnung",
+            title = getString(Res.string.AppCheckSelectFile).title(),
             initialDirectory = preferences.previousPdfLocation,
         ) ?: return
 

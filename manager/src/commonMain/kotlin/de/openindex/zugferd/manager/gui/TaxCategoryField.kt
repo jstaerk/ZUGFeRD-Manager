@@ -23,27 +23,27 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.model.UnitOfMeasurement
+import de.openindex.zugferd.manager.model.TaxCategory
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement
+import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 
 @Composable
-fun UnitOfMeasurementDropDown(
-    label: PluralStringResource = Res.plurals.UnitOfMeasurement,
-    value: UnitOfMeasurement? = null,
-    options: Map<UnitOfMeasurement, StringResource> = buildMap {
-        UnitOfMeasurement.entries.forEach { e -> put(e, e.title) }
+fun TaxCategoryField(
+    label: PluralStringResource = Res.plurals.TaxCategory,
+    value: TaxCategory? = null,
+    options: Map<TaxCategory, StringResource> = buildMap {
+        TaxCategory.entries.forEach { e -> put(e, e.title) }
     },
-    onSelect: (UnitOfMeasurement) -> Unit,
     requiredIndicator: Boolean = false,
+    onSelect: (TaxCategory) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
     label = label,
     value = value,
     options = options,
-    onSelect = onSelect,
     requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
     modifier = modifier,
 )

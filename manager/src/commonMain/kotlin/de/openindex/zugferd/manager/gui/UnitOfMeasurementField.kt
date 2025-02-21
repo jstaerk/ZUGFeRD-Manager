@@ -23,27 +23,27 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.model.PaymentMethod
-import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod
+import de.openindex.zugferd.manager.model.UnitOfMeasurement
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.zugferd_manager.generated.resources.UnitOfMeasurement
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 
 @Composable
-fun PaymentMethodDropDown(
-    label: PluralStringResource = Res.plurals.PaymentMethod,
-    value: PaymentMethod? = null,
-    options: Map<PaymentMethod, StringResource> = buildMap {
-        PaymentMethod.entries.forEach { e -> put(e, e.title) }
+fun UnitOfMeasurementField(
+    label: PluralStringResource = Res.plurals.UnitOfMeasurement,
+    value: UnitOfMeasurement? = null,
+    options: Map<UnitOfMeasurement, StringResource> = buildMap {
+        UnitOfMeasurement.entries.forEach { e -> put(e, e.title) }
     },
-    onSelect: (PaymentMethod) -> Unit,
     requiredIndicator: Boolean = false,
+    onSelect: (UnitOfMeasurement) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
     label = label,
     value = value,
     options = options,
-    onSelect = onSelect,
     requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
     modifier = modifier,
 )

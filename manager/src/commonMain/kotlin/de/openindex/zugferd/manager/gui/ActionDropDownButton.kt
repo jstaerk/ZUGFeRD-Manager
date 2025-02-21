@@ -36,7 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
-fun ActionsButton(
+fun ActionDropDownButton(
     icon: ImageVector = Icons.Default.MoreVert,
     iconDescription: String? = "Aktionen",
     actions: @Composable ColumnScope.(doClose: () -> Unit) -> Unit,

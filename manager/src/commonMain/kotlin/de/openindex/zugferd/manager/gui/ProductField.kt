@@ -37,106 +37,101 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.model.TradeParty
-import de.openindex.zugferd.manager.utils.getDefaultCountryCode
+import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.utils.title
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
+import de.openindex.zugferd.manager.utils.translate
+import org.jetbrains.compose.resources.Resource
 
 @Composable
-fun TradePartySelectField(
-    label: StringResource,
-    tradeParty: TradeParty? = null,
-    tradeParties: List<TradeParty>,
-    onSelect: (TradeParty?) -> Unit,
+fun ProductField(
+    label: Resource,
+    product: Product? = null,
+    products: List<Product>,
     requiredIndicator: Boolean = false,
+    onSelect: (Product?) -> Unit,
     modifier: Modifier = Modifier,
-) {
-    val options = remember(tradeParties) {
+) = AutoCompleteField(
+    label = label.translate(),
+    entry = product,
+    entries = remember(products) {
         buildMap {
-            tradeParties.forEach { party ->
+            products.forEach { party ->
                 put(party, party.summary)
             }
         }
-    }
-
-    AutoCompleteField(
-        label = stringResource(label),
-        entry = tradeParty,
-        entries = options,
-        onSelect = onSelect,
-        requiredIndicator = requiredIndicator,
-        modifier = modifier,
-    )
-}
+    },
+    requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
+    modifier = modifier,
+)
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-fun TradePartySelectFieldWithAdd(
-    label: StringResource,
-    addLabel: StringResource,
-    editLabel: StringResource,
-    tradeParty: TradeParty? = null,
-    tradeParties: List<TradeParty>,
-    onSelect: (tradeParty: TradeParty?, savePermanently: Boolean) -> Unit,
+fun ProductFieldWithAdd(
+    label: Resource,
+    addLabel: Resource,
+    editLabel: Resource,
+    product: Product? = null,
+    products: List<Product>,
     requiredIndicator: Boolean = false,
+    onSelect: (product: Product?, savePermanently: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var newTradeParty by remember { mutableStateOf<TradeParty?>(null) }
-    val unsavedTradeParty by derivedStateOf {
-        tradeParties.find { !it.isSaved }
+    var newProduct by remember { mutableStateOf<Product?>(null) }
+    val unsavedProduct by derivedStateOf {
+        products.find { !it.isSaved }
     }
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier,
     ) {
-        TradePartySelectField(
+        ProductField(
             label = label,
-            tradeParty = tradeParty,
-            tradeParties = tradeParties,
+            product = product,
+            products = products,
+            requiredIndicator = requiredIndicator,
             onSelect = { selection ->
                 onSelect(selection, false)
             },
-            requiredIndicator = requiredIndicator,
             modifier = Modifier.weight(1f, fill = true),
         )
 
         Tooltip(
-            text = stringResource(addLabel.takeIf { unsavedTradeParty == null } ?: editLabel).title(),
+            text = (addLabel.takeIf { unsavedProduct == null } ?: editLabel)
+                .translate()
+                .title(),
         ) {
             IconButton(
                 onClick = {
-                    newTradeParty = unsavedTradeParty ?: TradeParty(
-                        country = getDefaultCountryCode(),
-                    )
+                    newProduct = unsavedProduct ?: Product()
                 },
                 modifier = Modifier,
             ) {
-                if (unsavedTradeParty == null) {
+                if (unsavedProduct == null) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(addLabel),
+                        contentDescription = addLabel.translate(),
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(editLabel),
+                        contentDescription = editLabel.translate(),
                     )
                 }
             }
         }
     }
 
-    if (newTradeParty != null) {
-        TradePartyDialog(
-            title = stringResource(addLabel.takeIf { unsavedTradeParty == null } ?: editLabel).title(),
-            value = newTradeParty!!,
+    if (newProduct != null) {
+        ProductDialog(
+            title = (addLabel.takeIf { unsavedProduct == null } ?: editLabel),
+            value = newProduct!!,
             permanentSaveOption = true,
-            onDismissRequest = { newTradeParty = null },
+            onDismissRequest = { newProduct = null },
             onSubmitRequest = { selection, savePermanently ->
                 onSelect(selection, savePermanently)
-                newTradeParty = null
+                newProduct = null
             },
         )
     }

@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.model
 
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_AE
 import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_E
@@ -134,9 +135,14 @@ enum class TaxCategory(
 
     ;
 
+    @Suppress("unused")
+    suspend fun translateTitle(): String = getString(title)
+
     companion object {
-        fun getByCode(code: String?): TaxCategory? {
-            return TaxCategory.entries.firstOrNull { it.code == code }
-        }
+        fun getByCode(code: String?): TaxCategory? =
+            if (code != null)
+                TaxCategory.entries.firstOrNull { it.code == code }
+            else
+                null
     }
 }

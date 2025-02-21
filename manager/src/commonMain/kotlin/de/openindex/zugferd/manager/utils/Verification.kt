@@ -21,8 +21,17 @@
 
 package de.openindex.zugferd.manager.utils
 
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_ERROR
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_FATAL
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_NOTICE
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_WARNING
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_OTHER
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_PDF
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_XML
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 data class Validation(
@@ -49,17 +58,41 @@ data class ValidationMessage(
     val severity: ValidationSeverity,
 )
 
-enum class ValidationSeverity {
-    NOTICE,
-    WARNING,
-    ERROR,
-    FATAL,
+enum class ValidationSeverity(val title: StringResource) {
+    NOTICE(
+        title = Res.string.ValidationSeverity_NOTICE,
+    ),
+    WARNING(
+        title = Res.string.ValidationSeverity_WARNING,
+    ),
+    ERROR(
+        title = Res.string.ValidationSeverity_ERROR,
+    ),
+    FATAL(
+        title = Res.string.ValidationSeverity_FATAL,
+    ),
+
+    ;
+
+    @Suppress("unused")
+    suspend fun translateTitle(): String = getString(title)
 }
 
-enum class ValidationType {
-    PDF,
-    XML,
-    OTHER,
+enum class ValidationType(val title: StringResource) {
+    PDF(
+        title = Res.string.ValidationType_PDF,
+    ),
+    XML(
+        title = Res.string.ValidationType_XML,
+    ),
+    OTHER(
+        title = Res.string.ValidationType_OTHER,
+    ),
+
+    ;
+
+    @Suppress("unused")
+    suspend fun translateTitle(): String = getString(title)
 }
 
 expect fun getXmlFromPdf(pdf: PlatformFile): String?

@@ -47,12 +47,11 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
-import org.jetbrains.compose.resources.PluralStringResource
+import de.openindex.zugferd.manager.utils.translate
 import org.jetbrains.compose.resources.Resource
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,8 +59,8 @@ fun <T> AutoCompleteField(
     label: String,
     entry: T? = null,
     entries: Map<T, String>,
-    onSelect: (T?) -> Unit,
     requiredIndicator: Boolean = false,
+    onSelect: (T?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isEntrySelected by remember(entry) {
@@ -216,24 +215,21 @@ fun <T> AutoCompleteField(
 }
 
 @Composable
+@Suppress("unused")
 fun <T> AutoCompleteField(
     label: Resource,
     entry: T? = null,
     entries: Map<T, StringResource>,
-    onSelect: (T?) -> Unit,
     requiredIndicator: Boolean = false,
+    onSelect: (T?) -> Unit,
     modifier: Modifier = Modifier,
 ) = AutoCompleteField(
-    label = when (label) {
-        is PluralStringResource -> pluralStringResource(label, 1)
-        is StringResource -> stringResource(label)
-        else -> "???"
-    },
+    label = label.translate(),
     entry = entry,
     entries = buildMap<T, String> {
         entries.entries.forEach { e -> put(e.key, stringResource(e.value)) }
     },
-    onSelect = onSelect,
     requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
     modifier = modifier,
 )

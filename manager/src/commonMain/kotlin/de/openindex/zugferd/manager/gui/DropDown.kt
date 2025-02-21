@@ -36,12 +36,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
-import org.jetbrains.compose.resources.PluralStringResource
+import de.openindex.zugferd.manager.utils.translate
 import org.jetbrains.compose.resources.Resource
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * based on https://composables.com/material/exposeddropdownmenubox
@@ -52,8 +51,8 @@ fun <T> DropDown(
     label: String,
     value: T? = null,
     options: Map<T, String>,
-    onSelect: (T) -> Unit,
     requiredIndicator: Boolean = false,
+    onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -119,20 +118,16 @@ fun <T> DropDown(
     label: Resource,
     value: T? = null,
     options: Map<T, StringResource>,
-    onSelect: (T) -> Unit,
     requiredIndicator: Boolean = false,
+    onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
-    label = when (label) {
-        is PluralStringResource -> pluralStringResource(label, 1)
-        is StringResource -> stringResource(label)
-        else -> "???"
-    },
+    label = label.translate(),
     value = value,
     options = buildMap<T, String> {
         options.entries.forEach { e -> put(e.key, stringResource(e.value)) }
     },
-    onSelect = onSelect,
     requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
     modifier = modifier,
 )

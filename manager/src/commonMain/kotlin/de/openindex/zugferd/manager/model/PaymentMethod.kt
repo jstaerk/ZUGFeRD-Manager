@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.model
 
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod_58
 import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod_59
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
@@ -114,4 +115,16 @@ enum class PaymentMethod(
     //),
 
     ;
+
+    @Suppress("unused")
+    suspend fun translateTitle(): String = getString(title)
+
+    companion object {
+        @Suppress("unused")
+        fun getByCode(code: Int?): PaymentMethod? =
+            if (code != null)
+                PaymentMethod.entries.firstOrNull { it.code == code }
+            else
+                null
+    }
 }

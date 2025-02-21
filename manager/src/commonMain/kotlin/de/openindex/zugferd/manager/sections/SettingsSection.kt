@@ -49,7 +49,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.APP_TITLE
-import de.openindex.zugferd.manager.gui.ActionsButton
+import de.openindex.zugferd.manager.gui.ActionDropDownButton
+import de.openindex.zugferd.manager.gui.Label
 import de.openindex.zugferd.manager.gui.ProductItemSettings
 import de.openindex.zugferd.manager.gui.QuestionDialog
 import de.openindex.zugferd.manager.gui.SectionInfo
@@ -61,12 +62,62 @@ import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.LocalProducts
 import de.openindex.zugferd.manager.utils.LocalRecipients
 import de.openindex.zugferd.manager.utils.LocalSenders
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettings
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChrome
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChromeHardwareAcceleration
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChromeHardwareAccelerationRestart
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsPdf
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsPdfConvertAuto
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsPdfInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProduct
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductAdd
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductEdit
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductExport
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductExportFileName
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductImport
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductImportSelectFile
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductRemoveAll
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductRemoveAllConfirm
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipient
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientAdd
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientEdit
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientExport
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientExportFileName
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientImport
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientImportSelectFile
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientRemoveAll
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientRemoveAllConfirm
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSender
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderAdd
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderEdit
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderExport
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderExportFileName
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderImport
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderImportSelectFile
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderRemoveAll
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderRemoveAllConfirm
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsTheme
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeAuto
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeDark
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeLight
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.compose.rememberFileSaverLauncher
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.getString
 
+/**
+ * Main view of the settings section.
+ */
 @Composable
 fun SettingsSection(state: SettingsSectionState) {
     VerticalScrollBox {
@@ -76,30 +127,34 @@ fun SettingsSection(state: SettingsSectionState) {
                 .padding(vertical = 16.dp, horizontal = 20.dp),
         ) {
             SectionTitle(
-                text = "Einstellungen zum Programm",
+                text = Res.string.AppSettings,
             )
 
             SenderSettings(state)
             RecipientSettings(state)
             ProductSettings(state)
-            PdfASettings(state)
+            PdfSettings(state)
             ChromeSettings(state)
             ThemeSettings(state)
         }
     }
 }
 
+/**
+ * Section for sender settings.
+ */
 @Composable
-@Suppress("UNUSED_PARAMETER")
+@Suppress("UNUSED_PARAMETER", "DuplicatedCode")
 private fun SenderSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     val senders = LocalSenders.current
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    // Sender import handler.
     val importer = rememberFilePickerLauncher(
         type = PickerType.File(listOf("json")),
         mode = PickerMode.Single,
-        title = "Datei zum Import wählen",
+        title = stringResource(Res.string.AppSettingsSenderImportSelectFile).title(),
     ) { file ->
         if (file == null) {
             return@rememberFilePickerLauncher
@@ -111,6 +166,7 @@ private fun SenderSettings(state: SettingsSectionState) {
         }
     }
 
+    // Sender export handler.
     val exporter = rememberFileSaverLauncher { file ->
         if (file == null) {
             return@rememberFileSaverLauncher
@@ -126,15 +182,16 @@ private fun SenderSettings(state: SettingsSectionState) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier,
     ) {
+        // Sender section subtitle with additional actions.
         SectionSubTitle(
-            text = "Ersteller",
+            text = Res.string.AppSettingsSender,
             actions = {
-                ActionsButton { doClose ->
+                ActionDropDownButton { doClose ->
+                    // Import senders.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Ersteller importieren",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsSenderImport,
                             )
                         },
                         onClick = {
@@ -143,17 +200,17 @@ private fun SenderSettings(state: SettingsSectionState) {
                         }
                     )
 
+                    // Export senders.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Ersteller exportieren",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsSenderExport,
                             )
                         },
                         onClick = {
                             doClose()
                             exporter.launch(
-                                baseName = "zugferd-ersteller",
+                                baseName = runBlocking { getString(Res.string.AppSettingsSenderExportFileName) },
                                 extension = "json",
                             )
                         }
@@ -161,11 +218,11 @@ private fun SenderSettings(state: SettingsSectionState) {
 
                     HorizontalDivider()
 
+                    // Remove all senders.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Alle Ersteller löschen",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsSenderRemoveAll,
                             )
                         },
                         onClick = {
@@ -177,10 +234,12 @@ private fun SenderSettings(state: SettingsSectionState) {
             },
         )
 
+        // Sender section information.
         SectionInfo(
-            text = "Hier können die Erstellerdaten für Rechnungen erfasst werden, damit diese nicht bei jeder Rechnungserstellung neu eingetragen werden müssen.",
+            text = Res.string.AppSettingsSenderInfo,
         )
 
+        // Modify default sender items.
         TradePartyItemSettings(
             tradeParties = senders.senders,
             onSave = { item ->
@@ -200,16 +259,19 @@ private fun SenderSettings(state: SettingsSectionState) {
                 }
             },
             dialogTitle = { item ->
-                "Ersteller bearbeiten"
-                    .takeIf { item?.isSaved == true }
-                    ?: "Ersteller hinzufügen"
+                stringResource(
+                    Res.string.AppSettingsSenderEdit
+                        .takeIf { item?.isSaved == true }
+                        ?: Res.string.AppSettingsSenderAdd
+                ).title()
             },
         )
     }
 
+    // Show confirmation before removing senders.
     if (showDeleteDialog) {
         QuestionDialog(
-            question = "Sollen wirklich alle Ersteller gelöscht werden?",
+            question = stringResource(Res.string.AppSettingsSenderRemoveAllConfirm),
             onCancel = { showDeleteDialog = false },
             onAccept = {
                 showDeleteDialog = false
@@ -222,17 +284,21 @@ private fun SenderSettings(state: SettingsSectionState) {
     }
 }
 
+/**
+ * Section for recipient settings.
+ */
 @Composable
-@Suppress("UNUSED_PARAMETER")
+@Suppress("UNUSED_PARAMETER", "DuplicatedCode")
 private fun RecipientSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     val recipients = LocalRecipients.current
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    // Recipient import handler.
     val importer = rememberFilePickerLauncher(
         type = PickerType.File(listOf("json")),
         mode = PickerMode.Single,
-        title = "Datei zum Import wählen",
+        title = stringResource(Res.string.AppSettingsRecipientImportSelectFile).title(),
     ) { file ->
         if (file == null) {
             return@rememberFilePickerLauncher
@@ -244,6 +310,7 @@ private fun RecipientSettings(state: SettingsSectionState) {
         }
     }
 
+    // Recipient export handler.
     val exporter = rememberFileSaverLauncher { file ->
         if (file == null) {
             return@rememberFileSaverLauncher
@@ -259,15 +326,16 @@ private fun RecipientSettings(state: SettingsSectionState) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier,
     ) {
+        // Recipient section subtitle with additional actions.
         SectionSubTitle(
-            text = "Empfänger",
+            text = Res.string.AppSettingsRecipient,
             actions = {
-                ActionsButton { doClose ->
+                ActionDropDownButton { doClose ->
+                    // Import recipients.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Empfänger importieren",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsRecipientImport,
                             )
                         },
                         onClick = {
@@ -276,17 +344,17 @@ private fun RecipientSettings(state: SettingsSectionState) {
                         }
                     )
 
+                    // Export recipients.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Empfänger exportieren",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsRecipientExport,
                             )
                         },
                         onClick = {
                             doClose()
                             exporter.launch(
-                                baseName = "zugferd-empfaenger",
+                                baseName = runBlocking { getString(Res.string.AppSettingsRecipientExportFileName) },
                                 extension = "json",
                             )
                         }
@@ -294,11 +362,11 @@ private fun RecipientSettings(state: SettingsSectionState) {
 
                     HorizontalDivider()
 
+                    // Remove all recipients.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Alle Empfänger löschen",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsRecipientRemoveAll,
                             )
                         },
                         onClick = {
@@ -310,10 +378,12 @@ private fun RecipientSettings(state: SettingsSectionState) {
             },
         )
 
+        // Recipient section information.
         SectionInfo(
-            text = "Hier können die Empfängerdaten für Rechnungen erfasst werden, damit diese nicht bei jeder Rechnungserstellung neu eingetragen werden müssen.",
+            text = Res.string.AppSettingsRecipientInfo,
         )
 
+        // Modify default recipient items.
         TradePartyItemSettings(
             isCustomer = true,
             tradeParties = recipients.recipients,
@@ -334,16 +404,19 @@ private fun RecipientSettings(state: SettingsSectionState) {
                 }
             },
             dialogTitle = { item ->
-                "Empfänger bearbeiten"
-                    .takeIf { item?.isSaved == true }
-                    ?: "Empfänger hinzufügen"
+                stringResource(
+                    Res.string.AppSettingsRecipientEdit
+                        .takeIf { item?.isSaved == true }
+                        ?: Res.string.AppSettingsRecipientAdd
+                ).title()
             },
         )
     }
 
+    // Show confirmation before removing recipients.
     if (showDeleteDialog) {
         QuestionDialog(
-            question = "Sollen wirklich alle Empfänger gelöscht werden?",
+            question = Res.string.AppSettingsRecipientRemoveAllConfirm,
             onCancel = { showDeleteDialog = false },
             onAccept = {
                 showDeleteDialog = false
@@ -356,17 +429,21 @@ private fun RecipientSettings(state: SettingsSectionState) {
     }
 }
 
+/**
+ * Section for product settings.
+ */
 @Composable
-@Suppress("UNUSED_PARAMETER")
+@Suppress("UNUSED_PARAMETER", "DuplicatedCode")
 private fun ProductSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     val products = LocalProducts.current
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    // Product import handler.
     val importer = rememberFilePickerLauncher(
         type = PickerType.File(listOf("json")),
         mode = PickerMode.Single,
-        title = "Datei zum Import wählen",
+        title = stringResource(Res.string.AppSettingsProductImportSelectFile).title(),
     ) { file ->
         if (file == null) {
             return@rememberFilePickerLauncher
@@ -378,6 +455,7 @@ private fun ProductSettings(state: SettingsSectionState) {
         }
     }
 
+    // Product export handler.
     val exporter = rememberFileSaverLauncher { file ->
         if (file == null) {
             return@rememberFileSaverLauncher
@@ -393,15 +471,16 @@ private fun ProductSettings(state: SettingsSectionState) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier,
     ) {
+        // Product section subtitle with additional actions.
         SectionSubTitle(
-            text = "Rechnungsposten",
+            text = Res.string.AppSettingsProduct,
             actions = {
-                ActionsButton { doClose ->
+                ActionDropDownButton { doClose ->
+                    // Import products.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Posten importieren",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsProductImport,
                             )
                         },
                         onClick = {
@@ -410,17 +489,17 @@ private fun ProductSettings(state: SettingsSectionState) {
                         }
                     )
 
+                    // Export products.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Posten exportieren",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsProductExport,
                             )
                         },
                         onClick = {
                             doClose()
                             exporter.launch(
-                                baseName = "zugferd-rechnungsposten",
+                                baseName = runBlocking { getString(Res.string.AppSettingsProductExportFileName) },
                                 extension = "json",
                             )
                         }
@@ -428,11 +507,11 @@ private fun ProductSettings(state: SettingsSectionState) {
 
                     HorizontalDivider()
 
+                    // Remove all products.
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = "Alle Posten löschen",
-                                softWrap = false,
+                            Label(
+                                text = Res.string.AppSettingsProductRemoveAll,
                             )
                         },
                         onClick = {
@@ -444,10 +523,12 @@ private fun ProductSettings(state: SettingsSectionState) {
             },
         )
 
+        // Product section information.
         SectionInfo(
-            text = "Hier können die Rechnungsposten erfasst werden, damit diese nicht bei jeder Rechnungserstellung neu eingetragen werden müssen.",
+            text = Res.string.AppSettingsProductInfo,
         )
 
+        // Modify default product items.
         ProductItemSettings(
             products = products.products,
             onSave = { item ->
@@ -467,16 +548,19 @@ private fun ProductSettings(state: SettingsSectionState) {
                 }
             },
             dialogTitle = { item ->
-                "Rechnungsposten bearbeiten"
-                    .takeIf { item?.isSaved == true }
-                    ?: "Rechnungsposten hinzufügen"
+                stringResource(
+                    Res.string.AppSettingsProductEdit
+                        .takeIf { item?.isSaved == true }
+                        ?: Res.string.AppSettingsProductAdd
+                ).title()
             },
         )
     }
 
+    // Show confirmation before removing products.
     if (showDeleteDialog) {
         QuestionDialog(
-            question = "Sollen wirklich alle Rechnungsposten gelöscht werden?",
+            question = Res.string.AppSettingsProductRemoveAllConfirm,
             onCancel = { showDeleteDialog = false },
             onAccept = {
                 showDeleteDialog = false
@@ -489,6 +573,9 @@ private fun ProductSettings(state: SettingsSectionState) {
     }
 }
 
+/**
+ * Section for theme settings.
+ */
 @Composable
 @Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalLayoutApi::class)
@@ -500,19 +587,23 @@ private fun ThemeSettings(state: SettingsSectionState) {
     ) {
         val preferences = LocalPreferences.current
 
+        // Theme section subtitle.
         SectionSubTitle(
-            text = "Darstellung",
+            text = Res.string.AppSettingsTheme,
         )
 
+        // Theme section information.
         SectionInfo(
-            text = "Das Programm kann in heller oder dunkler Darstellung angezeigt werden. Bei automatischer Darstellung wird die Einstellung aus dem Betriebssystem übernommen.",
+            text = Res.string.AppSettingsThemeInfo,
         )
 
+        // Selection between light and dark mode.
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier,
         ) {
+            // automatic selection
             Button(
                 onClick = {
                     preferences.setDarkMode(null)
@@ -537,15 +628,15 @@ private fun ThemeSettings(state: SettingsSectionState) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Ansicht automatisch wählen.",
+                        contentDescription = stringResource(Res.string.AppSettingsThemeAuto),
                     )
-                    Text(
-                        text = "automatisch",
-                        softWrap = false,
+                    Label(
+                        text = stringResource(Res.string.AppSettingsThemeAuto),
                     )
                 }
             }
 
+            // light mode selection
             Button(
                 onClick = {
                     preferences.setDarkMode(false)
@@ -570,15 +661,15 @@ private fun ThemeSettings(state: SettingsSectionState) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.LightMode,
-                        contentDescription = "Helle Ansicht verwenden.",
+                        contentDescription = stringResource(Res.string.AppSettingsThemeLight),
                     )
-                    Text(
-                        text = "hell",
-                        softWrap = false,
+                    Label(
+                        text = stringResource(Res.string.AppSettingsThemeLight),
                     )
                 }
             }
 
+            // dark mode selection
             Button(
                 onClick = {
                     preferences.setDarkMode(true)
@@ -603,11 +694,10 @@ private fun ThemeSettings(state: SettingsSectionState) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.DarkMode,
-                        contentDescription = "Dunkle Ansicht verwenden.",
+                        contentDescription = stringResource(Res.string.AppSettingsThemeDark)
                     )
-                    Text(
-                        text = "dunkel",
-                        softWrap = false,
+                    Label(
+                        text = stringResource(Res.string.AppSettingsThemeDark),
                     )
                 }
             }
@@ -615,9 +705,12 @@ private fun ThemeSettings(state: SettingsSectionState) {
     }
 }
 
+/**
+ * Section for PDF settings.
+ */
 @Composable
 @Suppress("UNUSED_PARAMETER")
-private fun PdfASettings(state: SettingsSectionState) {
+private fun PdfSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -625,19 +718,17 @@ private fun PdfASettings(state: SettingsSectionState) {
     ) {
         val preferences = LocalPreferences.current
 
+        // PDF section subtitle.
         SectionSubTitle(
-            text = "PDF/A Format bei Erzeugung von E-Rechnungen",
+            text = Res.string.AppSettingsPdf,
         )
 
+        // PDF section information.
         SectionInfo(
-            text = "Bei der Erzeugung von E-Rechnungen muss die gewählte Rechnungsdatei im PDF/A-1 oder PDF/A-3 Format " +
-                    "vorliegen. Im Optimalfall sollte dieses Dateiformat direkt aus Word / LibreOffice etc. heraus " +
-                    "exportiert werden. $APP_TITLE kann eine gewählte PDF-Datei automatisch umwandeln. Dies ist aber " +
-                    "nicht 100%ig zuverlässig und kann zu Fehlern in der erzeugten E-Rechnung führen. Falls eine " +
-                    "Umwandlung innerhalb von $APP_TITLE trotzdem gewünscht ist, kann diese bei Bedarf automatisch " +
-                    "durchgeführt werden, wenn eine PDF-Rechnung ausgewählt wird.",
+            text = stringResource(Res.string.AppSettingsPdfInfo, APP_TITLE),
         )
 
+        // Toggle for automatic PDF/A conversion.
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -653,13 +744,16 @@ private fun PdfASettings(state: SettingsSectionState) {
                 }
             )
 
-            Text(
-                text = "Nicht unterstützte PDF-Dateien automatisch in PDF/A-3 umwandeln.",
+            Label(
+                text = Res.string.AppSettingsPdfConvertAuto,
             )
         }
     }
 }
 
+/**
+ * Section for Chrome settings.
+ */
 @Composable
 @Suppress("UNUSED_PARAMETER")
 private fun ChromeSettings(state: SettingsSectionState) {
@@ -670,8 +764,9 @@ private fun ChromeSettings(state: SettingsSectionState) {
     ) {
         val preferences = LocalPreferences.current
 
+        // Chrome section subtitle.
         SectionSubTitle(
-            text = "Integrierter Web-Browser",
+            text = Res.string.AppSettingsChrome,
         )
 
         Row(
@@ -690,11 +785,11 @@ private fun ChromeSettings(state: SettingsSectionState) {
             )
 
             Column {
-                Text(
-                    text = "Hardware-Beschleunigung verwenden",
+                Label(
+                    text = Res.string.AppSettingsChromeHardwareAcceleration,
                 )
                 Text(
-                    text = "(Neustart bei Änderung nötig)",
+                    text = "(${stringResource(Res.string.AppSettingsChromeHardwareAccelerationRestart)})",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

@@ -34,6 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.LocalAppState
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionDialogTitle
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -42,6 +44,7 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("UNUSED_PARAMETER")
 fun DateDialog(
     value: LocalDate?,
     onValueChange: (LocalDate?) -> Unit,
@@ -80,14 +83,14 @@ fun DateDialog(
     }
 
     DialogWindow(
+        title = Res.string.AppDateSelectionDialogTitle,
+        width = 400.dp,
+        height = 550.dp,
+        resizable = false,
         onCloseRequest = {
             onDismiss()
             appState.setLocked(false)
         },
-        title = "Datum wählen",
-        width = 400.dp,
-        height = 550.dp,
-        resizable = false,
     ) {
         DatePicker(
             state = dateState,

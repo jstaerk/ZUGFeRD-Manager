@@ -38,7 +38,12 @@ import de.openindex.zugferd.manager.utils.Senders
 import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.isSupportedPdfArchiveVersion
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerateFileSuffix
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectFile
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -74,7 +79,7 @@ class CreateSectionState : SectionState() {
         val pdf = FileKit.pickFile(
             type = PickerType.File(extensions = listOf("pdf")),
             mode = PickerMode.Single,
-            title = "Wähle eine PDF-Rechnung",
+            title = getString(Res.string.AppCreateSelectFile).title(),
             initialDirectory = preferences.previousPdfLocation,
         ) ?: return
 
@@ -153,7 +158,9 @@ class CreateSectionState : SectionState() {
         val originalSourceFile = _originalSelectedPdf.value ?: return
         val targetFile = FileKit.saveFile(
             bytes = null,
-            baseName = originalSourceFile.name.substringBeforeLast(".").plus(".e-rechnung"),
+            baseName = originalSourceFile.name.substringBeforeLast(".")
+                .plus(".")
+                .plus(getString(Res.string.AppCreateGenerateFileSuffix)),
             extension = "pdf",
             initialDirectory = preferences.previousExportLocation
                 ?: preferences.previousPdfLocation

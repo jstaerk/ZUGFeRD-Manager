@@ -22,28 +22,26 @@
 package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.model.TaxCategory
+import de.openindex.zugferd.manager.utils.getCurrencies
+import de.openindex.zugferd.manager.utils.translate
+import de.openindex.zugferd.zugferd_manager.generated.resources.Currency
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory
-import org.jetbrains.compose.resources.PluralStringResource
-import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.Resource
 
 @Composable
-fun TaxCategoryDropDown(
-    label: PluralStringResource = Res.plurals.TaxCategory,
-    value: TaxCategory? = null,
-    options: Map<TaxCategory, StringResource> = buildMap {
-        TaxCategory.entries.forEach { e -> put(e, e.title) }
-    },
-    onSelect: (TaxCategory) -> Unit,
+fun CurrencyField(
+    label: Resource = Res.plurals.Currency,
+    currency: String? = null,
     requiredIndicator: Boolean = false,
+    onSelect: (String?) -> Unit,
     modifier: Modifier = Modifier,
-) = DropDown(
-    label = label,
-    value = value,
-    options = options,
-    onSelect = onSelect,
+) = AutoCompleteField(
+    label = label.translate(),
+    entry = currency,
+    entries = remember { getCurrencies() },
     requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
     modifier = modifier,
 )

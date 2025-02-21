@@ -36,7 +36,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,10 +43,18 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.LocalAppState
+import de.openindex.zugferd.manager.utils.pluralStringResource
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppXmlDialogClose
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppXmlDialogTitle
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
 fun XmlDialog(
-    title: String,
+    title: String = stringResource(Res.string.AppXmlDialogTitle).title(),
     xml: String,
     onDismissRequest: () -> Unit,
 ) {
@@ -88,6 +95,34 @@ fun XmlDialog(
 }
 
 @Composable
+@Suppress("unused")
+fun XmlDialog(
+    title: StringResource = Res.string.AppXmlDialogTitle,
+    xml: String,
+    onDismissRequest: () -> Unit,
+) = XmlDialog(
+    title = stringResource(title).title(),
+    xml = xml,
+    onDismissRequest = onDismissRequest,
+)
+
+@Composable
+@Suppress("unused")
+fun XmlDialog(
+    title: PluralStringResource,
+    titleQuantity: Int,
+    xml: String,
+    onDismissRequest: () -> Unit,
+) = XmlDialog(
+    title = pluralStringResource(title, titleQuantity).title(),
+    xml = xml,
+    onDismissRequest = onDismissRequest,
+)
+
+/**
+ * Contents of the XML dialog.
+ */
+@Composable
 @Suppress("SameParameterValue")
 private fun XmlDialogContent(
     title: String?,
@@ -109,6 +144,7 @@ private fun XmlDialogContent(
                 modifier = Modifier
                     .fillMaxSize(),
             ) {
+                // Dialog title, if available.
                 if (title != null) {
                     Row(
                         Modifier
@@ -125,16 +161,16 @@ private fun XmlDialogContent(
                     }
                 }
 
-                TextField(
-                    value = xml.trim(),
-                    readOnly = true,
-                    onValueChange = {},
+                // XML viewer.
+                XmlViewer(
+                    xml = xml.trim(),
                     modifier = Modifier
                         .weight(1f, fill = true),
                 )
 
                 //Spacer(Modifier.weight(1f, true))
 
+                // Bottom row.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
@@ -147,12 +183,12 @@ private fun XmlDialogContent(
                             .weight(1f, true),
                     )
 
+                    // Close button.
                     Button(
                         onClick = { onDismissRequest() },
                     ) {
-                        Text(
-                            text = "Schließen",
-                            softWrap = false,
+                        Label(
+                            text = Res.string.AppXmlDialogClose,
                         )
                     }
                 }

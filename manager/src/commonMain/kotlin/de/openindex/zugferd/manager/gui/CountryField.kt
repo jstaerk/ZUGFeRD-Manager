@@ -25,21 +25,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.openindex.zugferd.manager.utils.getCountries
+import de.openindex.zugferd.manager.utils.translate
+import de.openindex.zugferd.zugferd_manager.generated.resources.Country
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.Resource
 
 @Composable
-fun CountrySelectField(
-    label: String = "Land",
+fun CountryField(
+    label: Resource = Res.plurals.Country,
     country: String? = null,
+    requiredIndicator: Boolean = false,
     onSelect: (String?) -> Unit,
     modifier: Modifier = Modifier,
-) {
-    val countries = remember { getCountries() }
-
-    AutoCompleteField(
-        label = label,
-        entry = country,
-        entries = countries,
-        onSelect = onSelect,
-        modifier = modifier,
-    )
-}
+) = AutoCompleteField(
+    label = label.translate(),
+    entry = country,
+    entries = remember { getCountries() },
+    requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
+    modifier = modifier,
+)

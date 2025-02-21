@@ -23,6 +23,10 @@ package de.openindex.zugferd.manager.model
 
 import de.openindex.zugferd.manager.utils.formatAsPrice
 import de.openindex.zugferd.manager.utils.getCurrencySymbol
+import de.openindex.zugferd.manager.utils.getString
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppPricePerUnit
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -39,26 +43,35 @@ data class Product(
     val taxExemptionReason: String? = null,
     val taxCategoryCode: String = TaxCategory.NORMAL_TAX.code,
 ) {
+    val unitOfMeasurement: UnitOfMeasurement?
+        get() = UnitOfMeasurement.getByCode(unit)
+
+    val taxCategory: TaxCategory?
+        get() = TaxCategory.getByCode(taxCategoryCode)
+
     val isSaved: Boolean
         get() = _key != null
 
     val summary: String
-        get() = buildList {
-            add(name.trim().takeIf { it.isNotBlank() } ?: "???")
+        get() = runBlocking {
+            buildList {
+                val priceInfo = if (_defaultPricePerUnit > 0) {
+                    _defaultPricePerUnit.formatAsPrice
+                        .plus(" ")
+                        .plus(getCurrencySymbol(DEFAULT_CURRENCY) ?: DEFAULT_CURRENCY)
+                        .trim()
+                } else ""
 
-            add(
-                buildString {
-                    if (_defaultPricePerUnit > 0) {
-                        append(_defaultPricePerUnit.formatAsPrice)
-                        append(" ")
-                        append(getCurrencySymbol(DEFAULT_CURRENCY) ?: DEFAULT_CURRENCY)
-                        append(" ")
-                    }
-                    append("pro ")
-                    append(UnitOfMeasurement.getByCode(unit)?.title ?: unit)
-                }
-            )
+                val unitInfo = unitOfMeasurement?.symbol
+                    ?: unitOfMeasurement?.translateValue(1)
+                    ?: unit
 
-            add(TaxCategory.getByCode(taxCategoryCode)?.title ?: taxCategoryCode)
-        }.joinToString(" | ")
+                val taxInfo = taxCategory?.translateTitle()
+                    ?: taxCategoryCode
+
+                add(name.trim().takeIf { it.isNotBlank() } ?: "???")
+                add(getString(Res.string.AppPricePerUnit, priceInfo, unitInfo))
+                add(taxInfo)
+            }.joinToString(" | ")
+        }
 }

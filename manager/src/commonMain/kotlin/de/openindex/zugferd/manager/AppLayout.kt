@@ -52,11 +52,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.gui.Label
+import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarQuit
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import de.openindex.zugferd.zugferd_manager.generated.resources.application
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -179,7 +181,7 @@ private fun AppNavigation() {
         )
 
         AppNavigationItem(
-            label = stringResource(Res.string.AppSidebarQuit),
+            label = Res.string.AppSidebarQuit,
             activeIcon = Icons.Default.Cancel,
             selected = false,
             onClick = {
@@ -195,7 +197,7 @@ private fun AppNavigation() {
 
 @Composable
 private fun AppNavigationItem(
-    label: String,
+    label: StringResource,
     activeIcon: ImageVector,
     inactiveIcon: ImageVector = activeIcon,
     selected: Boolean,
@@ -207,11 +209,11 @@ private fun AppNavigationItem(
         icon = {
             Icon(
                 imageVector = if (selected) activeIcon else inactiveIcon,
-                contentDescription = label,
+                contentDescription = stringResource(label),
             )
         },
         enabled = true,
-        label = { Text(text = label) },
+        label = { Label(text = label) },
         alwaysShowLabel = true,
         colors = NavigationRailItemDefaults.colors(
             indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -230,7 +232,7 @@ private fun AppSectionNavigationItem(section: AppSection) {
     val appState = LocalAppState.current
 
     AppNavigationItem(
-        label = stringResource(section.label),
+        label = section.label,
         activeIcon = section.activeIcon,
         inactiveIcon = section.inactiveIcon,
         selected = appState.isSection(section),
