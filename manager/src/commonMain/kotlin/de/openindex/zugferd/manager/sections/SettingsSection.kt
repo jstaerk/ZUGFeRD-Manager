@@ -84,6 +84,9 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreat
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfAutoConvert
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfAutoConvertExperimental
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfAutoConvertWarning
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfRemoveAttachments
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfRemoveAttachmentsExperimental
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfRemoveAttachmentsWarning
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneral
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralCountry
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralCurrency
@@ -779,7 +782,7 @@ private fun ThemeSettings(state: SettingsSectionState) =
     }
 
 /**
- * Section for PDF settings.
+ * Section for invoice create settings.
  */
 @Composable
 @Suppress("UNUSED_PARAMETER")
@@ -797,9 +800,9 @@ private fun CreateSettings(state: SettingsSectionState) =
             modifier = Modifier,
         ) {
             Switch(
-                checked = preferences.autoRemoveAttachments,
+                checked = preferences.autoConvertToPdfA,
                 onCheckedChange = {
-                    preferences.setAutoRemoveAttachments(it)
+                    preferences.setAutoConvertToPdfA(it)
                     scope.launch {
                         preferences.save()
                     }
@@ -823,6 +826,7 @@ private fun CreateSettings(state: SettingsSectionState) =
             )
         }
 
+        // Toggle for automatic removal of attachments.
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -838,8 +842,20 @@ private fun CreateSettings(state: SettingsSectionState) =
                 }
             )
 
-            Text(
-                text = "Eingebettete Anhänge aus PDF-Dateien entfernen.",
+            Column {
+                Label(
+                    text = Res.string.AppSettingsCreatePdfRemoveAttachments,
+                )
+                Text(
+                    text = "(${stringResource(Res.string.AppSettingsCreatePdfRemoveAttachmentsExperimental)})",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+
+        AnimatedVisibility(visible = preferences.autoRemoveAttachments) {
+            SectionInfo(
+                text = Res.string.AppSettingsCreatePdfRemoveAttachmentsWarning,
             )
         }
     }

@@ -84,12 +84,23 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSettingsThemeDark">dunkel</string>
 
     <string name="AppSettingsCreate">generation of e-invoices</string>
-    <string name="AppSettingsCreatePdfAutoConvert">Nicht unterstützte PDF-Dateien automatisch in PDF/A-3 umwandeln.</string>
+    <string name="AppSettingsCreatePdfAutoConvert">
+        Nicht unterstützte PDF-Dateien automatisch in PDF/A-3 umwandeln.
+    </string>
     <string name="AppSettingsCreatePdfAutoConvertExperimental">experimental feature</string>
     <string name="AppSettingsCreatePdfAutoConvertWarning">
         Die automatische Umwandlung von PDF-Rechnungen in das PDF/A-3 Format kann zu fehlerhaft erzeugten E-Rechnungen
         führen. Im Optimalfall sollte direkt aus Word / LibreOffice etc. eine PDF-Datei im PDF/A-3 Format heraus
-        exportiert werden. Bitte prüfen Sie erzeugte E-Rechnungen ausgiebig, wenn die automatische Umwandlung aktiviert
+        exportiert werden. Bitte prüfen Sie erzeugte E-Rechnungen ausgiebig, wenn diese Funktion aktiviert wurde.
+    </string>
+    <string name="AppSettingsCreatePdfRemoveAttachments">
+        Eingebettete Anhänge aus PDF-Dateien entfernen.
+    </string>
+    <string name="AppSettingsCreatePdfRemoveAttachmentsExperimental">experimental feature</string>
+    <string name="AppSettingsCreatePdfRemoveAttachmentsWarning">
+        Falls Dateianhänge in einer PDF-Datei enthalten sind, können diese bei Erzeugung der E-Rechnung automatisch
+        entfernt werden. Dies vermeidet unter Umständen Probleme bei der Validierung, kann aber von Fall zu Fall auch
+        zu neuen Problemen führen. Bitte prüfen Sie erzeugte E-Rechnungen ausgiebig, wenn diese Funktion aktiviert
         wurde.
     </string>
 
