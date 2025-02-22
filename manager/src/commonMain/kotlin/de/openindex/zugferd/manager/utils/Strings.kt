@@ -23,3 +23,13 @@ package de.openindex.zugferd.manager.utils
 
 fun String.trimToNull(): String? =
     trim().takeIf { it.isNotBlank() }
+
+//fun String.title(): String =
+//    replaceFirstChar {
+//        if (it.isLowerCase())
+//            it.uppercase()
+//        else
+//            it.toString()
+//    }
+
+expect fun String.title(): String

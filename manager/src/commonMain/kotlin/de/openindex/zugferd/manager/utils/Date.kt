@@ -21,3 +21,10 @@
 
 package de.openindex.zugferd.manager.utils
 
+import kotlinx.datetime.LocalDate
+
+expect fun LocalDate.formatAsShortDate(): String
+
+expect fun LocalDate.formatAsMediumDate(): String
+
+expect fun LocalDate.formatAsLongDate(): String

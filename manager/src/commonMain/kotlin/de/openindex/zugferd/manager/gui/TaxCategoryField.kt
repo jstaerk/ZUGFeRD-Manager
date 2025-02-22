@@ -22,24 +22,28 @@
 package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.utils.getCountries
+import de.openindex.zugferd.manager.model.TaxCategory
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
-fun CountrySelectField(
-    label: String = "Land",
-    country: String? = null,
-    onSelect: (String?) -> Unit,
+fun TaxCategoryField(
+    label: PluralStringResource = Res.plurals.TaxCategory,
+    value: TaxCategory? = null,
+    options: Map<TaxCategory, StringResource> = buildMap {
+        TaxCategory.entries.forEach { e -> put(e, e.title) }
+    },
+    requiredIndicator: Boolean = false,
+    onSelect: (TaxCategory) -> Unit,
     modifier: Modifier = Modifier,
-) {
-    val countries = remember { getCountries() }
-
-    AutoCompleteField(
-        label = label,
-        entry = country,
-        entries = countries,
-        onSelect = onSelect,
-        modifier = modifier,
-    )
-}
+) = DropDown(
+    label = label,
+    value = value,
+    options = options,
+    requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
+    modifier = modifier,
+)

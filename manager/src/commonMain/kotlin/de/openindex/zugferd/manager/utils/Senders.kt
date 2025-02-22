@@ -21,12 +21,9 @@
 
 package de.openindex.zugferd.manager.utils
 
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import de.openindex.zugferd.manager.model.TradeParty
 import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 
 class Senders(data: List<TradeParty>) {
     private val _senders = mutableStateOf(data)
@@ -115,12 +112,8 @@ class Senders(data: List<TradeParty>) {
     }
 }
 
-val LocalSenders = compositionLocalOf { loadSenders() }
-
-fun loadSenders(): Senders =
-    runBlocking(Dispatchers.IO) {
-        Senders(loadSendersData())
-    }
+suspend fun loadSenders(): Senders =
+    Senders(loadSendersData())
 
 expect suspend fun loadSendersData(sourceFile: PlatformFile? = null): List<TradeParty>
 

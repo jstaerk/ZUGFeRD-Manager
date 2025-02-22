@@ -28,7 +28,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import de.openindex.zugferd.manager.utils.LocalPreferences
+import de.openindex.zugferd.manager.LocalAppState
 
 @Suppress("DuplicatedCode")
 private val lightScheme = lightColorScheme(
@@ -108,7 +108,7 @@ private val darkScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
-@Suppress("DuplicatedCode")
+@Suppress("DuplicatedCode", "unused")
 private val mediumContrastLightColorScheme = lightColorScheme(
     primary = primaryLightMediumContrast,
     onPrimary = onPrimaryLightMediumContrast,
@@ -147,7 +147,7 @@ private val mediumContrastLightColorScheme = lightColorScheme(
     surfaceContainerHighest = surfaceContainerHighestLightMediumContrast,
 )
 
-@Suppress("DuplicatedCode")
+@Suppress("DuplicatedCode", "unused")
 private val highContrastLightColorScheme = lightColorScheme(
     primary = primaryLightHighContrast,
     onPrimary = onPrimaryLightHighContrast,
@@ -186,7 +186,7 @@ private val highContrastLightColorScheme = lightColorScheme(
     surfaceContainerHighest = surfaceContainerHighestLightHighContrast,
 )
 
-@Suppress("DuplicatedCode")
+@Suppress("DuplicatedCode", "unused")
 private val mediumContrastDarkColorScheme = darkColorScheme(
     primary = primaryDarkMediumContrast,
     onPrimary = onPrimaryDarkMediumContrast,
@@ -225,7 +225,7 @@ private val mediumContrastDarkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDarkMediumContrast,
 )
 
-@Suppress("DuplicatedCode")
+@Suppress("DuplicatedCode", "unused")
 private val highContrastDarkColorScheme = darkColorScheme(
     primary = primaryDarkHighContrast,
     onPrimary = onPrimaryDarkHighContrast,
@@ -272,6 +272,7 @@ data class ColorFamily(
     val onColorContainer: Color
 )
 
+@Suppress("unused")
 val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
@@ -280,7 +281,7 @@ val unspecified_scheme = ColorFamily(
 fun AppTheme(
     content: @Composable () -> Unit
 ) {
-    val preferences = LocalPreferences.current
+    val preferences = LocalAppState.current.preferences
     val isDark = preferences.darkMode ?: isSystemInDarkTheme()
     val colorScheme = when {
         isDark -> darkScheme

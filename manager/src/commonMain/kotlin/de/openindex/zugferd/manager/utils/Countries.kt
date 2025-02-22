@@ -21,16 +21,31 @@
 
 package de.openindex.zugferd.manager.utils
 
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.zugferd_manager.generated.resources.allStringResources
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+
 expect fun getCountryCodes(): List<String>
 
 expect fun getCountryName(code: String): String
 
-expect fun getDefaultCountryCode(): String
+expect fun getSystemCountryCode(): String
 
-fun getCountries(): Map<String, String> {
-    return mapOf(
+expect fun isValidCountryCode(code: String): Boolean
+
+fun getCountries(): Map<String, String> =
+    mapOf(
         *getCountryCodes().map { code ->
             Pair(code, getCountryName(code))
         }.toTypedArray()
     )
+
+@OptIn(ExperimentalResourceApi::class)
+suspend fun getCountryDefaultTax(code: String): Double? {
+    val resource = Res.allStringResources["DefaultTax_${code.trim().uppercase()}"] ?: return null
+    return getString(resource)
+        .toDoubleOrNull()
+        ?.takeIf { it > 0 }
 }
+
+expect fun getCountryDefaultCurrency(code: String): String?

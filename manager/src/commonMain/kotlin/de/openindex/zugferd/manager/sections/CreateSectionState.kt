@@ -22,7 +22,6 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.runtime.mutableStateOf
-import de.openindex.zugferd.manager.model.DEFAULT_CURRENCY
 import de.openindex.zugferd.manager.model.Invoice
 import de.openindex.zugferd.manager.model.Item
 import de.openindex.zugferd.manager.model.PaymentMethod
@@ -30,6 +29,7 @@ import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.model.export
 import de.openindex.zugferd.manager.model.isValid
 import de.openindex.zugferd.manager.model.toXml
+import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.Products
@@ -38,7 +38,12 @@ import de.openindex.zugferd.manager.utils.Senders
 import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.isSupportedPdfArchiveVersion
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerateFileSuffix
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectFile
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -74,7 +79,7 @@ class CreateSectionState : SectionState() {
         val pdf = FileKit.pickFile(
             type = PickerType.File(extensions = listOf("pdf")),
             mode = PickerMode.Single,
-            title = "Wähle eine PDF-Rechnung",
+            title = getString(Res.string.AppCreateSelectFile).title(),
             initialDirectory = preferences.previousPdfLocation,
         ) ?: return
 
@@ -121,7 +126,7 @@ class CreateSectionState : SectionState() {
 
         // Create empty invoice instance.
         _invoice.value = Invoice(
-            currency = preferences.previousCurrency ?: DEFAULT_CURRENCY,
+            currency = preferences.currency ?: FALLBACK_CURRENCY,
             sender = sender,
             items = listOf(
                 Item(
@@ -153,7 +158,9 @@ class CreateSectionState : SectionState() {
         val originalSourceFile = _originalSelectedPdf.value ?: return
         val targetFile = FileKit.saveFile(
             bytes = null,
-            baseName = originalSourceFile.name.substringBeforeLast(".").plus(".e-rechnung"),
+            baseName = originalSourceFile.name.substringBeforeLast(".")
+                .plus(".")
+                .plus(getString(Res.string.AppCreateGenerateFileSuffix)),
             extension = "pdf",
             initialDirectory = preferences.previousExportLocation
                 ?: preferences.previousPdfLocation

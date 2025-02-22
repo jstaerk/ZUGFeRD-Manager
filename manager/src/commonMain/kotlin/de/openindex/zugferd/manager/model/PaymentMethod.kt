@@ -21,59 +21,110 @@
 
 package de.openindex.zugferd.manager.model
 
+import de.openindex.zugferd.manager.utils.getString
+import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod_58
+import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod_59
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.StringResource
+
+/**
+ * BT-81
+ */
 enum class PaymentMethod(
     val code: Int,
-    val description: String
+    val title: StringResource
 ) {
     /**
-     * In Cash.
+     * In Cash / Barzahlung
      */
-    //CASH(10, "Barzahlung"),
+    //CASH(
+    //    code = 10,
+    //    title = Res.string.PaymentMethod_10,
+    //),
 
     /**
-     * Credit Transfer.
+     * Credit Transfer / Überweisung
      */
-    //CREDIT_TRANSFER(30, "Überweisung"),
+    //CREDIT_TRANSFER(
+    //    code = 30,
+    //    title = Res.string.PaymentMethod_30,
+    //),
 
     /**
-     * Debit Transfer.
+     * Debit Transfer / Bankeinzug
      */
-    //DEBIT_TRANSFER(31, "Bankeinzug"),
+    //DEBIT_TRANSFER(
+    //    code = 31,
+    //    title = Res.string.PaymentMethod_31,
+    //),
 
     /**
-     * Payment to bank account.
+     * Payment to bank account / Einzahlung auf Konto
      */
-    //PAYMENT_TO_BANK_ACCOUNT(42, "Einzahlung auf Konto"),
+    //PAYMENT_TO_BANK_ACCOUNT(
+    //    code = 42,
+    //    title = Res.string.PaymentMethod_42,
+    //),
 
     /**
-     * Bank card.
+     * Bank card / Kartenzahlung
      */
-    //BANK_CARD(48, "Bank-Karte"),
+    //BANK_CARD(
+    //    code = 48,
+    //    title = Res.string.PaymentMethod_48,
+    //),
 
     /**
-     * Direct Debit.
+     * Direct Debit / Abbuchung
      */
-    //DIRECT_DEBIT(49, "Abbuchung"),
+    //DIRECT_DEBIT(
+    //    code = 49,
+    //    title = Res.string.PaymentMethod_49,
+    //),
 
     /**
-     * Standing agreement.
+     * Standing agreement / Dauerauftrag
      */
-    //STANDING_AGREEMENT(57, "Abkommen"),
+    //STANDING_AGREEMENT(
+    //    code = 57,
+    //    title = Res.string.PaymentMethod_57,
+    //),
 
     /**
-     * SEPA credit transfer.
+     * SEPA credit transfer / SEPA-Überweisung
      */
-    SEPA_CREDIT_TRANSFER(58, "SEPA-Überweisung"),
+    SEPA_CREDIT_TRANSFER(
+        code = 58,
+        title = Res.string.PaymentMethod_58,
+    ),
 
     /**
-     * SEPA direct debit.
+     * SEPA direct debit / SEPA-Lastschrift
      */
-    SEPA_DIRECT_DEBIT(59, "SEPA-Lastschrift"),
+    SEPA_DIRECT_DEBIT(
+        code = 59,
+        title = Res.string.PaymentMethod_59,
+    ),
 
     /**
-     * Clearing between partners
+     * Clearing between partners / partnerschaftliche Verrechnung
      */
-    //CLEARING_BETWEEN_PARTNERS(97, "partnerschaftliche Verrechnung"),
+    //CLEARING_BETWEEN_PARTNERS(
+    //    code = 97,
+    //    title = Res.string.PaymentMethod_97,
+    //),
 
     ;
+
+    @Suppress("unused")
+    suspend fun translateTitle(): String = getString(title)
+
+    companion object {
+        @Suppress("unused")
+        fun getByCode(code: Int?): PaymentMethod? =
+            if (code != null)
+                PaymentMethod.entries.firstOrNull { it.code == code }
+            else
+                null
+    }
 }

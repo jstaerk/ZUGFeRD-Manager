@@ -21,8 +21,13 @@
 
 package de.openindex.zugferd.manager.model
 
-import de.openindex.zugferd.manager.utils.formatAsPrice
-import de.openindex.zugferd.manager.utils.getCurrencySymbol
+import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
+import de.openindex.zugferd.manager.utils.Preferences
+import de.openindex.zugferd.manager.utils.formatPrice
+import de.openindex.zugferd.manager.utils.getString
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppPricePerUnit
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -35,30 +40,39 @@ data class Product(
     val name: String = "",
     val description: String? = null,
     val unit: String = UnitOfMeasurement.UNIT.code,
-    val vatPercent: Double = TaxCategoryCode.NORMAL_TAX.defaultPercentage,
+    val vatPercent: Double,
     val taxExemptionReason: String? = null,
-    val taxCategoryCode: String = TaxCategoryCode.NORMAL_TAX.code,
+    val taxCategoryCode: String = TaxCategory.NORMAL_TAX.code,
 ) {
+    val unitOfMeasurement: UnitOfMeasurement?
+        get() = UnitOfMeasurement.getByCode(unit)
+
+    val taxCategory: TaxCategory?
+        get() = TaxCategory.getByCode(taxCategoryCode)
+
     val isSaved: Boolean
         get() = _key != null
 
-    val summary: String
-        get() = buildList {
-            add(name.trim().takeIf { it.isNotBlank() } ?: "???")
+    fun getSummary(preferences: Preferences): String =
+        runBlocking {
+            val currency = preferences.currency ?: FALLBACK_CURRENCY
 
-            add(
-                buildString {
-                    if (_defaultPricePerUnit > 0) {
-                        append(_defaultPricePerUnit.formatAsPrice)
-                        append(" ")
-                        append(getCurrencySymbol(DEFAULT_CURRENCY) ?: DEFAULT_CURRENCY)
-                        append(" ")
-                    }
-                    append("pro ")
-                    append(UnitOfMeasurement.getByCode(unit)?.description ?: unit)
-                }
-            )
+            buildList {
+                val priceInfo = if (_defaultPricePerUnit > 0)
+                    _defaultPricePerUnit.formatPrice(currency)
+                else
+                    ""
 
-            add(TaxCategoryCode.getByCode(taxCategoryCode)?.description ?: taxCategoryCode)
-        }.joinToString(" | ")
+                val unitInfo = unitOfMeasurement?.symbol
+                    ?: unitOfMeasurement?.translateValue(1)
+                    ?: unit
+
+                val taxInfo = taxCategory?.translateTitle()
+                    ?: taxCategoryCode
+
+                add(name.trim().takeIf { it.isNotBlank() } ?: "???")
+                add(getString(Res.string.AppPricePerUnit, priceInfo, unitInfo))
+                add(taxInfo)
+            }.joinToString(" | ")
+        }
 }
