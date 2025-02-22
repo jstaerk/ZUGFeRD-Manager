@@ -277,3 +277,11 @@ private fun convertToPdfArchive(
         }
     }
 }
+
+@Throws(IOException::class)
+fun PDDocument.removeEmbeddedFiles(): PDDocument {
+    val names = PDDocumentNameDictionary(documentCatalog)
+    names.embeddedFiles = PDEmbeddedFilesNameTreeNode()
+    documentCatalog.names = names
+    return this
+}

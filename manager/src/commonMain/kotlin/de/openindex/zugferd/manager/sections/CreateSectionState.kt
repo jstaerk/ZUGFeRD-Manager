@@ -170,6 +170,7 @@ class CreateSectionState : SectionState() {
             sourceFile = sourceFile,
             targetFile = targetFile,
             method = invoicePaymentMethod,
+            removeEmbeddedFiles = preferences.autoRemoveAttachments,
         )
     }
 

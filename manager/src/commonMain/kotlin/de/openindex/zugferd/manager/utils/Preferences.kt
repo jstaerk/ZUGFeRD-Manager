@@ -158,6 +158,16 @@ class Preferences(data: PreferencesData) {
     }
 
     //
+    // Remove attachments on invoice creation.
+    //
+
+    private var _autoRemoveAttachments = mutableStateOf(data.autoRemoveAttachments)
+    val autoRemoveAttachments get() = _autoRemoveAttachments.value
+    fun setAutoRemoveAttachments(enabled: Boolean) {
+        _autoRemoveAttachments.value = enabled
+    }
+
+    //
     // Enable GPU acceleration in Chrome.
     //
 
@@ -181,6 +191,7 @@ class Preferences(data: PreferencesData) {
             previousSenderKey = _previousSenderKey,
             previousProductKey = _previousProductKey,
             autoConvertToPdfA = _autoConvertToPdfA.value,
+            autoRemoveAttachments = _autoRemoveAttachments.value,
             chromeGpuEnabled = _chromeGpuEnabled.value,
         )
 
@@ -205,6 +216,7 @@ data class PreferencesData(
     val previousSenderKey: UInt? = null,
     val previousProductKey: UInt? = null,
     val autoConvertToPdfA: Boolean = false,
+    val autoRemoveAttachments: Boolean = false,
     val chromeGpuEnabled: Boolean = true,
 )
 

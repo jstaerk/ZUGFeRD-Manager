@@ -72,4 +72,5 @@ expect suspend fun Invoice.export(
     sourceFile: PlatformFile,
     targetFile: PlatformFile,
     method: PaymentMethod = PaymentMethod.SEPA_CREDIT_TRANSFER,
+    removeEmbeddedFiles: Boolean = false,
 ): Boolean
