@@ -26,10 +26,20 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 <resources>
     <string name="AppSettings">Einstellungen zum Programm</string>
 
+    <string name="AppSettingsGeneral">allgemeine Einstellungen</string>
+    <string name="AppSettingsGeneralInfo">
+        Die Standardwerte werden in verschiedenen Formularen als automatische Vorgaben verwendet, damit diese nicht
+        regelmäßig neu eingetragen werden müssen.
+    </string>
+    <string name="AppSettingsGeneralLanguage">Sprache der Anwendung</string>
+    <string name="AppSettingsGeneralCountry">Standard-Land</string>
+    <string name="AppSettingsGeneralVat">Standard-Steuersatz in %</string>
+    <string name="AppSettingsGeneralCurrency">Standard-Währung</string>
+
     <string name="AppSettingsSender">Ersteller</string>
     <string name="AppSettingsSenderInfo">
-        Hier können die Erstellerdaten für Rechnungen erfasst werden, damit diese nicht bei jeder Rechnungserstellung
-        neu eingetragen werden müssen.
+        Hier können wiederkehrende Rechnungsersteller dauerhaft erfasst werden, damit diese nicht bei jeder
+        Rechnungserstellung neu eingetragen werden müssen.
     </string>
     <string name="AppSettingsSenderAdd">Ersteller hinzufügen</string>
     <string name="AppSettingsSenderEdit">Ersteller bearbeiten</string>
@@ -42,8 +52,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppSettingsRecipient">Empfänger</string>
     <string name="AppSettingsRecipientInfo">
-        Hier können die Empfängerdaten für Rechnungen erfasst werden, damit diese nicht bei jeder Rechnungserstellung
-        neu eingetragen werden müssen.
+        Hier können wiederkehrende Rechnungsempfänger dauerhaft erfasst werden, damit diese nicht bei jeder
+        Rechnungserstellung neu eingetragen werden müssen.
     </string>
     <string name="AppSettingsRecipientAdd">Empfänger hinzufügen</string>
     <string name="AppSettingsRecipientEdit">Empfänger bearbeiten</string>
@@ -56,8 +66,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppSettingsProduct">Rechnungsposten</string>
     <string name="AppSettingsProductInfo">
-        Hier können die Rechnungsposten erfasst werden, damit diese nicht bei jeder Rechnungserstellung neu eingetragen
-        werden müssen.
+        Hier können wiederkehrende Rechnungsposten dauerhaft erfasst werden, damit diese nicht bei jeder
+        Rechnungserstellung neu eingetragen werden müssen.
     </string>
     <string name="AppSettingsProductAdd">Rechnungsposten hinzufügen</string>
     <string name="AppSettingsProductEdit">Rechnungsposten bearbeiten</string>
@@ -69,29 +79,29 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSettingsProductRemoveAllConfirm">Sollen wirklich alle Rechnungsposten gelöscht werden?</string>
 
     <string name="AppSettingsTheme">Darstellung</string>
-    <string name="AppSettingsThemeInfo">
-        Das Programm kann in heller oder dunkler Darstellung angezeigt werden. Bei automatischer Darstellung wird die
-        Einstellung aus dem Betriebssystem übernommen.
-    </string>
     <string name="AppSettingsThemeAuto">automatisch</string>
     <string name="AppSettingsThemeLight">hell</string>
     <string name="AppSettingsThemeDark">dunkel</string>
 
-    <string name="AppSettingsPdf">PDF/A Format bei Erzeugung von E-Rechnungen</string>
-    <string name="AppSettingsPdfInfo">
-        Bei der Erzeugung von E-Rechnungen muss die gewählte Rechnungsdatei im PDF/A-1 oder PDF/A-3 Format vorliegen. Im
-        Optimalfall sollte dieses Dateiformat direkt aus Word / LibreOffice etc. heraus exportiert werden. %1$s kann
-        eine gewählte PDF-Datei automatisch umwandeln. Dies ist aber nicht 100%ig zuverlässig und kann zu Fehlern in der
-        erzeugten E-Rechnung führen. Falls eine Umwandlung innerhalb von %1$s trotzdem gewünscht ist, kann diese bei
-        Bedarf automatisch durchgeführt werden, wenn eine PDF-Rechnung ausgewählt wird.
+    <string name="AppSettingsCreate">Erzeugung von E-Rechnungen</string>
+    <string name="AppSettingsCreatePdfAutoConvert">Nicht unterstützte PDF-Dateien automatisch in PDF/A-3 umwandeln.
     </string>
-    <string name="AppSettingsPdfConvertAuto">Nicht unterstützte PDF-Dateien automatisch in PDF/A-3 umwandeln.</string>
+    <string name="AppSettingsCreatePdfAutoConvertExperimental">experimentelle Funktion</string>
+    <string name="AppSettingsCreatePdfAutoConvertWarning">
+        Die automatische Umwandlung von PDF-Rechnungen in das PDF/A-3 Format kann zu fehlerhaft erzeugten E-Rechnungen
+        führen. Im Optimalfall sollte direkt aus Word / LibreOffice etc. eine PDF-Datei im PDF/A-3 Format heraus
+        exportiert werden. Bitte prüfen Sie erzeugte E-Rechnungen ausgiebig, wenn die automatische Umwandlung aktiviert
+        wurde.
+    </string>
 
-    <string name="AppSettingsChrome">Integrierter Web-Browser</string>
-    <string name="AppSettingsChromeHardwareAcceleration">Hardware-Beschleunigung verwenden</string>
-    <string name="AppSettingsChromeHardwareAccelerationRestart">Neustart bei Änderung nötig</string>
+    <string name="AppSettingsChrome">integrierter Web-Browser</string>
+    <string name="AppSettingsChromeAcceleration">Hardware-Beschleunigung verwenden</string>
+    <string name="AppSettingsChromeAccelerationRestart">Neustart bei Änderung nötig</string>
 
     <string name="AppSettingsItemAdd">hinzufügen</string>
     <string name="AppSettingsItemEdit">bearbeiten</string>
     <string name="AppSettingsItemRemove">löschen</string>
+
+    <string name="AppSettingsSectionInfo">Weitere Informationen einblenden / ausblenden.</string>
+    <string name="AppSettingsSectionMore">Weitere Aktionen anzeigen.</string>
 </resources>

@@ -21,7 +21,18 @@
 
 package de.openindex.zugferd.manager.utils
 
-fun getCurrencies(): Map<String, String> {
+const val FALLBACK_CURRENCY = "EUR"
+
+fun getCurrenciesByName(): Map<String, String> {
+    return buildMap {
+        getCurrencyCodes()
+            .forEach {
+                put(it, getCurrencyName(it) ?: it)
+            }
+    }
+}
+
+fun getCurrenciesBySymbol(): Map<String, String> {
     return buildMap {
         getCurrencyCodes()
             .sortedBy { it.lowercase() }
@@ -34,4 +45,10 @@ fun getCurrencies(): Map<String, String> {
 
 expect fun getCurrencyCodes(): List<String>
 
+expect fun getCurrencyName(currency: String): String?
+
 expect fun getCurrencySymbol(currency: String): String?
+
+expect fun getSystemCurrency(): String
+
+expect fun isValidCurrencyCode(code: String): Boolean

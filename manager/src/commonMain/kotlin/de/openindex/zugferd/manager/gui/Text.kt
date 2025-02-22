@@ -84,7 +84,7 @@ fun SectionSubTitle(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth(),

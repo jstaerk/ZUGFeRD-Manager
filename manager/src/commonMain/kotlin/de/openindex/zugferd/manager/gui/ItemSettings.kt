@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.utils.trimToNull
@@ -203,25 +204,34 @@ fun TradePartyItemSettings(
     onSave: (TradeParty) -> Unit,
     onRemove: (TradeParty) -> Unit,
     dialogTitle: @Composable (TradeParty?) -> String
-) = ItemSettings(
-    items = tradeParties,
-    itemKey = { it._key },
-    itemText = { it.summaryShort },
-    itemCreate = { TradeParty() },
-    onRemove = onRemove,
-) { selectedItem ->
-    TradePartyDialog(
-        title = dialogTitle(selectedItem),
-        value = selectedItem,
-        isCustomer = isCustomer,
-        onSubmitRequest = { updatedItem, _ ->
-            onSave(updatedItem)
-            closeDialog()
+) {
+    val preferences = LocalAppState.current.preferences
+    val defaultCountry = preferences.country
+
+    ItemSettings(
+        items = tradeParties,
+        itemKey = { it._key },
+        itemText = { it.summaryShort },
+        itemCreate = {
+            TradeParty(
+                country = defaultCountry,
+            )
         },
-        onDismissRequest = {
-            closeDialog()
-        },
-    )
+        onRemove = onRemove,
+    ) { selectedItem ->
+        TradePartyDialog(
+            title = dialogTitle(selectedItem),
+            value = selectedItem,
+            isCustomer = isCustomer,
+            onSubmitRequest = { updatedItem, _ ->
+                onSave(updatedItem)
+                closeDialog()
+            },
+            onDismissRequest = {
+                closeDialog()
+            },
+        )
+    }
 }
 
 /**
@@ -233,22 +243,27 @@ fun ProductItemSettings(
     onSave: (Product) -> Unit,
     onRemove: (Product) -> Unit,
     dialogTitle: @Composable (Product?) -> String
-) = ItemSettings(
-    items = products,
-    itemKey = { it._key },
-    itemText = { it.summary },
-    itemCreate = { Product() },
-    onRemove = onRemove,
-) { selectedItem ->
-    ProductDialog(
-        title = dialogTitle(selectedItem),
-        value = selectedItem,
-        onSubmitRequest = { updatedItem, _ ->
-            onSave(updatedItem)
-            closeDialog()
-        },
-        onDismissRequest = {
-            closeDialog()
-        },
-    )
+) {
+    val preferences = LocalAppState.current.preferences
+    val defaultTaxPercentage = preferences.vatPercentage ?: 0.toDouble()
+
+    ItemSettings(
+        items = products,
+        itemKey = { it._key },
+        itemText = { it.getSummary(preferences) },
+        itemCreate = { Product(vatPercent = defaultTaxPercentage) },
+        onRemove = onRemove,
+    ) { selectedItem ->
+        ProductDialog(
+            title = dialogTitle(selectedItem),
+            value = selectedItem,
+            onSubmitRequest = { updatedItem, _ ->
+                onSave(updatedItem)
+                closeDialog()
+            },
+            onDismissRequest = {
+                closeDialog()
+            },
+        )
+    }
 }

@@ -21,14 +21,20 @@
 
 package de.openindex.zugferd.manager.sections
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -36,6 +42,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -48,29 +55,41 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.APP_TITLE
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionDropDownButton
+import de.openindex.zugferd.manager.gui.CountryField
+import de.openindex.zugferd.manager.gui.CurrencyField
+import de.openindex.zugferd.manager.gui.DecimalField
 import de.openindex.zugferd.manager.gui.Label
+import de.openindex.zugferd.manager.gui.LanguageField
 import de.openindex.zugferd.manager.gui.ProductItemSettings
 import de.openindex.zugferd.manager.gui.QuestionDialog
 import de.openindex.zugferd.manager.gui.SectionInfo
 import de.openindex.zugferd.manager.gui.SectionSubTitle
 import de.openindex.zugferd.manager.gui.SectionTitle
+import de.openindex.zugferd.manager.gui.Tooltip
 import de.openindex.zugferd.manager.gui.TradePartyItemSettings
 import de.openindex.zugferd.manager.gui.VerticalScrollBox
-import de.openindex.zugferd.manager.utils.LocalPreferences
-import de.openindex.zugferd.manager.utils.LocalProducts
-import de.openindex.zugferd.manager.utils.LocalRecipients
-import de.openindex.zugferd.manager.utils.LocalSenders
+import de.openindex.zugferd.manager.utils.Language
+import de.openindex.zugferd.manager.utils.getCountryDefaultCurrency
+import de.openindex.zugferd.manager.utils.getCountryDefaultTax
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettings
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChrome
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChromeHardwareAcceleration
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChromeHardwareAccelerationRestart
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsPdf
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsPdfConvertAuto
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsPdfInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChromeAcceleration
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsChromeAccelerationRestart
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreate
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfAutoConvert
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfAutoConvertExperimental
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsCreatePdfAutoConvertWarning
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneral
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralCountry
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralCurrency
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralLanguage
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralVat
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProduct
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductAdd
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsProductEdit
@@ -91,6 +110,7 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecip
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientInfo
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientRemoveAll
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsRecipientRemoveAllConfirm
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSectionInfo
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSender
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderAdd
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSenderEdit
@@ -104,7 +124,6 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSende
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsTheme
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeAuto
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeDark
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeInfo
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsThemeLight
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
@@ -113,7 +132,7 @@ import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.StringResource
 
 /**
  * Main view of the settings section.
@@ -130,12 +149,108 @@ fun SettingsSection(state: SettingsSectionState) {
                 text = Res.string.AppSettings,
             )
 
+            GeneralSettings(state)
             SenderSettings(state)
             RecipientSettings(state)
             ProductSettings(state)
-            PdfSettings(state)
+            CreateSettings(state)
             ChromeSettings(state)
             ThemeSettings(state)
+        }
+    }
+}
+
+/**
+ * Section for General settings.
+ */
+@Composable
+@Suppress("UNUSED_PARAMETER")
+private fun GeneralSettings(state: SettingsSectionState) {
+    val scope = rememberCoroutineScope()
+
+    Section(
+        title = Res.string.AppSettingsGeneral,
+        info = Res.string.AppSettingsGeneralInfo,
+    ) {
+        val preferences = LocalAppState.current.preferences
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            // Application language.
+            LanguageField(
+                label = Res.string.AppSettingsGeneralLanguage,
+                language = preferences.language.code,
+                onSelect = { newLanguageCode ->
+                    val language = Language.getByCode(newLanguageCode)
+                        ?: return@LanguageField
+
+                    preferences.setLanguage(language)
+                    scope.launch {
+                        preferences.save()
+                    }
+                },
+                modifier = Modifier
+                    .weight(0.5f, fill = true),
+            )
+
+            // Default country.
+            CountryField(
+                label = Res.string.AppSettingsGeneralCountry,
+                country = preferences.country,
+                onSelect = { newCountryCode ->
+                    preferences.setCountry(newCountryCode)
+                    scope.launch {
+                        if (newCountryCode != null) {
+                            val defaultTax = getCountryDefaultTax(newCountryCode)
+                            if (defaultTax != null) {
+                                preferences.setVatPercentage(defaultTax)
+                            }
+
+                            val defaultCurrency = getCountryDefaultCurrency(newCountryCode)
+                            if (defaultCurrency != null) {
+                                preferences.setCurrency(defaultCurrency)
+                            }
+                        }
+                        preferences.save()
+                    }
+                },
+                modifier = Modifier
+                    .weight(0.5f, fill = true),
+            )
+
+            // Default VAT.
+            DecimalField(
+                label = Res.string.AppSettingsGeneralVat,
+                value = preferences.vatPercentage,
+                minPrecision = 0,
+                maxPrecision = 1,
+                onValueChange = { newVatPercentage ->
+                    preferences.setVatPercentage(newVatPercentage ?: 0.toDouble())
+                    scope.launch {
+                        preferences.save()
+                    }
+                },
+                modifier = Modifier
+                    .weight(0.5f, fill = true),
+            )
+
+            // Default currency.
+            CurrencyField(
+                label = Res.string.AppSettingsGeneralCurrency,
+                currency = preferences.currency,
+                onSelect = { newCurrencyCode ->
+                    preferences.setCurrency(newCurrencyCode)
+                    scope.launch {
+                        preferences.save()
+                    }
+                },
+                modifier = Modifier
+                    .weight(0.5f, fill = true),
+            )
         }
     }
 }
@@ -147,7 +262,7 @@ fun SettingsSection(state: SettingsSectionState) {
 @Suppress("UNUSED_PARAMETER", "DuplicatedCode")
 private fun SenderSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
-    val senders = LocalSenders.current
+    val senders = LocalAppState.current.senders
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     // Sender import handler.
@@ -178,68 +293,58 @@ private fun SenderSettings(state: SettingsSectionState) {
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier,
+    Section(
+        title = Res.string.AppSettingsSender,
+        info = Res.string.AppSettingsSenderInfo,
+        actions = {
+            ActionDropDownButton { doClose ->
+                // Import senders.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsSenderImport,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        importer.launch()
+                    }
+                )
+
+                // Export senders.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsSenderExport,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        exporter.launch(
+                            baseName = runBlocking { getString(Res.string.AppSettingsSenderExportFileName) },
+                            extension = "json",
+                        )
+                    }
+                )
+
+                HorizontalDivider()
+
+                // Remove all senders.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsSenderRemoveAll,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        showDeleteDialog = true
+                    }
+                )
+            }
+        },
     ) {
-        // Sender section subtitle with additional actions.
-        SectionSubTitle(
-            text = Res.string.AppSettingsSender,
-            actions = {
-                ActionDropDownButton { doClose ->
-                    // Import senders.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsSenderImport,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            importer.launch()
-                        }
-                    )
-
-                    // Export senders.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsSenderExport,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            exporter.launch(
-                                baseName = runBlocking { getString(Res.string.AppSettingsSenderExportFileName) },
-                                extension = "json",
-                            )
-                        }
-                    )
-
-                    HorizontalDivider()
-
-                    // Remove all senders.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsSenderRemoveAll,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            showDeleteDialog = true
-                        }
-                    )
-                }
-            },
-        )
-
-        // Sender section information.
-        SectionInfo(
-            text = Res.string.AppSettingsSenderInfo,
-        )
-
-        // Modify default sender items.
+        // Default sender items.
         TradePartyItemSettings(
             tradeParties = senders.senders,
             onSave = { item ->
@@ -291,7 +396,7 @@ private fun SenderSettings(state: SettingsSectionState) {
 @Suppress("UNUSED_PARAMETER", "DuplicatedCode")
 private fun RecipientSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
-    val recipients = LocalRecipients.current
+    val recipients = LocalAppState.current.recipients
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     // Recipient import handler.
@@ -322,68 +427,58 @@ private fun RecipientSettings(state: SettingsSectionState) {
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier,
+    Section(
+        title = Res.string.AppSettingsRecipient,
+        info = Res.string.AppSettingsRecipientInfo,
+        actions = {
+            ActionDropDownButton { doClose ->
+                // Import recipients.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsRecipientImport,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        importer.launch()
+                    }
+                )
+
+                // Export recipients.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsRecipientExport,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        exporter.launch(
+                            baseName = runBlocking { getString(Res.string.AppSettingsRecipientExportFileName) },
+                            extension = "json",
+                        )
+                    }
+                )
+
+                HorizontalDivider()
+
+                // Remove all recipients.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsRecipientRemoveAll,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        showDeleteDialog = true
+                    }
+                )
+            }
+        },
     ) {
-        // Recipient section subtitle with additional actions.
-        SectionSubTitle(
-            text = Res.string.AppSettingsRecipient,
-            actions = {
-                ActionDropDownButton { doClose ->
-                    // Import recipients.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsRecipientImport,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            importer.launch()
-                        }
-                    )
-
-                    // Export recipients.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsRecipientExport,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            exporter.launch(
-                                baseName = runBlocking { getString(Res.string.AppSettingsRecipientExportFileName) },
-                                extension = "json",
-                            )
-                        }
-                    )
-
-                    HorizontalDivider()
-
-                    // Remove all recipients.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsRecipientRemoveAll,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            showDeleteDialog = true
-                        }
-                    )
-                }
-            },
-        )
-
-        // Recipient section information.
-        SectionInfo(
-            text = Res.string.AppSettingsRecipientInfo,
-        )
-
-        // Modify default recipient items.
+        // Default recipient items.
         TradePartyItemSettings(
             isCustomer = true,
             tradeParties = recipients.recipients,
@@ -436,7 +531,7 @@ private fun RecipientSettings(state: SettingsSectionState) {
 @Suppress("UNUSED_PARAMETER", "DuplicatedCode")
 private fun ProductSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
-    val products = LocalProducts.current
+    val products = LocalAppState.current.products
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     // Product import handler.
@@ -467,68 +562,58 @@ private fun ProductSettings(state: SettingsSectionState) {
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier,
+    Section(
+        title = Res.string.AppSettingsProduct,
+        info = Res.string.AppSettingsProductInfo,
+        actions = {
+            ActionDropDownButton { doClose ->
+                // Import products.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsProductImport,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        importer.launch()
+                    }
+                )
+
+                // Export products.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsProductExport,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        exporter.launch(
+                            baseName = runBlocking { getString(Res.string.AppSettingsProductExportFileName) },
+                            extension = "json",
+                        )
+                    }
+                )
+
+                HorizontalDivider()
+
+                // Remove all products.
+                DropdownMenuItem(
+                    text = {
+                        Label(
+                            text = Res.string.AppSettingsProductRemoveAll,
+                        )
+                    },
+                    onClick = {
+                        doClose()
+                        showDeleteDialog = true
+                    }
+                )
+            }
+        },
     ) {
-        // Product section subtitle with additional actions.
-        SectionSubTitle(
-            text = Res.string.AppSettingsProduct,
-            actions = {
-                ActionDropDownButton { doClose ->
-                    // Import products.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsProductImport,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            importer.launch()
-                        }
-                    )
-
-                    // Export products.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsProductExport,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            exporter.launch(
-                                baseName = runBlocking { getString(Res.string.AppSettingsProductExportFileName) },
-                                extension = "json",
-                            )
-                        }
-                    )
-
-                    HorizontalDivider()
-
-                    // Remove all products.
-                    DropdownMenuItem(
-                        text = {
-                            Label(
-                                text = Res.string.AppSettingsProductRemoveAll,
-                            )
-                        },
-                        onClick = {
-                            doClose()
-                            showDeleteDialog = true
-                        }
-                    )
-                }
-            },
-        )
-
-        // Product section information.
-        SectionInfo(
-            text = Res.string.AppSettingsProductInfo,
-        )
-
-        // Modify default product items.
+        // Default product items.
         ProductItemSettings(
             products = products.products,
             onSave = { item ->
@@ -579,30 +664,19 @@ private fun ProductSettings(state: SettingsSectionState) {
 @Composable
 @Suppress("UNUSED_PARAMETER")
 @OptIn(ExperimentalLayoutApi::class)
-private fun ThemeSettings(state: SettingsSectionState) {
-    val scope = rememberCoroutineScope()
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier,
+private fun ThemeSettings(state: SettingsSectionState) =
+    Section(
+        title = Res.string.AppSettingsTheme,
     ) {
-        val preferences = LocalPreferences.current
-
-        // Theme section subtitle.
-        SectionSubTitle(
-            text = Res.string.AppSettingsTheme,
-        )
-
-        // Theme section information.
-        SectionInfo(
-            text = Res.string.AppSettingsThemeInfo,
-        )
-
-        // Selection between light and dark mode.
+        // Theme selection (light and dark mode).
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier,
         ) {
+            val scope = rememberCoroutineScope()
+            val preferences = LocalAppState.current.preferences
+
             // automatic selection
             Button(
                 onClick = {
@@ -703,30 +777,18 @@ private fun ThemeSettings(state: SettingsSectionState) {
             }
         }
     }
-}
 
 /**
  * Section for PDF settings.
  */
 @Composable
 @Suppress("UNUSED_PARAMETER")
-private fun PdfSettings(state: SettingsSectionState) {
-    val scope = rememberCoroutineScope()
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier,
+private fun CreateSettings(state: SettingsSectionState) =
+    Section(
+        title = stringResource(Res.string.AppSettingsCreate).title(),
     ) {
-        val preferences = LocalPreferences.current
-
-        // PDF section subtitle.
-        SectionSubTitle(
-            text = Res.string.AppSettingsPdf,
-        )
-
-        // PDF section information.
-        SectionInfo(
-            text = stringResource(Res.string.AppSettingsPdfInfo, APP_TITLE),
-        )
+        val scope = rememberCoroutineScope()
+        val preferences = LocalAppState.current.preferences
 
         // Toggle for automatic PDF/A conversion.
         Row(
@@ -744,31 +806,38 @@ private fun PdfSettings(state: SettingsSectionState) {
                 }
             )
 
-            Label(
-                text = Res.string.AppSettingsPdfConvertAuto,
+            Column {
+                Label(
+                    text = Res.string.AppSettingsCreatePdfAutoConvert,
+                )
+                Text(
+                    text = "(${stringResource(Res.string.AppSettingsCreatePdfAutoConvertExperimental)})",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+
+        }
+
+        AnimatedVisibility(visible = preferences.autoConvertToPdfA) {
+            SectionInfo(
+                text = Res.string.AppSettingsCreatePdfAutoConvertWarning,
             )
         }
     }
-}
 
 /**
  * Section for Chrome settings.
  */
 @Composable
 @Suppress("UNUSED_PARAMETER")
-private fun ChromeSettings(state: SettingsSectionState) {
-    val scope = rememberCoroutineScope()
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier,
+private fun ChromeSettings(state: SettingsSectionState) =
+    Section(
+        title = Res.string.AppSettingsChrome,
     ) {
-        val preferences = LocalPreferences.current
+        val scope = rememberCoroutineScope()
+        val preferences = LocalAppState.current.preferences
 
-        // Chrome section subtitle.
-        SectionSubTitle(
-            text = Res.string.AppSettingsChrome,
-        )
-
+        // Toggle for Chrome hardware acceleration.
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -786,13 +855,77 @@ private fun ChromeSettings(state: SettingsSectionState) {
 
             Column {
                 Label(
-                    text = Res.string.AppSettingsChromeHardwareAcceleration,
+                    text = Res.string.AppSettingsChromeAcceleration,
                 )
                 Text(
-                    text = "(${stringResource(Res.string.AppSettingsChromeHardwareAccelerationRestart)})",
+                    text = "(${stringResource(Res.string.AppSettingsChromeAccelerationRestart)})",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
         }
     }
+
+/**
+ * Reusable section component for the settings view.
+ */
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun Section(
+    title: String,
+    info: String? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit,
+) = Column(
+    verticalArrangement = Arrangement.spacedBy(12.dp),
+    modifier = Modifier,
+) {
+    var infoVisible by remember { mutableStateOf(false) }
+
+    SectionSubTitle(
+        text = title,
+        actions = {
+            actions()
+
+            if (info != null) {
+                Tooltip(
+                    text = Res.string.AppSettingsSectionInfo,
+                ) {
+                    IconButton(
+                        onClick = { infoVisible = !infoVisible },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = stringResource(Res.string.AppSettingsSectionInfo),
+                        )
+                    }
+                }
+            }
+        },
+    )
+
+    if (info != null) {
+        AnimatedVisibility(visible = infoVisible) {
+            SectionInfo(
+                text = info,
+            )
+        }
+    }
+
+    content()
 }
+
+/**
+ * Reusable section component for the settings view.
+ */
+@Composable
+private fun Section(
+    title: StringResource,
+    info: StringResource? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit,
+) = Section(
+    title = stringResource(title).title(),
+    info = if (info != null) stringResource(info) else null,
+    actions = actions,
+    content = content,
+)

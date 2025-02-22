@@ -21,18 +21,96 @@
 
 package de.openindex.zugferd.manager.utils
 
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPosition
 import io.github.vinceglb.filekit.core.PlatformDirectory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 class Preferences(data: PreferencesData) {
+
+    //
+    // Language.
+    //
+
+    private var _language = mutableStateOf(
+        Language.getByCode(data.language) ?: getCurrentLanguage()
+    )
+    val language get() = _language.value
+    fun setLanguage(language: Language) {
+        _language.value = language
+        setCurrentLanguage(
+            language = _language.value,
+            country = _country.value,
+        )
+    }
+
+
+    //
+    // Country.
+    //
+
+    private var _country = mutableStateOf(
+        if (data.country != null && isValidCountryCode(data.country))
+            data.country
+        else
+            null
+    )
+    val country get() = _country.value
+    fun setCountry(country: String?) {
+        _country.value = if (country != null && isValidCountryCode(country)) {
+            country
+        } else {
+            null
+        }
+        setCurrentLanguage(
+            language = _language.value,
+            country = _country.value,
+        )
+    }
+
+
+    //
+    // Currency.
+    //
+
+    private var _currency = mutableStateOf(
+        if (data.currency != null && isValidCurrencyCode(data.currency))
+            data.currency
+        else
+            null
+    )
+    val currency get() = _currency.value
+    fun setCurrency(currency: String?) {
+        _currency.value = if (currency != null && isValidCurrencyCode(currency)) {
+            currency
+        } else {
+            null
+        }
+    }
+
+
+    //
+    // VAT percentage.
+    //
+
+    private var _vatPercentage = mutableStateOf(
+        if (data.vatPercentage != null && data.vatPercentage > 0)
+            data.vatPercentage
+        else
+            null
+    )
+    val vatPercentage get() = _vatPercentage.value
+    fun setVatPercentage(vatPercentage: Double?) {
+        _vatPercentage.value = if (vatPercentage != null && vatPercentage > 0) {
+            vatPercentage
+        } else {
+            0.toDouble()
+        }
+    }
+
 
     //
     // Color theme.
@@ -116,17 +194,6 @@ class Preferences(data: PreferencesData) {
 
 
     //
-    // Previous currency used for invoices.
-    //
-
-    private var _previousCurrency = data.previousCurrency
-    val previousCurrency get() = _previousCurrency
-    fun setPreviousCurrency(currency: String?) {
-        _previousCurrency = currency
-    }
-
-
-    //
     // Previous sender used for invoices.
     //
 
@@ -170,6 +237,10 @@ class Preferences(data: PreferencesData) {
     @Suppress("MemberVisibilityCanBePrivate")
     fun toData(): PreferencesData =
         PreferencesData(
+            language = language.code,
+            country = country,
+            currency = currency,
+            vatPercentage = vatPercentage,
             darkMode = darkMode,
             windowWidth = _windowWidth,
             windowHeight = _windowHeight,
@@ -177,7 +248,6 @@ class Preferences(data: PreferencesData) {
             windowY = _windowY,
             previousPdfLocation = _previousPdfLocation,
             previousExportLocation = _previousExportLocation,
-            previousCurrency = _previousCurrency,
             previousSenderKey = _previousSenderKey,
             previousProductKey = _previousProductKey,
             autoConvertToPdfA = _autoConvertToPdfA.value,
@@ -194,6 +264,10 @@ class Preferences(data: PreferencesData) {
 @Serializable
 data class PreferencesData(
     val version: Int = 1,
+    val language: String? = null,
+    val country: String? = null,
+    val currency: String? = null,
+    val vatPercentage: Double? = null,
     val darkMode: Boolean? = null,
     val windowWidth: Int? = null,
     val windowHeight: Int? = null,
@@ -201,19 +275,16 @@ data class PreferencesData(
     val windowY: Int? = null,
     val previousPdfLocation: String? = null,
     val previousExportLocation: String? = null,
-    val previousCurrency: String? = null,
     val previousSenderKey: UInt? = null,
     val previousProductKey: UInt? = null,
     val autoConvertToPdfA: Boolean = false,
     val chromeGpuEnabled: Boolean = true,
 )
 
-val LocalPreferences = compositionLocalOf { loadPreferences() }
+suspend fun loadPreferences(): Preferences =
+    Preferences(loadPreferencesData())
 
-fun loadPreferences(): Preferences =
-    runBlocking(Dispatchers.IO) {
-        Preferences(loadPreferencesData())
-    }
+expect suspend fun initPreferences(preferences: Preferences)
 
 expect suspend fun loadPreferencesData(): PreferencesData
 

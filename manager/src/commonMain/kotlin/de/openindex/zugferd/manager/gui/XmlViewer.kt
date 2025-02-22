@@ -29,7 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontFamily
-import de.openindex.zugferd.manager.utils.LocalPreferences
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.utils.XmlVisualTransformation
 
 @Composable
@@ -37,7 +37,7 @@ fun XmlViewer(
     xml: String,
     modifier: Modifier = Modifier,
 ) {
-    val preferences = LocalPreferences.current
+    val preferences = LocalAppState.current.preferences
     val systemIsDark = isSystemInDarkTheme()
     val xmlVisualTransformation = remember(preferences.isThemeDark, systemIsDark) {
         XmlVisualTransformation(darkMode = preferences.darkMode ?: systemIsDark)

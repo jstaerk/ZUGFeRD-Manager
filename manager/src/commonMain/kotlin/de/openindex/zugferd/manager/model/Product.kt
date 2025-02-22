@@ -21,8 +21,9 @@
 
 package de.openindex.zugferd.manager.model
 
-import de.openindex.zugferd.manager.utils.formatAsPrice
-import de.openindex.zugferd.manager.utils.getCurrencySymbol
+import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
+import de.openindex.zugferd.manager.utils.Preferences
+import de.openindex.zugferd.manager.utils.formatPrice
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppPricePerUnit
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
@@ -39,7 +40,7 @@ data class Product(
     val name: String = "",
     val description: String? = null,
     val unit: String = UnitOfMeasurement.UNIT.code,
-    val vatPercent: Double = TaxCategory.NORMAL_TAX.defaultPercentage,
+    val vatPercent: Double,
     val taxExemptionReason: String? = null,
     val taxCategoryCode: String = TaxCategory.NORMAL_TAX.code,
 ) {
@@ -52,15 +53,15 @@ data class Product(
     val isSaved: Boolean
         get() = _key != null
 
-    val summary: String
-        get() = runBlocking {
+    fun getSummary(preferences: Preferences): String =
+        runBlocking {
+            val currency = preferences.currency ?: FALLBACK_CURRENCY
+
             buildList {
-                val priceInfo = if (_defaultPricePerUnit > 0) {
-                    _defaultPricePerUnit.formatAsPrice
-                        .plus(" ")
-                        .plus(getCurrencySymbol(DEFAULT_CURRENCY) ?: DEFAULT_CURRENCY)
-                        .trim()
-                } else ""
+                val priceInfo = if (_defaultPricePerUnit > 0)
+                    _defaultPricePerUnit.formatPrice(currency)
+                else
+                    ""
 
                 val unitInfo = unitOfMeasurement?.symbol
                     ?: unitOfMeasurement?.translateValue(1)

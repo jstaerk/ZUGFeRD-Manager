@@ -25,53 +25,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import de.openindex.zugferd.manager.LocalAppState
-import de.openindex.zugferd.manager.utils.getCurrenciesByName
-import de.openindex.zugferd.manager.utils.getCurrenciesBySymbol
+import de.openindex.zugferd.manager.utils.Language
+import de.openindex.zugferd.manager.utils.getLanguageName
+import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.translate
-import de.openindex.zugferd.zugferd_manager.generated.resources.Currency
+import de.openindex.zugferd.zugferd_manager.generated.resources.Language
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import org.jetbrains.compose.resources.Resource
 
 @Composable
-fun CurrencyField(
-    label: Resource = Res.plurals.Currency,
-    currency: String? = null,
-    short: Boolean = false,
+fun LanguageField(
+    label: Resource = Res.plurals.Language,
+    language: String? = null,
     requiredIndicator: Boolean = false,
     onSelect: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val language = LocalAppState.current.preferences.language
+    val currentLang = LocalAppState.current.preferences.language
+    val options = remember(currentLang) {
+        buildMap {
+            Language.entries.forEach { lang ->
+                put(
+                    lang.code,
+                    "${getLanguageName(lang, lang)} / ${getLanguageName(lang, currentLang)}",
+                )
+            }
+        }
+            .toList()
+            .sortedBy { (_, value) -> value }
+            .toMap()
+    }
 
     DropDown(
-        label = label.translate(),
-        value = currency,
-        options = remember(language) {
-            (if (short) getCurrenciesBySymbol() else getCurrenciesByName())
-                .toList()
-                .sortedBy { (_, value) -> value }
-                .toMap()
-        },
+        label = label.translate().title(),
+        value = language,
+        options = options,
         requiredIndicator = requiredIndicator,
         onSelect = onSelect,
         modifier = modifier,
     )
 }
-
-/*
-@Composable
-fun CurrencyField(
-    label: Resource = Res.plurals.Currency,
-    currency: String? = null,
-    requiredIndicator: Boolean = false,
-    onSelect: (String?) -> Unit,
-    modifier: Modifier = Modifier,
-) = AutoCompleteField(
-    label = label.translate(),
-    entry = currency,
-    entries = remember { getCurrencies() },
-    requiredIndicator = requiredIndicator,
-    onSelect = onSelect,
-    modifier = modifier,
-)
-*/

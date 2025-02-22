@@ -28,7 +28,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import de.openindex.zugferd.manager.utils.LocalPreferences
+import de.openindex.zugferd.manager.LocalAppState
 
 @Suppress("DuplicatedCode")
 private val lightScheme = lightColorScheme(
@@ -281,7 +281,7 @@ val unspecified_scheme = ColorFamily(
 fun AppTheme(
     content: @Composable () -> Unit
 ) {
-    val preferences = LocalPreferences.current
+    val preferences = LocalAppState.current.preferences
     val isDark = preferences.darkMode ?: isSystemInDarkTheme()
     val colorScheme = when {
         isDark -> darkScheme

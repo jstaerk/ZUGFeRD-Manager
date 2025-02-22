@@ -47,6 +47,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
         Die gewählte Rechnung liegt nicht im PDF/A-1 oder PDF/A-3 Format vor. Damit kann keine E-Rechnung erzeugt
         werden.
     </string>
+    <string name="AppCreateConvertExperimental">experimentell</string>
 
     <string name="AppCreateGeneral">Eckdaten bearbeiten</string>
     <string name="AppCreateGeneralSender">Ersteller der Rechnung</string>
@@ -72,7 +73,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateItemsItemAdd">neuer Rechnungsposten</string>
     <string name="AppCreateItemsItemEdit">Rechnungsposten bearbeiten</string>
     <string name="AppCreateItemsItemPrice">Preis pro %1$s</string>
-    <string name="AppCreateItemsItemQuantity">Preis pro %1$s</string>
+    <string name="AppCreateItemsItemQuantity">Anzahl %1$s</string>
     <string name="AppCreateItemsItemRemove">Den Posten aus der Rechnung entfernen.</string>
     <string name="AppCreateItemsItemDescription">Anmerkungen</string>
     <string name="AppCreateItemsItemSummaryNet">Netto-Betrag</string>

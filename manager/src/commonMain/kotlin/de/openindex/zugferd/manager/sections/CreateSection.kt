@@ -62,6 +62,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
 import de.openindex.zugferd.manager.gui.CurrencyField
 import de.openindex.zugferd.manager.gui.DateField
@@ -80,19 +81,16 @@ import de.openindex.zugferd.manager.gui.VerticalScrollBox
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.Item
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
-import de.openindex.zugferd.manager.utils.LocalPreferences
-import de.openindex.zugferd.manager.utils.LocalProducts
-import de.openindex.zugferd.manager.utils.LocalRecipients
-import de.openindex.zugferd.manager.utils.LocalSenders
+import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.formatAsPercentage
-import de.openindex.zugferd.manager.utils.formatAsPrice
-import de.openindex.zugferd.manager.utils.getCurrencySymbol
+import de.openindex.zugferd.manager.utils.formatPrice
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreate
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvert
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvertExperimental
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvertInfo
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateConvertWarning
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateDetailsPdf
@@ -224,9 +222,17 @@ fun CreateSection(state: CreateSectionState) {
                             modifier = Modifier
                                 .padding(all = 8.dp),
                         ) {
-                            Label(
-                                text = stringResource(Res.string.AppCreateConvert).title(),
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Label(
+                                    text = stringResource(Res.string.AppCreateConvert).title(),
+                                )
+                                Text(
+                                    text = "(${stringResource(Res.string.AppCreateConvertExperimental)})",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
                         }
                     }
                 }
@@ -249,9 +255,9 @@ fun CreateSection(state: CreateSectionState) {
 @Composable
 fun CreateSectionActions(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
-    val preferences = LocalPreferences.current
-    val senders = LocalSenders.current
-    val products = LocalProducts.current
+    val preferences = LocalAppState.current.preferences
+    val senders = LocalAppState.current.senders
+    val products = LocalAppState.current.products
     val selectedPdf = state.selectedPdf
     val isSelectedPdfArchiveUsable = state.isSelectedPdfArchiveUsable
     val isValid = state.invoiceValid
@@ -456,9 +462,9 @@ private fun DetailsView(state: CreateSectionState) {
 @Suppress("UnusedReceiverParameter")
 private fun ColumnScope.GeneralForm(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
-    val preferences = LocalPreferences.current
+    val preferences = LocalAppState.current.preferences
 
-    val senders = LocalSenders.current
+    val senders = LocalAppState.current.senders
     val sendersList = derivedStateOf {
         if (state.invoiceSender?.isSaved == false) {
             listOf(state.invoiceSender!!, *senders.senders.toTypedArray())
@@ -467,7 +473,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
         }
     }
 
-    val recipients = LocalRecipients.current
+    val recipients = LocalAppState.current.recipients
     val recipientsList = derivedStateOf {
         if (state.invoiceRecipient?.isSaved == false) {
             listOf(state.invoiceRecipient!!, *recipients.recipients.toTypedArray())
@@ -570,6 +576,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                     DateField(
                         label = stringResource(Res.string.AppCreateGeneralDeliveryDate).title(),
                         value = state.deliveryDate,
+                        clearable = true,
                         requiredIndicator = state.deliveryStartDate == null || state.deliveryEndDate == null,
                         onValueChange = { state.deliveryDate = it },
                         modifier = Modifier
@@ -580,6 +587,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                     DateField(
                         label = stringResource(Res.string.AppCreateGeneralDeliveryDateStart).title(),
                         value = state.deliveryStartDate,
+                        clearable = true,
                         requiredIndicator = state.deliveryDate == null,
                         onValueChange = { state.deliveryStartDate = it },
                         modifier = Modifier
@@ -590,6 +598,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                     DateField(
                         label = stringResource(Res.string.AppCreateGeneralDeliveryDateEnd).title(),
                         value = state.deliveryEndDate,
+                        clearable = true,
                         requiredIndicator = state.deliveryDate == null,
                         onValueChange = { state.deliveryEndDate = it },
                         modifier = Modifier
@@ -611,12 +620,10 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
             // Field for the currency.
             CurrencyField(
                 currency = state.invoiceCurrency,
+                short = true,
                 requiredIndicator = true,
                 onSelect = { currency ->
                     state.invoiceCurrency = currency
-                    if (currency != null) {
-                        preferences.setPreviousCurrency(currency)
-                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -668,7 +675,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
  */
 @Composable
 private fun ColumnScope.ItemsForm(state: CreateSectionState) {
-    val preferences = LocalPreferences.current
+    val preferences = LocalAppState.current.preferences
     val invoiceItems = state.invoiceItems
 
     // No invoice items selected.
@@ -724,7 +731,7 @@ private fun ColumnScope.ItemForm(
 ) {
     val scope = rememberCoroutineScope()
 
-    val products = LocalProducts.current
+    val products = LocalAppState.current.products
     val productsList = derivedStateOf {
         if (item.product?.isSaved == false) {
             listOf(item.product, *products.products.toTypedArray())
@@ -784,7 +791,8 @@ private fun ColumnScope.ItemForm(
                 DecimalField(
                     label = stringResource(
                         Res.string.AppCreateItemsItemPrice,
-                        unit.symbol ?: pluralStringResource(unit.value, 1)
+                        //unit.symbol ?: pluralStringResource(unit.value, 1),
+                        pluralStringResource(unit.value, 1),
                     ),
                     value = item.price,
                     minPrecision = 2,
@@ -807,7 +815,8 @@ private fun ColumnScope.ItemForm(
                 DecimalField(
                     label = stringResource(
                         Res.string.AppCreateItemsItemQuantity,
-                        unit.symbol ?: stringResource(unit.title)
+                        //unit.symbol ?: stringResource(unit.title),
+                        pluralStringResource(unit.value, 2),
                     ),
                     value = item.quantity,
                     minPrecision = unit.minPrecision,
@@ -887,13 +896,7 @@ private fun RowScope.ItemSummary(
     state: CreateSectionState,
     modifier: Modifier = Modifier,
 ) {
-    val currency = remember(state.invoiceCurrency) {
-        val c = state.invoiceCurrency
-        if (c != null)
-            getCurrencySymbol(c) ?: c
-        else
-            ""
-    }
+    val currency = remember(state.invoiceCurrency) { state.invoiceCurrency ?: FALLBACK_CURRENCY }
 
     Card(
         modifier = modifier,
@@ -911,7 +914,7 @@ private fun RowScope.ItemSummary(
                         append("\n")
                     }
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${item.totalNetPrice.formatAsPrice} $currency")
+                        append(item.totalNetPrice.formatPrice(currency))
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,
@@ -928,7 +931,7 @@ private fun RowScope.ItemSummary(
                         append("\n")
                     }
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${item.tax.formatAsPrice} $currency")
+                        append(item.tax.formatPrice(currency))
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,
@@ -942,7 +945,7 @@ private fun RowScope.ItemSummary(
                         append("\n")
                     }
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${item.totalGrossPrice.formatAsPrice} $currency")
+                        append(item.totalGrossPrice.formatPrice(currency))
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,
@@ -959,13 +962,7 @@ private fun RowScope.ItemSummary(
 private fun ColumnScope.AmountSummary(
     state: CreateSectionState,
 ) {
-    val currency = remember(state.invoiceCurrency) {
-        val c = state.invoiceCurrency
-        if (c != null)
-            getCurrencySymbol(c) ?: c
-        else
-            ""
-    }
+    val currency = remember(state.invoiceCurrency) { state.invoiceCurrency ?: FALLBACK_CURRENCY }
     val netSum = derivedStateOf {
         state.invoiceItems.sumOf { it.totalNetPrice }
     }
@@ -994,7 +991,7 @@ private fun ColumnScope.AmountSummary(
                         append("\n")
                     }
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${netSum.value.formatAsPrice} $currency")
+                        append(netSum.value.formatPrice(currency))
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,
@@ -1008,7 +1005,7 @@ private fun ColumnScope.AmountSummary(
                         append("\n")
                     }
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${taxSum.value.formatAsPrice} $currency")
+                        append(taxSum.value.formatPrice(currency))
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,
@@ -1022,7 +1019,7 @@ private fun ColumnScope.AmountSummary(
                         append("\n")
                     }
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${grossSum.value.formatAsPrice} $currency")
+                        append(grossSum.value.formatPrice(currency))
                     }
                 },
                 style = MaterialTheme.typography.bodyLarge,

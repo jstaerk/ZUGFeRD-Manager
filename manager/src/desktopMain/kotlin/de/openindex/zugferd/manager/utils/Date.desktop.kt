@@ -22,8 +22,10 @@
 package de.openindex.zugferd.manager.utils
 
 import kotlinx.datetime.LocalDate
+import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
 
 fun LocalDate.toJavaDate(): Date =
@@ -33,3 +35,20 @@ fun LocalDate.toJavaDate(): Date =
             set(this@toJavaDate.year, this@toJavaDate.monthNumber - 1, this@toJavaDate.dayOfMonth)
         }
         .time
+
+@Suppress("unused")
+actual fun LocalDate.formatAsShortDate(): String =
+    DateFormat
+        .getDateInstance(DateFormat.SHORT, Locale.getDefault())
+        .format(this.toJavaDate())
+
+actual fun LocalDate.formatAsMediumDate(): String =
+    DateFormat
+        .getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+        .format(this.toJavaDate())
+
+@Suppress("unused")
+actual fun LocalDate.formatAsLongDate(): String =
+    DateFormat
+        .getDateInstance(DateFormat.MEDIUM, Locale.getDefault())
+        .format(this.toJavaDate())

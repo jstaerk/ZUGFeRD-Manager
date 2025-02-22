@@ -59,7 +59,7 @@ fun DecimalField(
         ),
     value = value
         ?.format(
-            minPrecision = minPrecision,
+            minPrecision = if (minPrecision <= 0 && maxPrecision > 0) 1 else minPrecision,
             maxPrecision = maxPrecision,
             grouped = false,
         )

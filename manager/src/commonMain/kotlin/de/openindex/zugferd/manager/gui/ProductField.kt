@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.translate
@@ -50,20 +51,24 @@ fun ProductField(
     requiredIndicator: Boolean = false,
     onSelect: (Product?) -> Unit,
     modifier: Modifier = Modifier,
-) = AutoCompleteField(
-    label = label.translate(),
-    entry = product,
-    entries = remember(products) {
-        buildMap {
-            products.forEach { party ->
-                put(party, party.summary)
+) {
+    val preferences = LocalAppState.current.preferences
+
+    AutoCompleteField(
+        label = label.translate(),
+        entry = product,
+        entries = remember(products, preferences.currency) {
+            buildMap {
+                products.forEach { product ->
+                    put(product, product.getSummary(preferences))
+                }
             }
-        }
-    },
-    requiredIndicator = requiredIndicator,
-    onSelect = onSelect,
-    modifier = modifier,
-)
+        },
+        requiredIndicator = requiredIndicator,
+        onSelect = onSelect,
+        modifier = modifier,
+    )
+}
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -77,6 +82,9 @@ fun ProductFieldWithAdd(
     onSelect: (product: Product?, savePermanently: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val preferences = LocalAppState.current.preferences
+    val defaultTaxPercentage = preferences.vatPercentage ?: 0.toDouble()
+
     var newProduct by remember { mutableStateOf<Product?>(null) }
     val unsavedProduct by derivedStateOf {
         products.find { !it.isSaved }
@@ -104,7 +112,9 @@ fun ProductFieldWithAdd(
         ) {
             IconButton(
                 onClick = {
-                    newProduct = unsavedProduct ?: Product()
+                    newProduct = unsavedProduct ?: Product(
+                        vatPercent = defaultTaxPercentage,
+                    )
                 },
                 modifier = Modifier,
             ) {

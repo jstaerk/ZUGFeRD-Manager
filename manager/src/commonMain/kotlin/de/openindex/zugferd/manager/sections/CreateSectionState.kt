@@ -22,7 +22,6 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.runtime.mutableStateOf
-import de.openindex.zugferd.manager.model.DEFAULT_CURRENCY
 import de.openindex.zugferd.manager.model.Invoice
 import de.openindex.zugferd.manager.model.Item
 import de.openindex.zugferd.manager.model.PaymentMethod
@@ -30,6 +29,7 @@ import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.model.export
 import de.openindex.zugferd.manager.model.isValid
 import de.openindex.zugferd.manager.model.toXml
+import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.Products
@@ -126,7 +126,7 @@ class CreateSectionState : SectionState() {
 
         // Create empty invoice instance.
         _invoice.value = Invoice(
-            currency = preferences.previousCurrency ?: DEFAULT_CURRENCY,
+            currency = preferences.currency ?: FALLBACK_CURRENCY,
             sender = sender,
             items = listOf(
                 Item(

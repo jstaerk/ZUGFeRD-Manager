@@ -21,8 +21,11 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -55,7 +58,7 @@ fun DateDialog(
 
     val dateState = rememberDatePickerState(
         initialSelectedDateMillis = value
-            ?.atStartOfDayIn(TimeZone.currentSystemDefault())
+            ?.atStartOfDayIn(TimeZone.UTC)
             ?.toEpochMilliseconds()
     )
 
@@ -94,6 +97,20 @@ fun DateDialog(
         DatePicker(
             state = dateState,
             showModeToggle = true,
+            headline = {
+                if (value == null) {
+                    return@DatePicker
+                }
+
+                DatePickerDefaults.DatePickerHeadline(
+                    selectedDateMillis = dateState.selectedDateMillis,
+                    displayMode = dateState.displayMode,
+                    dateFormatter = remember { DatePickerDefaults.dateFormatter() },
+                    modifier = Modifier
+                        //.padding(DatePickerHeadlinePadding)
+                        .padding(PaddingValues(start = 24.dp, end = 12.dp, bottom = 12.dp)),
+                )
+            },
             modifier = Modifier
                 .fillMaxSize(),
         )

@@ -27,6 +27,11 @@ expect fun Number.format(
     grouped: Boolean = false,
 ): String
 
+expect fun Number.formatPrice(
+    currencyCode: String,
+    grouped: Boolean = false,
+): String
+
 val Number.formatAsPercentage: String
     get() = format(
         minPrecision = 0,
@@ -35,12 +40,12 @@ val Number.formatAsPercentage: String
         grouped = false,
     )
 
-val Number.formatAsPrice: String
-    get() = format(
-        minPrecision = 2,
-        maxPrecision = 2,
-        grouped = false,
-    )
+//val Number.formatAsPrice: String
+//    get() = format(
+//        minPrecision = 2,
+//        maxPrecision = 2,
+//        grouped = false,
+//    )
 
 @Suppress("unused")
 val Number.formatAsQuantity: String

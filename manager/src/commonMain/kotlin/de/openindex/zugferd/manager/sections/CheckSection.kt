@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
 import de.openindex.zugferd.manager.gui.Label
 import de.openindex.zugferd.manager.gui.PdfViewer
@@ -66,7 +67,6 @@ import de.openindex.zugferd.manager.gui.SectionTitle
 import de.openindex.zugferd.manager.gui.VerticalScrollBox
 import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
-import de.openindex.zugferd.manager.utils.LocalPreferences
 import de.openindex.zugferd.manager.utils.ValidationMessage
 import de.openindex.zugferd.manager.utils.ValidationSeverity
 import de.openindex.zugferd.manager.utils.pluralStringResource
@@ -142,7 +142,7 @@ fun CheckSection(state: CheckSectionState) {
 @Composable
 fun CheckSectionActions(state: CheckSectionState) {
     val scope = rememberCoroutineScope()
-    val preferences = LocalPreferences.current
+    val preferences = LocalAppState.current.preferences
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),

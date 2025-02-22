@@ -62,9 +62,9 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AppLayout(
-) {
+fun AppLayout() {
     val appState = LocalAppState.current
+
     //val blur: Float by animateFloatAsState(
     //    targetValue = if (appState.locked) 10f else 0f,
     //    animationSpec = tween(
@@ -158,7 +158,9 @@ private fun AppNavigation() {
 
         //Text(text = "Item")
         AppSection.entries.forEach {
-            AppSectionNavigationItem(section = it)
+            AppSectionNavigationItem(
+                section = it,
+            )
         }
 
         Spacer(

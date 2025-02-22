@@ -45,7 +45,7 @@ enum class TaxCategory(
     val code: String,
     val title: StringResource,
     val defaultExemptionReason: StringResource? = null,
-    val defaultPercentage: Double,
+    val isZeroTax: Boolean = false,
 ) {
     /**
      * Standard rate / normale Besteuerung
@@ -53,7 +53,6 @@ enum class TaxCategory(
     NORMAL_TAX(
         code = "S",
         title = Res.string.TaxCategory_S,
-        defaultPercentage = 19.0,
     ),
 
     /**
@@ -63,7 +62,7 @@ enum class TaxCategory(
         code = "Z",
         title = Res.string.TaxCategory_Z,
         defaultExemptionReason = Res.string.TaxCategory_Z_DefaultExemptionReason,
-        defaultPercentage = 0.0,
+        isZeroTax = true,
     ),
 
     /**
@@ -73,7 +72,7 @@ enum class TaxCategory(
         code = "E",
         title = Res.string.TaxCategory_E,
         defaultExemptionReason = Res.string.TaxCategory_E_DefaultExemptionReason,
-        defaultPercentage = 0.0,
+        isZeroTax = true,
     ),
 
     /**
@@ -82,7 +81,7 @@ enum class TaxCategory(
     REVERSE_TAX(
         code = "AE",
         title = Res.string.TaxCategory_AE,
-        defaultPercentage = 0.0,
+        isZeroTax = true,
     ),
 
     /**
@@ -92,7 +91,7 @@ enum class TaxCategory(
         code = "K",
         title = Res.string.TaxCategory_K,
         defaultExemptionReason = Res.string.TaxCategory_K_DefaultExemptionReason,
-        defaultPercentage = 0.0,
+        isZeroTax = true,
     ),
 
     /**
@@ -102,7 +101,7 @@ enum class TaxCategory(
         code = "G",
         title = Res.string.TaxCategory_G,
         defaultExemptionReason = Res.string.TaxCategory_G_DefaultExemptionReason,
-        defaultPercentage = 0.0,
+        isZeroTax = true,
     ),
 
     /**
@@ -112,7 +111,7 @@ enum class TaxCategory(
         code = "O",
         title = Res.string.TaxCategory_O,
         defaultExemptionReason = Res.string.TaxCategory_O_DefaultExemptionReason,
-        defaultPercentage = 0.0,
+        isZeroTax = true,
     ),
 
     /**
@@ -121,7 +120,7 @@ enum class TaxCategory(
     //CANARY_ISLAND(
     //    code = "L",
     //    title = Res.string.TaxCategory_L,
-    //    defaultPercentage = 0.0,
+    //    isZeroTax = true,
     //),
 
     /**
@@ -130,7 +129,7 @@ enum class TaxCategory(
     //CEUTA_AND_MELILLA(
     //    code = "M",
     //    title = Res.string.TaxCategory_M,
-    //    defaultPercentage = 0.0,
+    //    isZeroTax = true,
     //),
 
     ;

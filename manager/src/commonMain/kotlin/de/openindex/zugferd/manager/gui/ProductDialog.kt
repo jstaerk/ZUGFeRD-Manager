@@ -55,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.model.TaxCategory
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
@@ -395,6 +396,9 @@ private fun ProductFormGeneral(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
+            val preferences = LocalAppState.current.preferences
+            val defaultTaxPercentage = preferences.vatPercentage
+
             // Tax category field.
             TaxCategoryField(
                 value = TaxCategory.getByCode(value.taxCategoryCode) ?: TaxCategory.NORMAL_TAX,
@@ -409,7 +413,7 @@ private fun ProductFormGeneral(
                         onUpdate(
                             value.copy(
                                 taxCategoryCode = newTax.code,
-                                vatPercent = newTax.defaultPercentage,
+                                vatPercent = defaultTaxPercentage.takeUnless { newTax.isZeroTax } ?: 0.toDouble(),
                                 taxExemptionReason = taxExemptionReason,
                             )
                         )

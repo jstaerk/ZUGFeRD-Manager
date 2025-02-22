@@ -32,7 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import de.openindex.zugferd.manager.utils.LocalPreferences
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.utils.getCefBrowser
 import de.openindex.zugferd.manager.utils.installWebView
 import io.github.vinceglb.filekit.core.PlatformFile
@@ -46,7 +46,7 @@ import javax.swing.JPanel
 actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier) {
     val scope = rememberCoroutineScope()
     var isInstalled by remember { mutableStateOf(false) }
-    val chromeGpuEnabled = LocalPreferences.current.chromeGpuEnabled
+    val chromeGpuEnabled = LocalAppState.current.preferences.chromeGpuEnabled
 
     LaunchedEffect(Unit) {
         scope.launch {

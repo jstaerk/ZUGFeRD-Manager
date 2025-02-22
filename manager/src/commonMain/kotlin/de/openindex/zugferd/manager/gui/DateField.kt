@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import de.openindex.zugferd.manager.utils.formatAsMediumDate
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -43,19 +44,8 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelection
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionFieldSelect
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.format
-import kotlinx.datetime.format.Padding
-import kotlinx.datetime.format.char
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
-
-private val DATE_FORMAT = LocalDate.Format {
-    dayOfMonth()
-    char('.')
-    monthNumber(padding = Padding.ZERO)
-    char('.')
-    year()
-}
 
 @Composable
 fun DateField(
@@ -79,7 +69,7 @@ fun DateField(
             )
         },
         supportingText = supportingText,
-        value = value?.format(DATE_FORMAT) ?: "",
+        value = value?.formatAsMediumDate() ?: "",
         onValueChange = { },
         trailingIcon = {
             Row(

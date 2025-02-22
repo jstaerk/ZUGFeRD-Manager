@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager.gui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.utils.getCountries
 import de.openindex.zugferd.manager.utils.translate
 import de.openindex.zugferd.zugferd_manager.generated.resources.Country
@@ -37,11 +38,21 @@ fun CountryField(
     requiredIndicator: Boolean = false,
     onSelect: (String?) -> Unit,
     modifier: Modifier = Modifier,
-) = AutoCompleteField(
-    label = label.translate(),
-    entry = country,
-    entries = remember { getCountries() },
-    requiredIndicator = requiredIndicator,
-    onSelect = onSelect,
-    modifier = modifier,
-)
+) {
+    val currentLang = LocalAppState.current.preferences.language
+    val entries = remember(currentLang) {
+        getCountries()
+            .toList()
+            .sortedBy { (_, value) -> value }
+            .toMap()
+    }
+
+    AutoCompleteField(
+        label = label.translate(),
+        entry = country,
+        entries = entries,
+        requiredIndicator = requiredIndicator,
+        onSelect = onSelect,
+        modifier = modifier,
+    )
+}

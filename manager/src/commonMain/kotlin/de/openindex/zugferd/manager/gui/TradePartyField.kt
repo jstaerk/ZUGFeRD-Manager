@@ -38,7 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.model.TradeParty
-import de.openindex.zugferd.manager.utils.getDefaultCountryCode
+import de.openindex.zugferd.manager.utils.getSystemCountryCode
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.translate
 import org.jetbrains.compose.resources.Resource
@@ -106,7 +106,7 @@ fun TradePartyFieldWithAdd(
             IconButton(
                 onClick = {
                     newTradeParty = unsavedTradeParty ?: TradeParty(
-                        country = getDefaultCountryCode(),
+                        country = getSystemCountryCode(),
                     )
                 },
                 modifier = Modifier,

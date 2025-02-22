@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
+import org.apache.commons.lang3.SystemUtils
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteIfExists
@@ -76,6 +77,16 @@ actual suspend fun savePreferencesData(data: PreferencesData) {
         } catch (e: Exception) {
             APP_LOGGER.warn("Settings are not writable.", e)
             PREFERENCES_FILE.deleteIfExists()
+        }
+    }
+}
+
+actual suspend fun initPreferences(preferences: Preferences) {
+    if (SystemUtils.IS_OS_MAC) {
+        if (preferences.isThemeDark) {
+            System.setProperty("apple.awt.application.appearance", "NSAppearanceNameDarkAqua")
+        } else if (preferences.isThemeAuto) {
+            System.setProperty("apple.awt.application.appearance", "system")
         }
     }
 }

@@ -21,8 +21,10 @@
 
 package de.openindex.zugferd.manager.utils
 
+import de.openindex.zugferd.manager.APP_LOGGER
 import java.text.NumberFormat
 import java.text.ParseException
+import java.util.Currency
 import java.util.Locale
 
 actual fun Number.format(
@@ -41,6 +43,24 @@ actual fun Number.format(
         }
     }
     .format(this)
+
+actual fun Number.formatPrice(
+    currencyCode: String,
+    grouped: Boolean
+): String =
+    NumberFormat
+        .getCurrencyInstance(Locale.getDefault())
+        .apply {
+            isGroupingUsed = grouped
+            try {
+                currency = Currency.getInstance(currencyCode)
+                minimumFractionDigits = currency.defaultFractionDigits
+                maximumFractionDigits = currency.defaultFractionDigits
+            } catch (e: IllegalArgumentException) {
+                APP_LOGGER.warn("Can't load currency (${currencyCode})!", e)
+            }
+        }
+        .format(this)
 
 actual fun String.parseNumber(
     minPrecision: Int,
