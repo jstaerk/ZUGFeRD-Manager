@@ -21,7 +21,6 @@
 
 package de.openindex.zugferd.manager.model
 
-
 /**
  * The Unit Of Measurement Enumeration
  *
@@ -34,77 +33,90 @@ enum class UnitOfMeasurement(
     val description: String,
     val pluralDescription: String,
 ) {
-    /** A unit of count defining the number of articles (items).  */
-    //ARTICLE("NAR", "Anzahl Artikel"),
+    /** The lump sum. */
+    LUMP_SUM("LS", "Pauschale", "Pauschalen"),
 
-    /** A unit of count defining the number of pieces  */
-    UNIT("C62", "Einheit", "Einheiten"),
+    /** The Percent (%). */
+    PERCENT("P1", "Prozent", "Prozent"),
 
-    /** A number of objects grouped together to a set  */
-    //SET("SET", "Anzahl Sets"),
 
-    /** The number of pairs.  */
-    //PAIR("NPR", "Anzahl Paare"),
+    /** piece */
+    PIECE("H87", "Stück (Anzahl)", "Stücke (Anzahl)"),
 
-    /** The Hectare (ha).  */
-    //HECTARE("HAR", "Hectare (ha)"),
+    /** A unit of count defining the number of pieces */
+    UNIT("C62", "Einheit (Anzahl)", "Einheiten (Anzahl)"),
 
-    /** The Hour (h).  */
-    HOUR("HUR", "Stunde", "Stunden"),
+    /** A unit of count defining the number of articles (items). */
+    ARTICLE("NAR", "Artikel (Anzahl)", "Artikel (Anzahl)"),
 
-    /** The Kilogram (kg).  */
-    //KILOGRAM("KGM", "Kilogram (kg)"),
+    /** A number of objects grouped together to a set */
+    SET("SET", "Set", "Sets"),
 
-    /** The Kilometer (km).  */
-    //KILOMETER("KMT", "Kilometer (km)"),
+    /** The number of pairs. */
+    PAIR("NPR", "Paar", "Paare"),
 
-    /** The Kilowatt hour (kWh).  */
-    //KILOWATT_HOUR("KWH", "Kilowatt hour (kWh)"),
 
-    /** The lump sum.  */
-    //LUMP_SUM("LS", "lump sum"),
+    /** The Year. */
+    YEAR("ANN", "Jahr", "Jahre"),
 
-    /** The Liter (l).  */
-    //LITRE("LTR", "Liter (l)"),
+    /** The Month. */
+    MONTH("MON", "Monat", "Monate"),
 
-    /** The Minute (min).  */
-    MINUTE("MIN", "Minute", "Minuten"),
+    /** The week. */
+    WEEK("WEE", "Woche", "Wochen"),
 
-    /** The square millimeter (mm2).  */
-    //MILLIMETER_SQUARE("MMK", "square millimeter (mm2)"),
-
-    /** The Millimeter (mm).  */
-    //MILLIMETER("MMT", "Millimeter (mm)"),
-
-    /** The square meter (m2).  */
-    //METER_SQUARE("MTK", "square meter  (m2)"),
-
-    /** The cubic meter (m3).  */
-    //METER_CUBIC("MTQ", "cubic meter (m3)"),
-
-    /** The Meter (m).  */
-    //METER("MTR", "Meter (m)"),
-
-    /** The Second (s).  */
-    //SECOND("SEC", "Second (s)"),
-
-    /** The Percent (%).  */
-    //PERCENT("P1", "Percent (%)"),
-
-    /** The metric ton (t).  */
-    //TON_METRIC("TNE", "Metric ton (t)"),
-
-    /** The day count  */
+    /** The day count */
     DAY("DAY", "Tag", "Tage"),
 
-    /** The week.  */
-    //WEEK("WEE", "Wochen"),
+    /** The Hour (h). */
+    HOUR("HUR", "Stunde", "Stunden"),
 
-    /** The Month.  */
-    //MONTH("MON", "Monate"),
+    /** The Minute (min). */
+    MINUTE("MIN", "Minute", "Minuten"),
 
-    /** The Mile. 1609,344 m  */
-    //MILE("SMI", "International Mile"),
+    /** The Second (s). */
+    SECOND("SEC", "Sekunde", "Sekunden"),
+
+
+    /** The Hectare (ha). */
+    HECTARE("HAR", "Hektar", "Hektar"),
+
+    /** The square meter (m2). */
+    METER_SQUARE("MTK", "Quadratmeter", "Quadratmeter"),
+
+    /** The square millimeter (mm2). */
+    MILLIMETER_SQUARE("MMK", "Quadratmillimeter", "Quadratmillimeter"),
+
+
+    /** The Mile. 1609,344 m */
+    MILE("SMI", "Meile", "Meilen"),
+
+    /** The Kilometer (km). */
+    KILOMETER("KMT", "Kilometer", "Kilometer"),
+
+    /** The Meter (m). */
+    METER("MTR", "Meter", "Meter"),
+
+    /** The Millimeter (mm). */
+    MILLIMETER("MMT", "Millimeter", "Millimeter"),
+
+
+    /** The cubic meter (m3). */
+    METER_CUBIC("MTQ", "Kubikmeter", "Kubikmeter"),
+
+    /** The Liter (l). */
+    LITRE("LTR", "Liter", "Liter"),
+
+
+    /** The metric ton (t). */
+    TON_METRIC("TNE", "Tonne (metrisch)", "Tonnen (metrisch)"),
+
+    /** The Kilogram (kg). */
+    KILOGRAM("KGM", "Kilogramm", "Kilogramm"),
+
+
+    /** The Kilowatt hour (kWh). */
+    KILOWATT_HOUR("KWH", "Kilowattstunde", "Kilowattstunden"),
 
     ;
 

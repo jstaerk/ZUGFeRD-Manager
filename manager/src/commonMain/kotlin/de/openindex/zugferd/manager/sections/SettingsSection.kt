@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.sections
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -82,7 +83,7 @@ fun SettingsSection(state: SettingsSectionState) {
             SenderSettings(state)
             RecipientSettings(state)
             ProductSettings(state)
-            PdfASettings(state)
+            CreateSettings(state)
             ChromeSettings(state)
             ThemeSettings(state)
         }
@@ -617,7 +618,7 @@ private fun ThemeSettings(state: SettingsSectionState) {
 
 @Composable
 @Suppress("UNUSED_PARAMETER")
-private fun PdfASettings(state: SettingsSectionState) {
+private fun CreateSettings(state: SettingsSectionState) {
     val scope = rememberCoroutineScope()
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -626,16 +627,7 @@ private fun PdfASettings(state: SettingsSectionState) {
         val preferences = LocalPreferences.current
 
         SectionSubTitle(
-            text = "PDF/A Format bei Erzeugung von E-Rechnungen",
-        )
-
-        SectionInfo(
-            text = "Bei der Erzeugung von E-Rechnungen muss die gewählte Rechnungsdatei im PDF/A-1 oder PDF/A-3 Format " +
-                    "vorliegen. Im Optimalfall sollte dieses Dateiformat direkt aus Word / LibreOffice etc. heraus " +
-                    "exportiert werden. $APP_TITLE kann eine gewählte PDF-Datei automatisch umwandeln. Dies ist aber " +
-                    "nicht 100%ig zuverlässig und kann zu Fehlern in der erzeugten E-Rechnung führen. Falls eine " +
-                    "Umwandlung innerhalb von $APP_TITLE trotzdem gewünscht ist, kann diese bei Bedarf automatisch " +
-                    "durchgeführt werden, wenn eine PDF-Rechnung ausgewählt wird.",
+            text = "Erzeugung von E-Rechnungen",
         )
 
         Row(
@@ -655,6 +647,37 @@ private fun PdfASettings(state: SettingsSectionState) {
 
             Text(
                 text = "Nicht unterstützte PDF-Dateien automatisch in PDF/A-3 umwandeln.",
+            )
+        }
+
+        AnimatedVisibility(visible = preferences.autoConvertToPdfA) {
+            SectionInfo(
+                text = "Bei der Erzeugung von E-Rechnungen muss die gewählte Rechnungsdatei im PDF/A-1 oder PDF/A-3 Format " +
+                        "vorliegen. Im Optimalfall sollte dieses Dateiformat direkt aus Word / LibreOffice etc. heraus " +
+                        "exportiert werden. $APP_TITLE kann eine gewählte PDF-Datei automatisch umwandeln. Dies ist aber " +
+                        "nicht 100%ig zuverlässig und kann zu Fehlern in der erzeugten E-Rechnung führen. Falls eine " +
+                        "Umwandlung innerhalb von $APP_TITLE trotzdem gewünscht ist, kann diese bei Bedarf automatisch " +
+                        "durchgeführt werden, wenn eine PDF-Rechnung ausgewählt wird.",
+            )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier,
+        ) {
+            Switch(
+                checked = preferences.autoRemoveAttachments,
+                onCheckedChange = {
+                    preferences.setAutoRemoveAttachments(it)
+                    scope.launch {
+                        preferences.save()
+                    }
+                }
+            )
+
+            Text(
+                text = "Eingebettete Anhänge aus PDF-Dateien entfernen.",
             )
         }
     }

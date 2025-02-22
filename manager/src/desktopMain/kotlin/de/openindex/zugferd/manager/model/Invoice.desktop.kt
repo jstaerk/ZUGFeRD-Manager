@@ -24,15 +24,18 @@ package de.openindex.zugferd.manager.model
 import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.APP_TITLE_FULL
 import de.openindex.zugferd.manager.APP_VERSION
+import de.openindex.zugferd.manager.utils.removeEmbeddedFiles
 import de.openindex.zugferd.manager.utils.toJavaDate
 import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.PlatformFile
+import org.apache.pdfbox.Loader
 import org.mustangproject.ZUGFeRD.IExportableTransaction
 import org.mustangproject.ZUGFeRD.Profiles
 import org.mustangproject.ZUGFeRD.ZUGFeRD2PullProvider
 import org.mustangproject.ZUGFeRD.ZUGFeRDExporterFromA1
 import org.mustangproject.ZUGFeRD.ZUGFeRDExporterFromA3
 import org.mustangproject.ZUGFeRD.ZUGFeRDExporterFromPDFA
+import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.text.DateFormat
 import java.util.Locale
@@ -152,12 +155,26 @@ actual suspend fun Invoice.export(
     sourceFile: PlatformFile,
     targetFile: PlatformFile,
     method: PaymentMethod,
+    removeEmbeddedFiles: Boolean,
 ): Boolean {
     val exporter = try {
-        sourceFile.file.inputStream().use { input ->
+        //sourceFile.file.inputStream().use { input ->
+        //    //ZUGFeRDExporterFromPDFA()
+        //    CustomZUGFeRDExporterFromPDFA()
+        //        .load(input)
+        //}
+        Loader.loadPDF(sourceFile.file).use { doc ->
+            if (removeEmbeddedFiles) {
+                println("removeEmbeddedFiles")
+                doc.removeEmbeddedFiles()
+            }
+
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            doc.save(byteArrayOutputStream)
+
             //ZUGFeRDExporterFromPDFA()
             CustomZUGFeRDExporterFromPDFA()
-                .load(input)
+                .load(byteArrayOutputStream.toByteArray())
         }
             .setProducer("$APP_TITLE_FULL $APP_VERSION")
             .setCreator("$APP_TITLE_FULL $APP_VERSION")
