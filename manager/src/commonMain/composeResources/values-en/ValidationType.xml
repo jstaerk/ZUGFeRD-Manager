@@ -25,11 +25,11 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
 <resources>
     <plurals name="ValidationType">
-        <item quantity="one">Validierungsart</item>
-        <item quantity="other">Validierungsarten</item>
+        <item quantity="one">Validation type</item>
+        <item quantity="other">Validation types</item>
     </plurals>
 
-    <string name="ValidationType_PDF">bzgl. PDF</string>
-    <string name="ValidationType_XML">bzgl. XML</string>
-    <string name="ValidationType_OTHER">allgemein</string>
+    <string name="ValidationType_PDF">ref. PDF</string>
+    <string name="ValidationType_XML">ref. XML</string>
+    <string name="ValidationType_OTHER">generic</string>
 </resources>

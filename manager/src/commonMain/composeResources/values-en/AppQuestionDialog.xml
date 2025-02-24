@@ -24,6 +24,6 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppQuestionDialogYes">ja</string>
-    <string name="AppQuestionDialogNo">nein</string>
+    <string name="AppQuestionDialogYes">yes</string>
+    <string name="AppQuestionDialogNo">no</string>
 </resources>

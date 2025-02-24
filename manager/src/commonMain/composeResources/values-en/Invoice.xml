@@ -24,6 +24,6 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="InvoicePaymentTermDescriptionSepaDirectDebit">Abbuchung erfolgt am %1$s.</string>
-    <string name="InvoicePaymentTermDescriptionSepaCreditTransfer">Bitte bis %1$s überweisen.</string>
+    <string name="InvoicePaymentTermDescriptionSepaDirectDebit">Will be deducted on %1$s.</string>
+    <string name="InvoicePaymentTermDescriptionSepaCreditTransfer">please remit until %1$s.</string>
 </resources>

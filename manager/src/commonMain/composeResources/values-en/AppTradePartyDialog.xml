@@ -24,44 +24,44 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppTradePartyDialogGeneral">Allgemein</string>
+    <string name="AppTradePartyDialogGeneral">General information</string>
     <string name="AppTradePartyDialogGeneralName">Name</string>
-    <string name="AppTradePartyDialogGeneralStreet">Straße</string>
-    <string name="AppTradePartyDialogGeneralAdditionalAddress">Adresszusatz</string>
-    <string name="AppTradePartyDialogGeneralZip">PLZ</string>
-    <string name="AppTradePartyDialogGeneralLocation">Ort</string>
-    <string name="AppTradePartyDialogGeneralCountry">Land</string>
-    <string name="AppTradePartyDialogGeneralVatId">USt-Id-Nr</string>
-    <string name="AppTradePartyDialogGeneralTaxId">Steuer-Nr</string>
-    <string name="AppTradePartyDialogGeneralCustomerId">Kunden-Nr</string>
+    <string name="AppTradePartyDialogGeneralStreet">Street</string>
+    <string name="AppTradePartyDialogGeneralAdditionalAddress">Additional address line</string>
+    <string name="AppTradePartyDialogGeneralZip">Zip</string>
+    <string name="AppTradePartyDialogGeneralLocation">City</string>
+    <string name="AppTradePartyDialogGeneralCountry">Country</string>
+    <string name="AppTradePartyDialogGeneralVatId">Vat-Id-Nr</string>
+    <string name="AppTradePartyDialogGeneralTaxId">Tax-Nr</string>
+    <string name="AppTradePartyDialogGeneralCustomerId">Customer-Nr</string>
 
-    <string name="AppTradePartyDialogContact">Kontakt</string>
-    <string name="AppTradePartyDialogContactName">Kontaktperson</string>
-    <string name="AppTradePartyDialogContactStreet">Straße</string>
-    <string name="AppTradePartyDialogContactZip">PLZ</string>
-    <string name="AppTradePartyDialogContactLocation">Ort</string>
-    <string name="AppTradePartyDialogContactCountry">Land</string>
+    <string name="AppTradePartyDialogContact">Contakt</string>
+    <string name="AppTradePartyDialogContactName">Contact person</string>
+    <string name="AppTradePartyDialogContactStreet">Street</string>
+    <string name="AppTradePartyDialogContactZip">Zip</string>
+    <string name="AppTradePartyDialogContactLocation">City</string>
+    <string name="AppTradePartyDialogContactCountry">Country</string>
     <string name="AppTradePartyDialogContactEmail">E-Mail</string>
-    <string name="AppTradePartyDialogContactPhone">Telefon</string>
+    <string name="AppTradePartyDialogContactPhone">Telephone</string>
     <string name="AppTradePartyDialogContactFax">Fax</string>
 
-    <string name="AppTradePartyDialogAccount">Konto</string>
-    <string name="AppTradePartyDialogAccountName">Kontoinhaber</string>
+    <string name="AppTradePartyDialogAccount">Bank details</string>
+    <string name="AppTradePartyDialogAccountName">Account holder</string>
     <string name="AppTradePartyDialogAccountIBAN">IBAN</string>
     <string name="AppTradePartyDialogAccountBIC">BIC</string>
-    <string name="AppTradePartyDialogAccountCreditorReferenceId">SEPA-Gläubigerkennung</string>
-    <string name="AppTradePartyDialogAccountDirectDebitMandateId">SEPA-Mandatsreferenz</string>
-    <string name="AppTradePartyDialogAccountPreferredPaymentMethod">bevorzugte Zahlungsart</string>
+    <string name="AppTradePartyDialogAccountCreditorReferenceId">SEPA-ID</string>
+    <string name="AppTradePartyDialogAccountDirectDebitMandateId">SEPA-Mandate</string>
+    <string name="AppTradePartyDialogAccountPreferredPaymentMethod">preferred payment method</string>
 
-    <string name="AppTradePartyDialogNotes">Freitexte</string>
-    <string name="AppTradePartyDialogNotesDescription">Beschreibung</string>
-    <string name="AppTradePartyDialogNotesImprint">Impressum</string>
+    <string name="AppTradePartyDialogNotes">Notes</string>
+    <string name="AppTradePartyDialogNotesDescription">Description</string>
+    <string name="AppTradePartyDialogNotesImprint">Legal info</string>
     <string name="AppTradePartyDialogNotesImprintInfo">
-        Weitere Impressums-Angaben zum Unternehmen, die in der Regel im Briefkopf einer Rechnung stehen.[br]
-        Zum Beispiel: Gesellschafter, Vorstand, Handelsregister, zuständiges Registergericht, etc.
+        Further "letterhead" company info.[br]
+        E.g.: Complete legal name, type, shareholders, management board, commercial register, register court, etc.
     </string>
 
-    <string name="AppTradePartyDialogSubmit">übernehmen</string>
-    <string name="AppTradePartyDialogCancel">abbrechen</string>
-    <string name="AppTradePartyDialogSavePermanently">dauerhaft speichern</string>
+    <string name="AppTradePartyDialogSubmit">apply</string>
+    <string name="AppTradePartyDialogCancel">cancel</string>
+    <string name="AppTradePartyDialogSavePermanently">save permanently</string>
 </resources>
