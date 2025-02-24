@@ -24,37 +24,37 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppCheck">E-Rechnung „%1$s“ wird geprüft…</string>
-    <string name="AppCheckPassed">E-Rechnung „%1$s“ ist gültig</string>
-    <string name="AppCheckFailed">E-Rechnung „%1$s“ ist ungültig</string>
+    <string name="AppCheck">e-invoice „%1$s“ is being validated…</string>
+    <string name="AppCheckPassed">e-invoice „%1$s“ is valid</string>
+    <string name="AppCheckFailed">e-invoice „%1$s“ is invalid</string>
 
-    <string name="AppCheckSelect">E-Rechnung wählen</string>
-    <string name="AppCheckSelectInfo">Eine E-Rechnung zur Prüfung auswählen.</string>
-    <string name="AppCheckSelectMessage">Bitte wählen Sie eine E-Rechnung aus.</string>
-    <string name="AppCheckSelectFile">eine E-Rechnung wählen</string>
+    <string name="AppCheckSelect">Select e-invoice</string>
+    <string name="AppCheckSelectInfo">Select e-invoice for validation.</string>
+    <string name="AppCheckSelectMessage">Please select a e-invoice.</string>
+    <string name="AppCheckSelectFile">select a e-invoice</string>
 
-    <string name="AppCheckSummary">Zusammenfassung</string>
-    <string name="AppCheckSummaryProfile">Profil</string>
+    <string name="AppCheckSummary">Summary</string>
+    <string name="AppCheckSummaryProfile">Profile</string>
     <string name="AppCheckSummaryVersion">Version</string>
-    <string name="AppCheckSummarySignature">Signatur</string>
-    <string name="AppCheckSummaryUnknown">unbekannt</string>
-    <string name="AppCheckSummaryMessages">Mitteilungen</string>
+    <string name="AppCheckSummarySignature">used software</string>
+    <string name="AppCheckSummaryUnknown">unknown</string>
+    <string name="AppCheckSummaryMessages">Messages</string>
     <plurals name="AppCheckSummaryErrors">
-        <item quantity="one">%1$d Fehler</item>
-        <item quantity="other">%1$d Fehler</item>
+        <item quantity="one">%1$d error</item>
+        <item quantity="other">%1$d errors</item>
     </plurals>
     <plurals name="AppCheckSummaryWarnings">
-        <item quantity="one">%1$d Warnung</item>
-        <item quantity="other">%1$d Warnungen</item>
+        <item quantity="one">%1$d warning</item>
+        <item quantity="other">%1$d warnings</item>
     </plurals>
     <plurals name="AppCheckSummaryNotices">
-        <item quantity="one">%1$d Hinweis</item>
-        <item quantity="other">%1$d Hinweise</item>
+        <item quantity="one">%1$d notice</item>
+        <item quantity="other">%1$d notices</item>
     </plurals>
 
-    <string name="AppCheckMessages">Mitteilungen</string>
+    <string name="AppCheckMessages">Messages</string>
 
-    <string name="AppCheckDetailsPdf">gewählte PDF</string>
-    <string name="AppCheckDetailsHtml">XML-Visualisierung</string>
-    <string name="AppCheckDetailsXml">XML-Rohdaten</string>
+    <string name="AppCheckDetailsPdf">selected PDF</string>
+    <string name="AppCheckDetailsHtml">XML-Visualization</string>
+    <string name="AppCheckDetailsXml">XML-Data</string>
 </resources>
