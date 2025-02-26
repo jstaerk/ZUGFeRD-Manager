@@ -24,21 +24,21 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppCheck">e-invoice „%1$s“ is being validated…</string>
-    <string name="AppCheckPassed">e-invoice „%1$s“ is valid</string>
-    <string name="AppCheckFailed">e-invoice „%1$s“ is invalid</string>
+    <string name="AppCheck">E-invoice „%1$s“ is being validated…</string>
+    <string name="AppCheckPassed">E-invoice „%1$s“ is valid.</string>
+    <string name="AppCheckFailed">E-invoice „%1$s“ is invalid.</string>
 
-    <string name="AppCheckSelect">Select e-invoice</string>
-    <string name="AppCheckSelectInfo">Select e-invoice for validation.</string>
-    <string name="AppCheckSelectMessage">Please select a e-invoice.</string>
-    <string name="AppCheckSelectFile">select a e-invoice</string>
+    <string name="AppCheckSelect">select e-invoice</string>
+    <string name="AppCheckSelectInfo">select e-invoice for validation.</string>
+    <string name="AppCheckSelectMessage">Please select an e-invoice.</string>
+    <string name="AppCheckSelectFile">select an e-invoice</string>
 
-    <string name="AppCheckSummary">Summary</string>
-    <string name="AppCheckSummaryProfile">Profile</string>
-    <string name="AppCheckSummaryVersion">Version</string>
+    <string name="AppCheckSummary">summary</string>
+    <string name="AppCheckSummaryProfile">profile</string>
+    <string name="AppCheckSummaryVersion">version</string>
     <string name="AppCheckSummarySignature">used software</string>
     <string name="AppCheckSummaryUnknown">unknown</string>
-    <string name="AppCheckSummaryMessages">Messages</string>
+    <string name="AppCheckSummaryMessages">messages</string>
     <plurals name="AppCheckSummaryErrors">
         <item quantity="one">%1$d error</item>
         <item quantity="other">%1$d errors</item>
@@ -52,9 +52,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
         <item quantity="other">%1$d notices</item>
     </plurals>
 
-    <string name="AppCheckMessages">Messages</string>
+    <string name="AppCheckMessages">messages</string>
 
     <string name="AppCheckDetailsPdf">selected PDF</string>
-    <string name="AppCheckDetailsHtml">XML-Visualization</string>
-    <string name="AppCheckDetailsXml">XML-Data</string>
+    <string name="AppCheckDetailsHtml">XML visualization</string>
+    <string name="AppCheckDetailsXml">XML data</string>
 </resources>

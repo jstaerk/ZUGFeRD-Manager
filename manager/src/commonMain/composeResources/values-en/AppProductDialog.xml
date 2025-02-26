@@ -24,14 +24,14 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppProductDialogGeneral">Generic</string>
-    <string name="AppProductDialogGeneralName">Name</string>
-    <string name="AppProductDialogGeneralPricePerUnit">Price per unit</string>
-    <string name="AppProductDialogGeneralTax">Taxes in %</string>
-    <string name="AppProductDialogGeneralTaxExemptionReason">Reason für 0% tax</string>
+    <string name="AppProductDialogGeneral">general</string>
+    <string name="AppProductDialogGeneralName">name</string>
+    <string name="AppProductDialogGeneralPricePerUnit">price per unit</string>
+    <string name="AppProductDialogGeneralTax">taxes in %</string>
+    <string name="AppProductDialogGeneralTaxExemptionReason">reason für 0% tax</string>
 
-    <string name="AppProductDialogNotes">Notes</string>
-    <string name="AppProductDialogNotesDescription">Description</string>
+    <string name="AppProductDialogNotes">notes</string>
+    <string name="AppProductDialogNotesDescription">description</string>
 
     <string name="AppProductDialogSubmit">apply</string>
     <string name="AppProductDialogCancel">cancel</string>

@@ -24,7 +24,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppCreate">Create e-invoice from „%1$s“</string>
+    <string name="AppCreate">Create e-invoice from „%1$s“.</string>
 
     <string name="AppCreateSelect">select PDF</string>
     <string name="AppCreateSelectInfo">Select a PDF to edit.</string>
@@ -33,7 +33,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppCreateGenerate">create e-invoice</string>
     <string name="AppCreateGenerateInfo">
-        create e-invoice with selected PDF and specified data.
+        Create e-invoice with selected PDF and specified data.
     </string>
     <string name="AppCreateGenerateFileSuffix">e-invoice</string>
 
@@ -48,7 +48,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     </string>
     <string name="AppCreateConvertExperimental">experimental</string>
 
-    <string name="AppCreateGeneral">Edit important data</string>
+    <string name="AppCreateGeneral">edit important data</string>
     <string name="AppCreateGeneralSender">creator of the invoice</string>
     <string name="AppCreateGeneralSenderAdd">new creator</string>
     <string name="AppCreateGeneralSenderEdit">edit sender</string>
@@ -88,7 +88,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateDetailsXml">XML data</string>
 
     <string name="AppCreateErrorInvalid">
-        The invoice data is insufficient. A e-invoice can only be created after all required fields have been filled.
+        The invoice data is insufficient. An e-invoice can only be created after all required fields have been filled.
     </string>
     <string name="AppCreateErrorIncompatible">
         The PDF-template is in %1$s format. No Factur-X/ZUGFeRD can be created from that.

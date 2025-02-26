@@ -25,8 +25,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
 <resources>
     <string name="AppCheck">E-Rechnung „%1$s“ wird geprüft…</string>
-    <string name="AppCheckPassed">E-Rechnung „%1$s“ ist gültig</string>
-    <string name="AppCheckFailed">E-Rechnung „%1$s“ ist ungültig</string>
+    <string name="AppCheckPassed">E-Rechnung „%1$s“ ist gültig.</string>
+    <string name="AppCheckFailed">E-Rechnung „%1$s“ ist ungültig.</string>
 
     <string name="AppCheckSelect">E-Rechnung wählen</string>
     <string name="AppCheckSelectInfo">Eine E-Rechnung zur Prüfung auswählen.</string>

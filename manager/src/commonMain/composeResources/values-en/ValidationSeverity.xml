@@ -25,8 +25,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
 <resources>
     <plurals name="ValidationSeverity">
-        <item quantity="one">Severity</item>
-        <item quantity="other">Severities</item>
+        <item quantity="one">severity</item>
+        <item quantity="other">severities</item>
     </plurals>
 
     <string name="ValidationSeverity_NOTICE">notice</string>

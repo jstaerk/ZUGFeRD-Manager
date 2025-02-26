@@ -24,7 +24,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppCreate">E-Rechnung aus „%1$s“ erstellen</string>
+    <string name="AppCreate">E-Rechnung aus „%1$s“ erstellen.</string>
 
     <string name="AppCreateSelect">PDF wählen</string>
     <string name="AppCreateSelectInfo">Eine PDF-Rechnung zur Bearbeitung auswählen.</string>
@@ -61,7 +61,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateGeneralDeliveryDateStart">Start der Leistung</string>
     <string name="AppCreateGeneralDeliveryDateEnd">Ende der Leistung</string>
     <string name="AppCreateGeneralDeliveryDateInfo">
-        Eine E-Rechnung benötigt ENTWEDER ein Lieferdatum UND / ODER einen Zeitraum für die erbrachte Leistung.
+        Eine E-Rechnung benötigt entweder ein Lieferdatum und / oder einen Zeitraum für die erbrachte Leistung.
     </string>
     <string name="AppCreateGeneralIssueDate">erstellt am</string>
     <string name="AppCreateGeneralDueDate">fällig am</string>

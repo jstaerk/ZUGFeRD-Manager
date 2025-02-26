@@ -46,7 +46,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSettingsSenderImport">Ersteller importieren</string>
     <string name="AppSettingsSenderImportSelectFile">Datei zum Import wählen</string>
     <string name="AppSettingsSenderExport">Ersteller exportieren</string>
-    <string name="AppSettingsSenderExportFileName">zugferd-ersteller</string>
+    <string name="AppSettingsSenderExportFileName">rechnung-ersteller</string>
     <string name="AppSettingsSenderRemoveAll">alle Ersteller löschen</string>
     <string name="AppSettingsSenderRemoveAllConfirm">Sollen wirklich alle Ersteller gelöscht werden?</string>
 
@@ -60,7 +60,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSettingsRecipientImport">Empfänger importieren</string>
     <string name="AppSettingsRecipientImportSelectFile">Datei zum Import wählen</string>
     <string name="AppSettingsRecipientExport">Empfänger exportieren</string>
-    <string name="AppSettingsRecipientExportFileName">zugferd-empfaenger</string>
+    <string name="AppSettingsRecipientExportFileName">rechnung-empfaenger</string>
     <string name="AppSettingsRecipientRemoveAll">alle Empfänger löschen</string>
     <string name="AppSettingsRecipientRemoveAllConfirm">Sollen wirklich alle Empfänger gelöscht werden?</string>
 
@@ -74,7 +74,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSettingsProductImport">Posten importieren</string>
     <string name="AppSettingsProductImportSelectFile">Datei zum Import wählen</string>
     <string name="AppSettingsProductExport">Posten exportieren</string>
-    <string name="AppSettingsProductExportFileName">zugferd-rechnungsposten</string>
+    <string name="AppSettingsProductExportFileName">rechnung-posten</string>
     <string name="AppSettingsProductRemoveAll">alle Posten löschen</string>
     <string name="AppSettingsProductRemoveAllConfirm">Sollen wirklich alle Rechnungsposten gelöscht werden?</string>
 
