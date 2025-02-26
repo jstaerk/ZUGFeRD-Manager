@@ -24,8 +24,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 -->
 
 <resources>
-    <string name="AppDateSelectionDialogTitle">Datum wählen</string>
+    <string name="AppDateSelectionDialogTitle">select date</string>
 
-    <string name="AppDateSelectionFieldSelect">Datum wählen</string>
-    <string name="AppDateSelectionFieldClear">Datum leeren</string>
+    <string name="AppDateSelectionFieldSelect">select date</string>
+    <string name="AppDateSelectionFieldClear">clear date</string>
 </resources>

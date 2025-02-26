@@ -25,12 +25,12 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
 <resources>
     <plurals name="ValidationSeverity">
-        <item quantity="one">Schweregrad</item>
-        <item quantity="other">Schweregrade</item>
+        <item quantity="one">Severity</item>
+        <item quantity="other">Severities</item>
     </plurals>
 
-    <string name="ValidationSeverity_NOTICE">Hinweis</string>
-    <string name="ValidationSeverity_WARNING">Warnung</string>
-    <string name="ValidationSeverity_ERROR">Fehler</string>
-    <string name="ValidationSeverity_FATAL">kritischer Fehler</string>
+    <string name="ValidationSeverity_NOTICE">notice</string>
+    <string name="ValidationSeverity_WARNING">warning</string>
+    <string name="ValidationSeverity_ERROR">error</string>
+    <string name="ValidationSeverity_FATAL">critical error</string>
 </resources>

@@ -31,16 +31,16 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="TaxCategory_S">standard rate</string>
     <string name="TaxCategory_Z">zero rated goods</string>
-    <string name="TaxCategory_Z_DefaultExemptionReason">Ware ist nach dem Nullsatz besteuert</string>
+    <string name="TaxCategory_Z_DefaultExemptionReason">Taxation with 0%</string>
     <string name="TaxCategory_E">exempt from tax</string>
-    <string name="TaxCategory_E_DefaultExemptionReason">Kleinunternehmer gemäß §19 UStG</string>
+    <string name="TaxCategory_E_DefaultExemptionReason">Small business</string>
     <string name="TaxCategory_AE">VAT reverse charge</string>
     <string name="TaxCategory_K">VAT exempt for EEA intra-community supply</string>
-    <string name="TaxCategory_K_DefaultExemptionReason">Lieferung ins EU-Ausland</string>
+    <string name="TaxCategory_K_DefaultExemptionReason">intra community supply</string>
     <string name="TaxCategory_G">free export item</string>
-    <string name="TaxCategory_G_DefaultExemptionReason">Export ins Nicht-EU-Ausland</string>
+    <string name="TaxCategory_G_DefaultExemptionReason">Export non-EU</string>
     <string name="TaxCategory_O">services outside scope of tax</string>
-    <string name="TaxCategory_O_DefaultExemptionReason">Leistung außerhalb des Steueranwendungsbereichs</string>
+    <string name="TaxCategory_O_DefaultExemptionReason">Services exempt taxes</string>
     <string name="TaxCategory_L">Canary Islands general indirect tax</string>
-    <string name="TaxCategory_M">production, services and importation in Ceuta and Melilla</string>
+    <string name="TaxCategory_M">production, services and importats in and to Ceuta and Melilla</string>
 </resources>
