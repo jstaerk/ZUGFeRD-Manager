@@ -22,7 +22,10 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,11 +53,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.DragData
+import androidx.compose.ui.draganddrop.dragData
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -69,6 +78,7 @@ import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.utils.ValidationMessage
 import de.openindex.zugferd.manager.utils.ValidationSeverity
+import de.openindex.zugferd.manager.utils.getPlatformFileFromURI
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -99,41 +109,79 @@ import kotlinx.coroutines.launch
  * Main view of the check section.
  */
 @Composable
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 fun CheckSection(state: CheckSectionState) {
+    val scope = rememberCoroutineScope()
+    val appState = LocalAppState.current
     val selectedPdf = state.selectedPdf
+
+    val dragAndDropCallback = remember {
+        object : DragAndDropTarget {
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+                val dragData = event.dragData()
+                if (dragData !is DragData.FilesList) {
+                    return false
+                }
+
+                val pdfFileUri = dragData.readFiles().firstOrNull {
+                    it.lowercase().endsWith(".pdf")
+                } ?: return false
+
+                scope.launch {
+                    state.selectPdf(
+                        pdf = getPlatformFileFromURI(pdfFileUri),
+                        appState = appState,
+                    )
+                }
+
+                return true
+            }
+        }
+    }
 
     // Show an empty view, if no PDF file was selected.
     if (selectedPdf == null) {
         EmptyView(state)
-        return
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-    ) {
-        // Left column with e-invoice validation.
-        Column(
+    // Show two column layout, if a PDF file was selected.
+    else {
+        Row(
             modifier = Modifier
-                .weight(0.6f, fill = true),
+                .fillMaxSize(),
         ) {
-            // Validation result.
-            VerticalScrollBox(
+            // Left column with e-invoice validation.
+            Column(
                 modifier = Modifier
-                    .weight(1f, fill = true),
+                    .weight(0.6f, fill = true),
             ) {
-                CheckView(state)
+                // Validation result.
+                VerticalScrollBox(
+                    modifier = Modifier
+                        .weight(1f, fill = true),
+                ) {
+                    CheckView(state)
+                }
+            }
+
+            // Right column with further details about the selected PDF.
+            Column(
+                modifier = Modifier
+                    .weight(0.4f, fill = true),
+            ) {
+                DetailsView(state)
             }
         }
-
-        // Right column with further details about the selected PDF.
-        Column(
-            modifier = Modifier
-                .weight(0.4f, fill = true),
-        ) {
-            DetailsView(state)
-        }
     }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .dragAndDropTarget(
+                target = dragAndDropCallback,
+                shouldStartDragAndDrop = { true },
+            ),
+    )
 }
 
 /**
@@ -142,7 +190,7 @@ fun CheckSection(state: CheckSectionState) {
 @Composable
 fun CheckSectionActions(state: CheckSectionState) {
     val scope = rememberCoroutineScope()
-    val preferences = LocalAppState.current.preferences
+    val appState = LocalAppState.current
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -156,7 +204,7 @@ fun CheckSectionActions(state: CheckSectionState) {
             onClick = {
                 scope.launch(Dispatchers.IO) {
                     state.selectPdf(
-                        preferences = preferences,
+                        appState = appState,
                     )
                 }
             },
@@ -184,6 +232,7 @@ private fun EmptyView(state: CheckSectionState) {
             // Request user to select a PDF file.
             Text(
                 text = stringResource(Res.string.AppCheckSelectMessage),
+                textAlign = TextAlign.Center,
                 softWrap = true,
             )
         }

@@ -22,7 +22,7 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.runtime.mutableStateOf
-import de.openindex.zugferd.manager.utils.Preferences
+import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Validation
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
@@ -59,14 +59,22 @@ class CheckSectionState : SectionState() {
     val selectedPdfValidation: Validation?
         get() = _selectedPdfValidation.value
 
-    suspend fun selectPdf(preferences: Preferences) {
+    suspend fun selectPdf(appState: AppState) {
         val pdf = FileKit.pickFile(
             type = PickerType.File(extensions = listOf("pdf")),
             mode = PickerMode.Single,
             title = getString(Res.string.AppCheckSelectFile).title(),
-            initialDirectory = preferences.previousPdfLocation,
+            initialDirectory = appState.preferences.previousPdfLocation,
         ) ?: return
 
+        selectPdf(
+            pdf = pdf,
+            appState = appState,
+        )
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    suspend fun selectPdf(pdf: PlatformFile, appState: AppState) {
         _selectedPdf.value = pdf
         _selectedPdfXml.value = getXmlFromPdf(pdf)?.let { getPrettyPrintedXml(it) }?.trimToNull()
 

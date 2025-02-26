@@ -24,7 +24,9 @@ package de.openindex.zugferd.manager.sections
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -53,11 +55,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.DragData
+import androidx.compose.ui.draganddrop.dragData
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -85,6 +93,7 @@ import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.formatAsPercentage
 import de.openindex.zugferd.manager.utils.formatPrice
+import de.openindex.zugferd.manager.utils.getPlatformFileFromURI
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -142,111 +151,147 @@ import kotlinx.coroutines.launch
  * Main view of the create section.
  */
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 fun CreateSection(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
+    val appState = LocalAppState.current
     val isValid = state.invoiceValid
     val selectedPdf = state.selectedPdf
     val selectedPdfArchiveVersion = state.selectedPdfArchiveVersion
     val selectedPdfArchiveError = state.selectedPdfArchiveError
     val isSelectedPdfArchiveUsable = state.isSelectedPdfArchiveUsable
 
+    val dragAndDropCallback = remember {
+        object : DragAndDropTarget {
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+                val dragData = event.dragData()
+                if (dragData !is DragData.FilesList) {
+                    return false
+                }
+
+                val pdfFileUri = dragData.readFiles().firstOrNull {
+                    it.lowercase().endsWith(".pdf")
+                } ?: return false
+
+                scope.launch {
+                    state.selectPdf(
+                        pdf = getPlatformFileFromURI(pdfFileUri),
+                        appState = appState,
+                    )
+                }
+
+                return true
+            }
+        }
+    }
+
     // Show an empty view, if no PDF file was selected.
     if (selectedPdf == null) {
         EmptyView(state)
-        return
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-    ) {
-        // Left column with e-invoice creation form.
-        Column(
+    // Show two column layout, if a PDF file was selected.
+    else {
+        Row(
             modifier = Modifier
-                .weight(0.6f, fill = true),
+                .fillMaxSize(),
         ) {
-            // Show form to create an e-invoice from the selected PDF file.
-            VerticalScrollBox(
+            // Left column with e-invoice creation form.
+            Column(
                 modifier = Modifier
-                    .weight(1f, fill = true),
+                    .weight(0.6f, fill = true),
             ) {
-                CreateView(state)
-            }
-
-            // Show validation error for invalid e-invoice inputs.
-            AnimatedVisibility(visible = !isValid && isSelectedPdfArchiveUsable) {
-                NotificationBar(
-                    text = Res.string.AppCreateErrorInvalid,
-                )
-            }
-
-            // Show error message, if selected PDF has an unsupported / unusable PDF/A version.
-            AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion > MAX_PDF_ARCHIVE_VERSION) {
-                NotificationBar(
-                    text = stringResource(
-                        Res.string.AppCreateErrorIncompatible,
-                        "PDF/A-${selectedPdfArchiveVersion}",
-                    ),
-                )
-            }
-
-            // Show error message, if selected PDF was not convertable to PDF/A-3.
-            AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveError != null) {
-                NotificationBar(
-                    text = stringResource(Res.string.AppCreateErrorConversion)
-                        .plus("\n").plus(selectedPdfArchiveError),
-                )
-            }
-
-            // Show warning message, if selected PDF has an unsupported PDF/A version but maybe convertable to PDF/A-3.
-            AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION && selectedPdfArchiveError == null) {
-                NotificationBar(
-                    text = Res.string.AppCreateConvertWarning,
+                // Show form to create an e-invoice from the selected PDF file.
+                VerticalScrollBox(
+                    modifier = Modifier
+                        .weight(1f, fill = true),
                 ) {
-                    // Information about possible conversion problems as tooltip.
-                    Tooltip(
-                        text = Res.string.AppCreateConvertInfo,
-                        tooltipPlacement = TooltipPlacement.CursorPoint(
-                            alignment = Alignment.TopCenter,
-                            offset = DpOffset(8.dp, (-16).dp)
+                    CreateView(state)
+                }
+
+                // Show validation error for invalid e-invoice inputs.
+                AnimatedVisibility(visible = !isValid && isSelectedPdfArchiveUsable) {
+                    NotificationBar(
+                        text = Res.string.AppCreateErrorInvalid,
+                    )
+                }
+
+                // Show error message, if selected PDF has an unsupported / unusable PDF/A version.
+                AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion > MAX_PDF_ARCHIVE_VERSION) {
+                    NotificationBar(
+                        text = stringResource(
+                            Res.string.AppCreateErrorIncompatible,
+                            "PDF/A-${selectedPdfArchiveVersion}",
                         ),
+                    )
+                }
+
+                // Show error message, if selected PDF was not convertable to PDF/A-3.
+                AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveError != null) {
+                    NotificationBar(
+                        text = stringResource(Res.string.AppCreateErrorConversion)
+                            .plus("\n").plus(selectedPdfArchiveError),
+                    )
+                }
+
+                // Show warning message, if selected PDF has an unsupported PDF/A version but maybe convertable to PDF/A-3.
+                AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION && selectedPdfArchiveError == null) {
+                    NotificationBar(
+                        text = Res.string.AppCreateConvertWarning,
                     ) {
-                        // Button to start manual conversion to PDF/A-3.
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    state.convertToPdfArchive()
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(all = 8.dp),
+                        // Information about possible conversion problems as tooltip.
+                        Tooltip(
+                            text = Res.string.AppCreateConvertInfo,
+                            tooltipPlacement = TooltipPlacement.CursorPoint(
+                                alignment = Alignment.TopCenter,
+                                offset = DpOffset(8.dp, (-16).dp)
+                            ),
                         ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                            // Button to start manual conversion to PDF/A-3.
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        state.convertToPdfArchive()
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(all = 8.dp),
                             ) {
-                                Label(
-                                    text = stringResource(Res.string.AppCreateConvert).title(),
-                                )
-                                Text(
-                                    text = "(${stringResource(Res.string.AppCreateConvertExperimental)})",
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    Label(
+                                        text = stringResource(Res.string.AppCreateConvert).title(),
+                                    )
+                                    Text(
+                                        text = "(${stringResource(Res.string.AppCreateConvertExperimental)})",
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        // Right column with further details about the selected PDF.
-        Column(
-            modifier = Modifier
-                .weight(0.4f, fill = true),
-        ) {
-            DetailsView(state)
+            // Right column with further details about the selected PDF.
+            Column(
+                modifier = Modifier
+                    .weight(0.4f, fill = true),
+            ) {
+                DetailsView(state)
+            }
         }
     }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .dragAndDropTarget(
+                target = dragAndDropCallback,
+                shouldStartDragAndDrop = { true },
+            ),
+    )
 }
 
 /**
@@ -255,9 +300,8 @@ fun CreateSection(state: CreateSectionState) {
 @Composable
 fun CreateSectionActions(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
-    val preferences = LocalAppState.current.preferences
-    val senders = LocalAppState.current.senders
-    val products = LocalAppState.current.products
+    val appState = LocalAppState.current
+    val preferences = appState.preferences
     val selectedPdf = state.selectedPdf
     val isSelectedPdfArchiveUsable = state.isSelectedPdfArchiveUsable
     val isValid = state.invoiceValid
@@ -274,9 +318,7 @@ fun CreateSectionActions(state: CreateSectionState) {
             onClick = {
                 scope.launch(Dispatchers.IO) {
                     state.selectPdf(
-                        preferences = preferences,
-                        senders = senders,
-                        products = products
+                        appState = appState,
                     )
                 }
             },
@@ -319,6 +361,7 @@ private fun EmptyView(state: CreateSectionState) {
             // Request user to select a PDF file.
             Text(
                 text = stringResource(Res.string.AppCreateSelectMessage),
+                textAlign = TextAlign.Center,
                 softWrap = true,
             )
         }

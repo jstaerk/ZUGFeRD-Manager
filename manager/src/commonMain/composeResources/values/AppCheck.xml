@@ -30,7 +30,10 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppCheckSelect">select e-invoice</string>
     <string name="AppCheckSelectInfo">select e-invoice for validation.</string>
-    <string name="AppCheckSelectMessage">Please select an e-invoice.</string>
+    <string name="AppCheckSelectMessage">
+        Please select an e-invoice[br]
+        or move an e-invoice via drag &amp; drop into this window.
+    </string>
     <string name="AppCheckSelectFile">select an e-invoice</string>
 
     <string name="AppCheckSummary">summary</string>

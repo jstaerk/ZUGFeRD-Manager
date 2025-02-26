@@ -30,7 +30,10 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppCheckSelect">E-Rechnung wählen</string>
     <string name="AppCheckSelectInfo">Eine E-Rechnung zur Prüfung auswählen.</string>
-    <string name="AppCheckSelectMessage">Bitte wählen Sie eine E-Rechnung aus.</string>
+    <string name="AppCheckSelectMessage">
+        Bitte wählen Sie eine E-Rechnung aus[br]
+        oder ziehen Sie eine E-Rechnung per Drag &amp; Drop in dieses Fenster.
+    </string>
     <string name="AppCheckSelectFile">eine E-Rechnung wählen</string>
 
     <string name="AppCheckSummary">Zusammenfassung</string>

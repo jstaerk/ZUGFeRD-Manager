@@ -28,7 +28,10 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppCreateSelect">select PDF</string>
     <string name="AppCreateSelectInfo">Select a PDF to edit.</string>
-    <string name="AppCreateSelectMessage">Please select a PDF-invoice.</string>
+    <string name="AppCreateSelectMessage">
+        Please select a PDF invoice[br]
+        or move a PDF invoice via drag &amp; drop into this window.
+    </string>
     <string name="AppCreateSelectFile">select a PDF-invoice</string>
 
     <string name="AppCreateGenerate">create e-invoice</string>

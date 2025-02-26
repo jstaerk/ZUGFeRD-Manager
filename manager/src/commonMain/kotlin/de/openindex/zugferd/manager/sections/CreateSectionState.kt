@@ -22,6 +22,7 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.runtime.mutableStateOf
+import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.model.Invoice
 import de.openindex.zugferd.manager.model.Item
 import de.openindex.zugferd.manager.model.PaymentMethod
@@ -32,9 +33,7 @@ import de.openindex.zugferd.manager.model.toXml
 import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.Preferences
-import de.openindex.zugferd.manager.utils.Products
 import de.openindex.zugferd.manager.utils.SectionState
-import de.openindex.zugferd.manager.utils.Senders
 import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
@@ -75,32 +74,39 @@ class CreateSectionState : SectionState() {
     val isSelectedPdfArchiveUsable: Boolean
         get() = isSupportedPdfArchiveVersion(_selectedPdfArchiveVersion.value)
 
-    suspend fun selectPdf(preferences: Preferences, senders: Senders, products: Products) {
+    suspend fun selectPdf(appState: AppState) {
         val pdf = FileKit.pickFile(
             type = PickerType.File(extensions = listOf("pdf")),
             mode = PickerMode.Single,
             title = getString(Res.string.AppCreateSelectFile).title(),
-            initialDirectory = preferences.previousPdfLocation,
+            initialDirectory = appState.preferences.previousPdfLocation,
         ) ?: return
 
+        selectPdf(
+            pdf = pdf,
+            appState = appState,
+        )
+    }
+
+    suspend fun selectPdf(pdf: PlatformFile, appState: AppState) {
         // Remember directory of selected pdf.
         val directory = pdf.directory
         if (directory != null) {
-            preferences.setPreviousPdfLocation(directory)
+            appState.preferences.setPreviousPdfLocation(directory)
         }
 
         // Detect previously selected sender.
-        val senderKey = preferences.previousSenderKey
+        val senderKey = appState.preferences.previousSenderKey
         val sender = if (senderKey != null) {
-            senders.senders.find { it._key == senderKey }
+            appState.senders.senders.find { it._key == senderKey }
         } else {
             null
         }
 
         // Detect previously selected product.
-        val productKey = preferences.previousProductKey
+        val productKey = appState.preferences.previousProductKey
         val product = if (productKey != null) {
-            products.products.find { it._key == productKey }
+            appState.products.products.find { it._key == productKey }
         } else {
             null
         }
@@ -111,7 +117,7 @@ class CreateSectionState : SectionState() {
         _selectedPdfArchiveError.value = null
 
         val pdfArchiveVersion = getPdfArchiveVersion(pdf)
-        if (preferences.autoConvertToPdfA && !isSupportedPdfArchiveVersion(pdfArchiveVersion) && pdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION) {
+        if (appState.preferences.autoConvertToPdfA && !isSupportedPdfArchiveVersion(pdfArchiveVersion) && pdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION) {
             try {
                 val convertedPdf = convertToPdfArchive(pdf)
                 _selectedPdf.value = convertedPdf
@@ -126,7 +132,7 @@ class CreateSectionState : SectionState() {
 
         // Create empty invoice instance.
         _invoice.value = Invoice(
-            currency = preferences.currency ?: FALLBACK_CURRENCY,
+            currency = appState.preferences.currency ?: FALLBACK_CURRENCY,
             sender = sender,
             items = listOf(
                 Item(
