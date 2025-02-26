@@ -73,7 +73,6 @@ actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier) {
     if (isInstalled) {
         SwingPanel(
             background = MaterialTheme.colorScheme.surface,
-            modifier = modifier,
             factory = {
                 val browser = getCefBrowser(pdfUrl)
                 browserState = browser
@@ -82,7 +81,8 @@ actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier) {
             update = { panel: PdfPanel ->
                 panel.browser.stopLoad()
                 panel.browser.loadURL(pdfUrl)
-            }
+            },
+            modifier = modifier,
         )
     }
 }

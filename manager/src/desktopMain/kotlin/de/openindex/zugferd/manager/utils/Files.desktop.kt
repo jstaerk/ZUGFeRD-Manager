@@ -23,6 +23,11 @@ package de.openindex.zugferd.manager.utils
 
 import io.github.vinceglb.filekit.core.PlatformDirectory
 import io.github.vinceglb.filekit.core.PlatformFile
+import java.net.URI
+import kotlin.io.path.toPath
 
 actual val PlatformFile.directory: PlatformDirectory?
     get() = if (file.parentFile != null) PlatformDirectory(file.parentFile) else null
+
+actual fun getPlatformFileFromURI(uri: String): PlatformFile =
+    PlatformFile(URI.create(uri).toPath().toFile())

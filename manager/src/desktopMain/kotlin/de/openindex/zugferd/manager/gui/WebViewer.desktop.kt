@@ -77,7 +77,6 @@ actual fun WebViewer(html: String, modifier: Modifier) {
     if (isInstalled) {
         SwingPanel(
             background = MaterialTheme.colorScheme.surface,
-            modifier = modifier,
             factory = {
                 val browser = getCefBrowser(dataUrl)
                 browserState = browser
@@ -86,7 +85,8 @@ actual fun WebViewer(html: String, modifier: Modifier) {
             update = { panel: WebPanel ->
                 panel.browser.stopLoad()
                 panel.browser.loadURL(dataUrl)
-            }
+            },
+            modifier = modifier,
         )
     }
 }
