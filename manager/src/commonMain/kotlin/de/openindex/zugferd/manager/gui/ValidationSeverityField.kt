@@ -23,22 +23,22 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.model.TaxCategory
+import de.openindex.zugferd.manager.model.ValidationSeverity
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 
 @Composable
 @Suppress("unused")
-fun TaxCategoryField(
+fun ValidationSeverityField(
     label: StringResource,
-    value: TaxCategory? = null,
-    options: Map<TaxCategory, StringResource> = buildMap {
-        TaxCategory.entries.forEach { e -> put(e, e.title) }
+    value: ValidationSeverity? = null,
+    options: Map<ValidationSeverity, StringResource> = buildMap {
+        ValidationSeverity.entries.forEach { e -> put(e, e.title) }
     },
     requiredIndicator: Boolean = false,
-    onSelect: (TaxCategory) -> Unit,
+    onSelect: (ValidationSeverity) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
     label = label,
@@ -49,16 +49,15 @@ fun TaxCategoryField(
     modifier = modifier,
 )
 
-
 @Composable
-fun TaxCategoryField(
-    label: PluralStringResource = Res.plurals.TaxCategory,
-    value: TaxCategory? = null,
-    options: Map<TaxCategory, StringResource> = buildMap {
-        TaxCategory.entries.forEach { e -> put(e, e.title) }
+fun ValidationSeverityField(
+    label: PluralStringResource = Res.plurals.ValidationSeverity,
+    value: ValidationSeverity? = null,
+    options: Map<ValidationSeverity, StringResource> = buildMap {
+        ValidationSeverity.entries.forEach { e -> put(e, e.title) }
     },
     requiredIndicator: Boolean = false,
-    onSelect: (TaxCategory) -> Unit,
+    onSelect: (ValidationSeverity) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
     label = label,

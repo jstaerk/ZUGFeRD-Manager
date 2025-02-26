@@ -38,14 +38,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSectionMore
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun ActionDropDownButton(
     icon: ImageVector = Icons.Default.MoreVert,
+    tooltipText: StringResource = Res.string.AppSettingsSectionMore,
     actions: @Composable ColumnScope.(doClose: () -> Unit) -> Unit,
 ) = Tooltip(
-    text = Res.string.AppSettingsSectionMore,
+    text = tooltipText,
 ) {
     Box {
         var expanded by remember { mutableStateOf(false) }
@@ -55,7 +57,7 @@ fun ActionDropDownButton(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = stringResource(Res.string.AppSettingsSectionMore),
+                contentDescription = stringResource(tooltipText),
             )
         }
 

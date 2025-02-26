@@ -30,6 +30,26 @@ import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 
 @Composable
+@Suppress("unused")
+fun UnitOfMeasurementField(
+    label: StringResource,
+    value: UnitOfMeasurement? = null,
+    options: Map<UnitOfMeasurement, StringResource> = buildMap {
+        UnitOfMeasurement.entries.forEach { e -> put(e, e.title) }
+    },
+    requiredIndicator: Boolean = false,
+    onSelect: (UnitOfMeasurement) -> Unit,
+    modifier: Modifier = Modifier,
+) = DropDown(
+    label = label,
+    value = value,
+    options = options,
+    requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
+    modifier = modifier,
+)
+
+@Composable
 fun UnitOfMeasurementField(
     label: PluralStringResource = Res.plurals.UnitOfMeasurement,
     value: UnitOfMeasurement? = null,

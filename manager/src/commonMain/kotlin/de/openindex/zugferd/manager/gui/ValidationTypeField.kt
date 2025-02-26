@@ -23,22 +23,22 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.model.TaxCategory
+import de.openindex.zugferd.manager.model.ValidationType
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 
 @Composable
 @Suppress("unused")
-fun TaxCategoryField(
+fun ValidationTypeField(
     label: StringResource,
-    value: TaxCategory? = null,
-    options: Map<TaxCategory, StringResource> = buildMap {
-        TaxCategory.entries.forEach { e -> put(e, e.title) }
+    value: ValidationType? = null,
+    options: Map<ValidationType, StringResource> = buildMap {
+        ValidationType.entries.forEach { e -> put(e, e.title) }
     },
     requiredIndicator: Boolean = false,
-    onSelect: (TaxCategory) -> Unit,
+    onSelect: (ValidationType) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
     label = label,
@@ -49,16 +49,15 @@ fun TaxCategoryField(
     modifier = modifier,
 )
 
-
 @Composable
-fun TaxCategoryField(
-    label: PluralStringResource = Res.plurals.TaxCategory,
-    value: TaxCategory? = null,
-    options: Map<TaxCategory, StringResource> = buildMap {
-        TaxCategory.entries.forEach { e -> put(e, e.title) }
+fun ValidationTypeField(
+    label: PluralStringResource = Res.plurals.ValidationType,
+    value: ValidationType? = null,
+    options: Map<ValidationType, StringResource> = buildMap {
+        ValidationType.entries.forEach { e -> put(e, e.title) }
     },
     requiredIndicator: Boolean = false,
-    onSelect: (TaxCategory) -> Unit,
+    onSelect: (ValidationType) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
     label = label,
