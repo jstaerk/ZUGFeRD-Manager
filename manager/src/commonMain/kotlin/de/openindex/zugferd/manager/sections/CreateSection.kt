@@ -55,12 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draganddrop.DragAndDropEvent
-import androidx.compose.ui.draganddrop.DragAndDropTarget
-import androidx.compose.ui.draganddrop.DragData
-import androidx.compose.ui.draganddrop.dragData
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -91,9 +86,9 @@ import de.openindex.zugferd.manager.model.Item
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
 import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
+import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.formatAsPercentage
 import de.openindex.zugferd.manager.utils.formatPrice
-import de.openindex.zugferd.manager.utils.getPlatformFileFromURI
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -151,7 +146,7 @@ import kotlinx.coroutines.launch
  * Main view of the create section.
  */
 @Composable
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 fun CreateSection(state: CreateSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
@@ -162,27 +157,16 @@ fun CreateSection(state: CreateSectionState) {
     val isSelectedPdfArchiveUsable = state.isSelectedPdfArchiveUsable
 
     val dragAndDropCallback = remember {
-        object : DragAndDropTarget {
-            override fun onDrop(event: DragAndDropEvent): Boolean {
-                val dragData = event.dragData()
-                if (dragData !is DragData.FilesList) {
-                    return false
-                }
-
-                val pdfFileUri = dragData.readFiles().firstOrNull {
-                    it.lowercase().endsWith(".pdf")
-                } ?: return false
-
+        createDragAndDropTarget(
+            onDrop = { pdfFile ->
                 scope.launch {
                     state.selectPdf(
-                        pdf = getPlatformFileFromURI(pdfFileUri),
+                        pdf = pdfFile,
                         appState = appState,
                     )
                 }
-
-                return true
             }
-        }
+        )
     }
 
     // Show an empty view, if no PDF file was selected.
