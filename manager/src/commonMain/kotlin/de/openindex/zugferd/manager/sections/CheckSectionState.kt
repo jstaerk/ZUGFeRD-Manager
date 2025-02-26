@@ -32,6 +32,7 @@ import de.openindex.zugferd.manager.utils.getXmlFromPdf
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.trimToNull
 import de.openindex.zugferd.manager.utils.validatePdf
+import de.openindex.zugferd.manager.utils.writeJson
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectFile
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
@@ -93,5 +94,18 @@ class CheckSectionState : SectionState() {
                 _selectedPdfValidation.value = validatePdf(pdf)
             }
         }
+    }
+
+    suspend fun exportValidation(validation: Validation) {
+        val sourceFile = selectedPdf ?: return
+        val targetFile = FileKit.saveFile(
+            bytes = null,
+            baseName = sourceFile.name.substringBeforeLast(".")
+                .plus(".validation"),
+            extension = "json",
+            initialDirectory = sourceFile.path,
+        ) ?: return
+
+        targetFile.writeJson(validation)
     }
 }

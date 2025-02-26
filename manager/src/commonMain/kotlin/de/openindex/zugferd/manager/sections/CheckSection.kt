@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -89,6 +90,7 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectIn
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectMessage
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummary
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryErrors
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryExport
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryMessages
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryNotices
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryProfile
@@ -229,6 +231,7 @@ private fun EmptyView(state: CheckSectionState) {
  */
 @Composable
 private fun CheckView(state: CheckSectionState) {
+    val scope = rememberCoroutineScope()
     val selectedPdf = state.selectedPdf!!
     val validation = state.selectedPdfValidation
 
@@ -284,7 +287,19 @@ private fun CheckView(state: CheckSectionState) {
             ) {
                 SectionSubTitle(
                     text = Res.string.AppCheckSummary,
-                )
+                ) {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                state.exportValidation(validation)
+                            }
+                        },
+                    ) {
+                        Label(
+                            text = Res.string.AppCheckSummaryExport,
+                        )
+                    }
+                }
 
                 ValidationSummary(state)
             }

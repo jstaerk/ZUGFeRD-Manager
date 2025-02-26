@@ -37,6 +37,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCheckSelectFile">select an e-invoice</string>
 
     <string name="AppCheckSummary">summary</string>
+    <string name="AppCheckSummaryExport">export report</string>
     <string name="AppCheckSummaryProfile">profile</string>
     <string name="AppCheckSummaryVersion">version</string>
     <string name="AppCheckSummarySignature">used software</string>

@@ -37,6 +37,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCheckSelectFile">eine E-Rechnung wählen</string>
 
     <string name="AppCheckSummary">Zusammenfassung</string>
+    <string name="AppCheckSummaryExport">Bericht exportieren</string>
     <string name="AppCheckSummaryProfile">Profil</string>
     <string name="AppCheckSummaryVersion">Version</string>
     <string name="AppCheckSummarySignature">Signatur</string>
