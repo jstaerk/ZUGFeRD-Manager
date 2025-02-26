@@ -19,44 +19,15 @@
  * under the License.
  */
 
-package de.openindex.zugferd.manager.utils
+package de.openindex.zugferd.manager.model
 
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_ERROR
 import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_FATAL
 import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_NOTICE
 import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_WARNING
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_OTHER
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_PDF
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_XML
-import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.StringResource
-
-@Serializable
-data class Validation(
-    val isValid: Boolean,
-    val signature: String?,
-    val profile: String?,
-    val version: String?,
-    val messages: List<ValidationMessage>
-) {
-    val countNotices: Int
-        get() = messages.count { it.severity == ValidationSeverity.NOTICE }
-
-    val countWarnings: Int
-        get() = messages.count { it.severity == ValidationSeverity.WARNING }
-
-    val countErrors: Int
-        get() = messages.count { it.severity == ValidationSeverity.ERROR || it.severity == ValidationSeverity.FATAL }
-}
-
-@Serializable
-data class ValidationMessage(
-    val message: String,
-    val type: ValidationType,
-    val severity: ValidationSeverity,
-)
 
 enum class ValidationSeverity(val title: StringResource) {
     NOTICE(
@@ -77,26 +48,3 @@ enum class ValidationSeverity(val title: StringResource) {
     @Suppress("unused")
     suspend fun translateTitle(): String = getString(title)
 }
-
-enum class ValidationType(val title: StringResource) {
-    PDF(
-        title = Res.string.ValidationType_PDF,
-    ),
-    XML(
-        title = Res.string.ValidationType_XML,
-    ),
-    OTHER(
-        title = Res.string.ValidationType_OTHER,
-    ),
-
-    ;
-
-    @Suppress("unused")
-    suspend fun translateTitle(): String = getString(title)
-}
-
-expect fun getXmlFromPdf(pdf: PlatformFile): String?
-
-expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
-
-expect suspend fun validatePdf(pdf: PlatformFile): Validation

@@ -21,24 +21,34 @@
 
 package de.openindex.zugferd.manager.utils
 
+import de.openindex.zugferd.manager.model.ValidationSeverity
+import de.openindex.zugferd.manager.model.ValidationType
 import io.github.vinceglb.filekit.core.PlatformFile
+import kotlinx.serialization.Serializable
 
-const val MAX_PDF_ARCHIVE_VERSION = 3
+@Serializable
+data class Validation(
+    val isValid: Boolean,
+    val signature: String?,
+    val profile: String?,
+    val version: String?,
+    val messages: List<ValidationMessage>
+) {
+    val countNotices: Int
+        get() = messages.count { it.severity == ValidationSeverity.NOTICE }
 
-fun isPdfArchive(version: Int): Boolean =
-    version > 0
+    val countWarnings: Int
+        get() = messages.count { it.severity == ValidationSeverity.WARNING }
 
-fun isSupportedPdfArchiveVersion(version: Int): Boolean =
-    version == 1 || version == MAX_PDF_ARCHIVE_VERSION
+    val countErrors: Int
+        get() = messages.count { it.severity == ValidationSeverity.ERROR || it.severity == ValidationSeverity.FATAL }
+}
 
-@Suppress("unused")
-suspend fun isPdfArchive(pdfFile: PlatformFile): Boolean =
-    isPdfArchive(getPdfArchiveVersion(pdfFile))
+@Serializable
+data class ValidationMessage(
+    val message: String,
+    val type: ValidationType,
+    val severity: ValidationSeverity,
+)
 
-expect suspend fun getPdfArchiveVersion(pdfFile: PlatformFile): Int
-
-expect suspend fun convertToPdfArchive(pdfFile: PlatformFile): PlatformFile
-
-expect fun getXmlFromPdf(pdf: PlatformFile): String?
-
-expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
+expect suspend fun validatePdf(pdf: PlatformFile): Validation

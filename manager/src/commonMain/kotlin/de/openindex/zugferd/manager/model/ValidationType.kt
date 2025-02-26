@@ -19,26 +19,28 @@
  * under the License.
  */
 
-package de.openindex.zugferd.manager.utils
+package de.openindex.zugferd.manager.model
 
-import io.github.vinceglb.filekit.core.PlatformFile
+import de.openindex.zugferd.manager.utils.getString
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_OTHER
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_PDF
+import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_XML
+import org.jetbrains.compose.resources.StringResource
 
-const val MAX_PDF_ARCHIVE_VERSION = 3
+enum class ValidationType(val title: StringResource) {
+    PDF(
+        title = Res.string.ValidationType_PDF,
+    ),
+    XML(
+        title = Res.string.ValidationType_XML,
+    ),
+    OTHER(
+        title = Res.string.ValidationType_OTHER,
+    ),
 
-fun isPdfArchive(version: Int): Boolean =
-    version > 0
+    ;
 
-fun isSupportedPdfArchiveVersion(version: Int): Boolean =
-    version == 1 || version == MAX_PDF_ARCHIVE_VERSION
-
-@Suppress("unused")
-suspend fun isPdfArchive(pdfFile: PlatformFile): Boolean =
-    isPdfArchive(getPdfArchiveVersion(pdfFile))
-
-expect suspend fun getPdfArchiveVersion(pdfFile: PlatformFile): Int
-
-expect suspend fun convertToPdfArchive(pdfFile: PlatformFile): PlatformFile
-
-expect fun getXmlFromPdf(pdf: PlatformFile): String?
-
-expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
+    @Suppress("unused")
+    suspend fun translateTitle(): String = getString(title)
+}
