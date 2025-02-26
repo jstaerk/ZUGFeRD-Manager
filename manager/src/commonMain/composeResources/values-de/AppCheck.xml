@@ -57,6 +57,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     </plurals>
 
     <string name="AppCheckMessages">Mitteilungen</string>
+    <string name="AppCheckMessagesFilter">Mitteilungen filtern</string>
+    <string name="AppCheckMessagesFilterType">nach Art</string>
+    <string name="AppCheckMessagesFilterSeverity">nach Dringlichkeit</string>
 
     <string name="AppCheckDetailsPdf">gewählte PDF</string>
     <string name="AppCheckDetailsHtml">XML-Visualisierung</string>

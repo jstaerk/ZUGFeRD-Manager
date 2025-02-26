@@ -33,6 +33,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ThumbDown
@@ -41,6 +43,9 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -73,6 +78,7 @@ import de.openindex.zugferd.manager.gui.VerticalScrollBox
 import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.ValidationSeverity
+import de.openindex.zugferd.manager.model.ValidationType
 import de.openindex.zugferd.manager.utils.ValidationMessage
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.pluralStringResource
@@ -84,6 +90,9 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckDetailsP
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckDetailsXml
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckFailed
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessages
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessagesFilter
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessagesFilterSeverity
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessagesFilterType
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckPassed
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelect
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectInfo
@@ -313,7 +322,106 @@ private fun CheckView(state: CheckSectionState) {
                 ) {
                     SectionSubTitle(
                         text = Res.string.AppCheckMessages,
-                    )
+                    ) {
+                        Box {
+                            var expanded by remember { mutableStateOf(false) }
+
+                            Button(
+                                onClick = { expanded = true },
+                            ) {
+                                Label(
+                                    text = Res.string.AppCheckMessagesFilter,
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.AppCheckMessagesFilterType),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    softWrap = false,
+                                    modifier = Modifier
+                                        .padding(
+                                            horizontal = 12.dp,
+                                            vertical = 12.dp,
+                                        )
+                                )
+
+                                ValidationType.entries.forEach { type ->
+                                    val isSelected = state.filterType.contains(type)
+
+                                    DropdownMenuItem(
+                                        text = {
+                                            Label(
+                                                text = stringResource(type.title),
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = if (isSelected)
+                                                    Icons.Default.CheckBox
+                                                else
+                                                    Icons.Default.CheckBoxOutlineBlank,
+                                                contentDescription = stringResource(type.title),
+                                            )
+                                        },
+                                        onClick = {
+                                            state.setFilterType(
+                                                if (state.filterType.contains(type))
+                                                    state.filterType.minus(type)
+                                                else
+                                                    state.filterType.plus(type)
+                                            )
+                                        }
+                                    )
+                                }
+
+                                HorizontalDivider()
+
+                                Text(
+                                    text = stringResource(Res.string.AppCheckMessagesFilterSeverity),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    softWrap = false,
+                                    modifier = Modifier
+                                        .padding(
+                                            horizontal = 12.dp,
+                                            vertical = 12.dp,
+                                        )
+                                )
+
+                                ValidationSeverity.entries.forEach { severity ->
+                                    val isSelected = state.filterSeverity.contains(severity)
+
+                                    DropdownMenuItem(
+                                        text = {
+                                            Label(
+                                                text = stringResource(severity.title),
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = if (isSelected)
+                                                    Icons.Default.CheckBox
+                                                else
+                                                    Icons.Default.CheckBoxOutlineBlank,
+                                                contentDescription = stringResource(severity.title),
+                                            )
+                                        },
+                                        onClick = {
+                                            state.setFilterSeverity(
+                                                if (state.filterSeverity.contains(severity))
+                                                    state.filterSeverity.minus(severity)
+                                                else
+                                                    state.filterSeverity.plus(severity)
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
 
                     ValidationMessages(state)
                 }
@@ -529,15 +637,20 @@ private fun ValidationSummary(state: CheckSectionState) {
 @Composable
 private fun ValidationMessages(state: CheckSectionState) {
     val validation = state.selectedPdfValidation!!
+    val filterType = state.filterType
+    val filterSeverity = state.filterSeverity
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth(),
     ) {
-        validation.messages.forEach {
-            ValidationMessage(it)
-        }
+        validation.messages
+            .filter { filterType.contains(it.type) }
+            .filter { filterSeverity.contains(it.severity) }
+            .forEach {
+                ValidationMessage(it)
+            }
     }
 }
 

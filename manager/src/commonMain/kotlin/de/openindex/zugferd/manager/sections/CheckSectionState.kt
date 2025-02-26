@@ -23,6 +23,8 @@ package de.openindex.zugferd.manager.sections
 
 import androidx.compose.runtime.mutableStateOf
 import de.openindex.zugferd.manager.AppState
+import de.openindex.zugferd.manager.model.ValidationSeverity
+import de.openindex.zugferd.manager.model.ValidationType
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Validation
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
@@ -76,10 +78,11 @@ class CheckSectionState : SectionState() {
 
     @Suppress("UNUSED_PARAMETER")
     suspend fun selectPdf(pdf: PlatformFile, appState: AppState) {
+        _selectedPdfHtml.value = null
+        _selectedPdfValidation.value = null
         _selectedPdf.value = pdf
         _selectedPdfXml.value = getXmlFromPdf(pdf)?.let { getPrettyPrintedXml(it) }?.trimToNull()
 
-        _selectedPdfHtml.value = null
         coroutineScope {
             launch(Dispatchers.IO) {
                 //delay(2000)
@@ -87,11 +90,12 @@ class CheckSectionState : SectionState() {
             }
         }
 
-        _selectedPdfValidation.value = null
         coroutineScope {
             launch(Dispatchers.IO) {
                 //delay(2000)
                 _selectedPdfValidation.value = validatePdf(pdf)
+                _filterType.value = ValidationType.entries.toList()
+                _filterSeverity.value = ValidationSeverity.entries.toList()
             }
         }
     }
@@ -107,5 +111,21 @@ class CheckSectionState : SectionState() {
         ) ?: return
 
         targetFile.writeJson(validation)
+    }
+
+    private var _filterType = mutableStateOf(ValidationType.entries.toList())
+    val filterType: List<ValidationType>
+        get() = _filterType.value
+
+    fun setFilterType(type: List<ValidationType>) {
+        _filterType.value = type.toList()
+    }
+
+    private var _filterSeverity = mutableStateOf(ValidationSeverity.entries.toList())
+    val filterSeverity: List<ValidationSeverity>
+        get() = _filterSeverity.value
+
+    fun setFilterSeverity(severity: List<ValidationSeverity>) {
+        _filterSeverity.value = severity.toList()
     }
 }
