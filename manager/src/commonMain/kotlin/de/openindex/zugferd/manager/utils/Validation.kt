@@ -21,6 +21,8 @@
 
 package de.openindex.zugferd.manager.utils
 
+import de.openindex.zugferd.manager.model.ValidationSeverity
+import de.openindex.zugferd.manager.model.ValidationType
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.serialization.Serializable
 
@@ -48,22 +50,5 @@ data class ValidationMessage(
     val type: ValidationType,
     val severity: ValidationSeverity,
 )
-
-enum class ValidationSeverity {
-    NOTICE,
-    WARNING,
-    ERROR,
-    FATAL,
-}
-
-enum class ValidationType {
-    PDF,
-    XML,
-    OTHER,
-}
-
-expect fun getXmlFromPdf(pdf: PlatformFile): String?
-
-expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
 
 expect suspend fun validatePdf(pdf: PlatformFile): Validation

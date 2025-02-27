@@ -35,7 +35,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -47,14 +46,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.utils.trimToNull
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsItemAdd
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsItemEdit
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsItemRemove
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 
 interface ItemSettingsContext {
     fun closeDialog()
 }
 
+/**
+ * A generic implementation to manage a pool of items.
+ */
 @Composable
 @OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 fun <T, K> ItemSettings(
@@ -116,9 +123,8 @@ fun <T, K> ItemSettings(
                                     editedItem.value = selectedItem.value
                                 },
                         ) {
-                            Text(
+                            Label(
                                 text = itemText(item).trimToNull() ?: "???",
-                                softWrap = false,
                             )
                         }
                     }
@@ -131,17 +137,18 @@ fun <T, K> ItemSettings(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier,
         ) {
+            // Button to add a new item.
             Button(
                 onClick = {
                     editedItem.value = itemCreate()
                 },
             ) {
-                Text(
-                    text = "Hinzufügen",
-                    softWrap = false,
+                Label(
+                    text = Res.string.AppSettingsItemAdd,
                 )
             }
 
+            // Button to edit the currently selected item.
             AnimatedVisibility(visible = selectedItem.value != null) {
                 Button(
                     onClick = {
@@ -149,13 +156,13 @@ fun <T, K> ItemSettings(
                         //tradePartySelected.value = null
                     },
                 ) {
-                    Text(
-                        text = "Bearbeiten",
-                        softWrap = false,
+                    Label(
+                        text = Res.string.AppSettingsItemEdit,
                     )
                 }
             }
 
+            // Button to remove the currently selected item.
             AnimatedVisibility(visible = selectedItem.value != null) {
                 Button(
                     onClick = {
@@ -167,9 +174,8 @@ fun <T, K> ItemSettings(
                         }
                     },
                 ) {
-                    Text(
-                        text = "Löschen",
-                        softWrap = false,
+                    Label(
+                        text = Res.string.AppSettingsItemRemove,
                     )
                 }
             }
@@ -188,19 +194,29 @@ fun <T, K> ItemSettings(
     }
 }
 
+/**
+ * Manage a pool of trade party items.
+ */
 @Composable
 fun TradePartyItemSettings(
     tradeParties: List<TradeParty>,
     isCustomer: Boolean = false,
     onSave: (TradeParty) -> Unit,
     onRemove: (TradeParty) -> Unit,
-    dialogTitle: (TradeParty?) -> String
+    dialogTitle: @Composable (TradeParty?) -> String
 ) {
+    val preferences = LocalAppState.current.preferences
+    val defaultCountry = preferences.country
+
     ItemSettings(
         items = tradeParties,
         itemKey = { it._key },
         itemText = { it.summaryShort },
-        itemCreate = { TradeParty() },
+        itemCreate = {
+            TradeParty(
+                country = defaultCountry,
+            )
+        },
         onRemove = onRemove,
     ) { selectedItem ->
         TradePartyDialog(
@@ -218,18 +234,24 @@ fun TradePartyItemSettings(
     }
 }
 
+/**
+ * Manage a pool of product items.
+ */
 @Composable
 fun ProductItemSettings(
     products: List<Product>,
     onSave: (Product) -> Unit,
     onRemove: (Product) -> Unit,
-    dialogTitle: (Product?) -> String
+    dialogTitle: @Composable (Product?) -> String
 ) {
+    val preferences = LocalAppState.current.preferences
+    val defaultTaxPercentage = preferences.vatPercentage ?: 0.toDouble()
+
     ItemSettings(
         items = products,
         itemKey = { it._key },
-        itemText = { it.summary },
-        itemCreate = { Product() },
+        itemText = { it.getSummary(preferences) },
+        itemCreate = { Product(vatPercent = defaultTaxPercentage) },
         onRemove = onRemove,
     ) { selectedItem ->
         ProductDialog(

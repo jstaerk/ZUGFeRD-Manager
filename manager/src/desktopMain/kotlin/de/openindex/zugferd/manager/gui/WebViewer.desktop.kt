@@ -32,7 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import de.openindex.zugferd.manager.utils.LocalPreferences
+import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.utils.getCefBrowser
 import de.openindex.zugferd.manager.utils.installWebView
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 actual fun WebViewer(html: String, modifier: Modifier) {
     val scope = rememberCoroutineScope()
     var isInstalled by remember { mutableStateOf(false) }
-    val chromeGpuEnabled = LocalPreferences.current.chromeGpuEnabled
+    val chromeGpuEnabled = LocalAppState.current.preferences.chromeGpuEnabled
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -77,7 +77,6 @@ actual fun WebViewer(html: String, modifier: Modifier) {
     if (isInstalled) {
         SwingPanel(
             background = MaterialTheme.colorScheme.surface,
-            modifier = modifier,
             factory = {
                 val browser = getCefBrowser(dataUrl)
                 browserState = browser
@@ -86,7 +85,8 @@ actual fun WebViewer(html: String, modifier: Modifier) {
             update = { panel: WebPanel ->
                 panel.browser.stopLoad()
                 panel.browser.loadURL(dataUrl)
-            }
+            },
+            modifier = modifier,
         )
     }
 }

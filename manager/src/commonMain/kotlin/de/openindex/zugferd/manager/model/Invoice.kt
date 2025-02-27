@@ -30,13 +30,12 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 import kotlinx.serialization.Serializable
 
-const val DEFAULT_CURRENCY = "EUR"
-val DEFAULT_PAYMENT_METHOD = PaymentMethod.SEPA_CREDIT_TRANSFER
+//private val DEFAULT_PAYMENT_METHOD = PaymentMethod.SEPA_CREDIT_TRANSFER
 
 @Serializable
 data class Invoice(
     @Suppress("PropertyName")
-    val _paymentMethod: PaymentMethod = DEFAULT_PAYMENT_METHOD,
+    val _paymentMethod: PaymentMethod = PaymentMethod.SEPA_CREDIT_TRANSFER,
 
     val number: String = "",
     val issueDate: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
@@ -46,7 +45,7 @@ data class Invoice(
     val deliveryEndDate: LocalDate? = null,
     val sender: TradeParty? = null,
     val recipient: TradeParty? = null,
-    val currency: String? = DEFAULT_CURRENCY,
+    val currency: String? = null,
     val items: List<Item> = listOf(),
 )
 

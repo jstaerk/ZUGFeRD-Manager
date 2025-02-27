@@ -21,12 +21,9 @@
 
 package de.openindex.zugferd.manager.utils
 
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import de.openindex.zugferd.manager.model.Product
 import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 
 class Products(data: List<Product>) {
     private val _products = mutableStateOf(data)
@@ -92,12 +89,8 @@ class Products(data: List<Product>) {
     }
 }
 
-val LocalProducts = compositionLocalOf { loadProducts() }
-
-fun loadProducts(): Products =
-    runBlocking(Dispatchers.IO) {
-        Products(loadProductsData())
-    }
+suspend fun loadProducts(): Products =
+    Products(loadProductsData())
 
 expect suspend fun loadProductsData(sourceFile: PlatformFile? = null): List<Product>
 

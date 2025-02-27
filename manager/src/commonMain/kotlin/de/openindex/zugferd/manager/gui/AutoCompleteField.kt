@@ -47,13 +47,19 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.manager.utils.translate
+import org.jetbrains.compose.resources.Resource
+import org.jetbrains.compose.resources.StringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun <T> AutoCompleteField(
     label: String,
     entry: T? = null,
     entries: Map<T, String>,
+    requiredIndicator: Boolean = false,
     onSelect: (T?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -85,9 +91,9 @@ fun <T> AutoCompleteField(
                 .fillMaxWidth(),
             singleLine = true,
             label = {
-                Text(
-                    text = label,
-                    softWrap = false,
+                Label(
+                    text = label.title(),
+                    requiredIndicator = requiredIndicator,
                 )
             },
             trailingIcon = {
@@ -153,9 +159,9 @@ fun <T> AutoCompleteField(
                     .menuAnchor(MenuAnchorType.PrimaryEditable),
                 singleLine = true,
                 label = {
-                    Text(
-                        text = label,
-                        softWrap = false,
+                    Label(
+                        text = label.title(),
+                        requiredIndicator = requiredIndicator,
                     )
                 },
                 trailingIcon = {
@@ -207,3 +213,23 @@ fun <T> AutoCompleteField(
         }
     }
 }
+
+@Composable
+@Suppress("unused")
+fun <T> AutoCompleteField(
+    label: Resource,
+    entry: T? = null,
+    entries: Map<T, StringResource>,
+    requiredIndicator: Boolean = false,
+    onSelect: (T?) -> Unit,
+    modifier: Modifier = Modifier,
+) = AutoCompleteField(
+    label = label.translate(),
+    entry = entry,
+    entries = buildMap<T, String> {
+        entries.entries.forEach { e -> put(e.key, stringResource(e.value)) }
+    },
+    requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
+    modifier = modifier,
+)

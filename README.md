@@ -1,4 +1,4 @@
-# OpenIndex ZUGFeRD-Manager 1.2.1
+# OpenIndex ZUGFeRD-Manager 1.3.0
 
 <img src="./share/icons/application.svg" align="right" height="125" alt="OpenIndex ZUGFeRD-Manager">
 
@@ -12,9 +12,9 @@
 | Windows                                                                                                                                  | MacOS                                                                                                                                        | Linux                                                                                                                                     |
 |------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | <img src="./share/os-logos/windows.png" width="100" alt="Windows">                                                                       | <img src="./share/os-logos/apple.png" width="90" alt="MacOS">                                                                                | <img src="./share/os-logos/linux.png" width="100" alt="Linux">                                                                            |
-| [EXE-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.2.1/ZUGFeRD-Manager-1.2.1-windows-x64.exe)<br>(x86_64) | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.2.1/ZUGFeRD-Manager-1.2.1-macos-arm64.dmg)<br>(M1 oder neuer) | [DEB-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.2.1/ZUGFeRD-Manager-1.2.1-linux-x64.deb)<br>(x86_64)    |
-| [ZIP-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.2.1/ZUGFeRD-Manager-1.2.1-windows-x64.zip)<br>(x86_64)    | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.2.1/ZUGFeRD-Manager-1.2.1-macos-x64.dmg)<br>(Intel)           | [RPM-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.2.1/ZUGFeRD-Manager-1.2.1-linux-x64.rpm)<br>(x86_64)    |
-|                                                                                                                                          |                                                                                                                                              | [TAR.GZ-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.2.1/ZUGFeRD-Manager-1.2.1-linux-x64.tar.gz)<br>(x86_64) |
+| [EXE-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.0/ZUGFeRD-Manager-1.3.0-windows-x64.exe)<br>(x86_64) | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.0/ZUGFeRD-Manager-1.3.0-macos-arm64.dmg)<br>(M1 oder neuer) | [DEB-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.0/ZUGFeRD-Manager-1.3.0-linux-x64.deb)<br>(x86_64)    |
+| [ZIP-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.0/ZUGFeRD-Manager-1.3.0-windows-x64.zip)<br>(x86_64)    | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.0/ZUGFeRD-Manager-1.3.0-macos-x64.dmg)<br>(Intel)           | [RPM-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.0/ZUGFeRD-Manager-1.3.0-linux-x64.rpm)<br>(x86_64)    |
+|                                                                                                                                          |                                                                                                                                              | [TAR.GZ-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.0/ZUGFeRD-Manager-1.3.0-linux-x64.tar.gz)<br>(x86_64) |
 
 Ältere Versionen sind in der [Release-Übersicht](https://github.com/OpenIndex/ZUGFeRD-Manager/releases) zu finden.
 
@@ -76,7 +76,7 @@ The application is written in [Kotlin / JVM](https://kotlinlang.org/) using [Com
 
 ### Development
 
-The application requires a certain version of the [Jetbrains JDK (bundled with JCEF)](https://github.com/JetBrains/JetBrainsRuntime). 
+The application requires the [Jetbrains JDK (bundled with JCEF)](https://github.com/JetBrains/JetBrainsRuntime). Other JDK's won't work. 
 
 -  Download the *Jetbrains JDK* for your operating system via:
 
@@ -131,7 +131,7 @@ The application requires a certain version of the [Jetbrains JDK (bundled with J
 
 ### Translations
 
-The application is currently only available in German language. Translation into other languages is currently not planned, but generally possible.
+The application is developed in English and translated into in German language. Translation into other languages are pretty straightforward. Please get in contact with us, if you like to translate the application into another language or help out with existing translations.
 
 
 ### Third party components

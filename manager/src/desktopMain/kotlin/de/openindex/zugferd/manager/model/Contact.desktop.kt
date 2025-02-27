@@ -24,8 +24,8 @@ package de.openindex.zugferd.manager.model
 import de.openindex.zugferd.manager.utils.trimToNull
 import org.mustangproject.Contact as _Contact
 
-fun Contact.build(): _Contact? {
-    return _Contact()
+fun Contact.build(): _Contact? =
+    _Contact()
         .setName(name.trim())
         .setPhone(phone?.trimToNull())
         .setEMail(email?.trimToNull())
@@ -35,4 +35,3 @@ fun Contact.build(): _Contact? {
         .setLocation(location?.trimToNull())
         .setCountry(country?.trimToNull())
         .takeIf { it.name.isNotBlank() }
-}

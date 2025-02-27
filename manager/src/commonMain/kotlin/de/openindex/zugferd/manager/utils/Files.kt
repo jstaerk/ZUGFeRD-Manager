@@ -25,3 +25,7 @@ import io.github.vinceglb.filekit.core.PlatformDirectory
 import io.github.vinceglb.filekit.core.PlatformFile
 
 expect val PlatformFile.directory: PlatformDirectory?
+
+expect suspend inline fun <reified T> PlatformFile.writeJson(data: T): Unit
+
+expect fun getPlatformFileFromURI(uri: String): PlatformFile

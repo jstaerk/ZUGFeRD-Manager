@@ -23,6 +23,20 @@ package de.openindex.zugferd.manager.utils
 
 import io.github.vinceglb.filekit.core.PlatformDirectory
 import io.github.vinceglb.filekit.core.PlatformFile
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.encodeToStream
+import java.net.URI
+import kotlin.io.path.toPath
 
 actual val PlatformFile.directory: PlatformDirectory?
     get() = if (file.parentFile != null) PlatformDirectory(file.parentFile) else null
+
+@OptIn(ExperimentalSerializationApi::class)
+actual suspend inline fun <reified T> PlatformFile.writeJson(data: T) {
+    this.file.outputStream().use { output ->
+        JSON_EXPORT.encodeToStream(data, output)
+    }
+}
+
+actual fun getPlatformFileFromURI(uri: String): PlatformFile =
+    PlatformFile(URI.create(uri).toPath().toFile())

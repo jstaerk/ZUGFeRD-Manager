@@ -40,25 +40,23 @@ import androidx.compose.ui.Modifier
 fun VerticalScrollBox(
     modifier: Modifier = Modifier.fillMaxSize(),
     content: @Composable BoxScope.() -> Unit,
+) = Box(
+    modifier = modifier,
 ) {
+    val scrollState = rememberScrollState(0)
+
     Box(
-        modifier = modifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState),
     ) {
-        val scrollState = rememberScrollState(0)
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState),
-        ) {
-            content()
-        }
-
-        VerticalScrollbar(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .fillMaxHeight(),
-            adapter = rememberScrollbarAdapter(scrollState)
-        )
+        content()
     }
+
+    VerticalScrollbar(
+        modifier = Modifier
+            .align(Alignment.CenterEnd)
+            .fillMaxHeight(),
+        adapter = rememberScrollbarAdapter(scrollState)
+    )
 }

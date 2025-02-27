@@ -21,18 +21,52 @@
 
 package de.openindex.zugferd.manager.utils
 
+import org.apache.commons.lang3.LocaleUtils
 import java.util.Currency
 import java.util.Locale
 
-actual fun getCurrencyCodes(): List<String> {
-    return Currency
-        .getAvailableCurrencies()
-        .map { it.currencyCode }
+private val CURRENCY_CODES by lazy {
+    // This approach also returns historic currencies.
+    //Currency
+    //    .getAvailableCurrencies()
+    //    .map { it.currencyCode }
+    //    .sorted()
+
+    // We only need active currencies for available countries.
+    Locale
+        .getISOCountries()
+        .mapNotNull { LocaleUtils.languagesByCountry(it).firstOrNull() }
+        .mapNotNull { Currency.getInstance(it)?.currencyCode }
+        .distinct()
         .sorted()
 }
 
-actual fun getCurrencySymbol(currency: String): String? {
-    return Currency.getInstance(currency)
+actual fun getCurrencyCodes(): List<String> =
+    CURRENCY_CODES
+
+actual fun getCurrencySymbol(currency: String): String? =
+    Currency.getInstance(currency)
         ?.getSymbol(Locale.getDefault())
         ?.takeIf { !it.equals(currency, true) }
-}
+
+actual fun getCurrencyName(currency: String): String? =
+    Currency.getInstance(currency)
+        ?.getDisplayName(Locale.getDefault())
+        ?.takeIf { !it.equals(currency, true) }
+
+@Suppress("unused")
+actual fun getSystemCurrency(): String =
+    try {
+        Currency.getInstance(Locale.getDefault())
+            ?.currencyCode
+            ?: FALLBACK_CURRENCY
+    } catch (e: IllegalArgumentException) {
+        FALLBACK_CURRENCY
+    }
+
+actual fun isValidCurrencyCode(code: String): Boolean =
+    try {
+        Currency.getInstance(code) != null
+    } catch (e: IllegalArgumentException) {
+        false
+    }

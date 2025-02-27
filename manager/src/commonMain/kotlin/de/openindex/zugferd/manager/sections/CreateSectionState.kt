@@ -22,7 +22,7 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.runtime.mutableStateOf
-import de.openindex.zugferd.manager.model.DEFAULT_CURRENCY
+import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.model.Invoice
 import de.openindex.zugferd.manager.model.Item
 import de.openindex.zugferd.manager.model.PaymentMethod
@@ -30,15 +30,19 @@ import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.model.export
 import de.openindex.zugferd.manager.model.isValid
 import de.openindex.zugferd.manager.model.toXml
+import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.Preferences
-import de.openindex.zugferd.manager.utils.Products
 import de.openindex.zugferd.manager.utils.SectionState
-import de.openindex.zugferd.manager.utils.Senders
 import de.openindex.zugferd.manager.utils.convertToPdfArchive
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
+import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.isSupportedPdfArchiveVersion
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerateFileSuffix
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectFile
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -70,32 +74,39 @@ class CreateSectionState : SectionState() {
     val isSelectedPdfArchiveUsable: Boolean
         get() = isSupportedPdfArchiveVersion(_selectedPdfArchiveVersion.value)
 
-    suspend fun selectPdf(preferences: Preferences, senders: Senders, products: Products) {
+    suspend fun selectPdf(appState: AppState) {
         val pdf = FileKit.pickFile(
             type = PickerType.File(extensions = listOf("pdf")),
             mode = PickerMode.Single,
-            title = "Wähle eine PDF-Rechnung",
-            initialDirectory = preferences.previousPdfLocation,
+            title = getString(Res.string.AppCreateSelectFile).title(),
+            initialDirectory = appState.preferences.previousPdfLocation,
         ) ?: return
 
+        selectPdf(
+            pdf = pdf,
+            appState = appState,
+        )
+    }
+
+    suspend fun selectPdf(pdf: PlatformFile, appState: AppState) {
         // Remember directory of selected pdf.
         val directory = pdf.directory
         if (directory != null) {
-            preferences.setPreviousPdfLocation(directory)
+            appState.preferences.setPreviousPdfLocation(directory)
         }
 
         // Detect previously selected sender.
-        val senderKey = preferences.previousSenderKey
+        val senderKey = appState.preferences.previousSenderKey
         val sender = if (senderKey != null) {
-            senders.senders.find { it._key == senderKey }
+            appState.senders.senders.find { it._key == senderKey }
         } else {
             null
         }
 
         // Detect previously selected product.
-        val productKey = preferences.previousProductKey
+        val productKey = appState.preferences.previousProductKey
         val product = if (productKey != null) {
-            products.products.find { it._key == productKey }
+            appState.products.products.find { it._key == productKey }
         } else {
             null
         }
@@ -106,7 +117,7 @@ class CreateSectionState : SectionState() {
         _selectedPdfArchiveError.value = null
 
         val pdfArchiveVersion = getPdfArchiveVersion(pdf)
-        if (preferences.autoConvertToPdfA && !isSupportedPdfArchiveVersion(pdfArchiveVersion) && pdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION) {
+        if (appState.preferences.autoConvertToPdfA && !isSupportedPdfArchiveVersion(pdfArchiveVersion) && pdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION) {
             try {
                 val convertedPdf = convertToPdfArchive(pdf)
                 _selectedPdf.value = convertedPdf
@@ -121,7 +132,7 @@ class CreateSectionState : SectionState() {
 
         // Create empty invoice instance.
         _invoice.value = Invoice(
-            currency = preferences.previousCurrency ?: DEFAULT_CURRENCY,
+            currency = appState.preferences.currency ?: FALLBACK_CURRENCY,
             sender = sender,
             items = listOf(
                 Item(
@@ -153,7 +164,9 @@ class CreateSectionState : SectionState() {
         val originalSourceFile = _originalSelectedPdf.value ?: return
         val targetFile = FileKit.saveFile(
             bytes = null,
-            baseName = originalSourceFile.name.substringBeforeLast(".").plus(".e-rechnung"),
+            baseName = originalSourceFile.name.substringBeforeLast(".")
+                .plus(".")
+                .plus(getString(Res.string.AppCreateGenerateFileSuffix)),
             extension = "pdf",
             initialDirectory = preferences.previousExportLocation
                 ?: preferences.previousPdfLocation

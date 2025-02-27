@@ -37,57 +37,61 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.model.Product
+import de.openindex.zugferd.manager.model.TradeParty
+import de.openindex.zugferd.manager.utils.getSystemCountryCode
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.manager.utils.translate
+import org.jetbrains.compose.resources.Resource
 
 @Composable
-fun ProductSelectField(
-    label: String = "Rechnungsposten",
-    product: Product? = null,
-    products: List<Product>,
-    onSelect: (Product?) -> Unit,
+fun TradePartyField(
+    label: Resource,
+    tradeParty: TradeParty? = null,
+    tradeParties: List<TradeParty>,
+    requiredIndicator: Boolean = false,
+    onSelect: (TradeParty?) -> Unit,
     modifier: Modifier = Modifier,
-) {
-    val options = remember(products) {
+) = AutoCompleteField(
+    label = label.translate(),
+    entry = tradeParty,
+    entries = remember(tradeParties) {
         buildMap {
-            products.forEach { party ->
+            tradeParties.forEach { party ->
                 put(party, party.summary)
             }
         }
-    }
-
-    AutoCompleteField(
-        label = label,
-        entry = product,
-        entries = options,
-        onSelect = onSelect,
-        modifier = modifier,
-    )
-}
+    },
+    requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
+    modifier = modifier,
+)
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-fun ProductSelectFieldWithAdd(
-    label: String = "Rechnungsposten",
-    addLabel: String = "Neuer Rechnungsposten",
-    editLabel: String = "Rechnungsposten bearbeiten",
-    product: Product? = null,
-    products: List<Product>,
-    onSelect: (product: Product?, savePermanently: Boolean) -> Unit,
+fun TradePartyFieldWithAdd(
+    label: Resource,
+    addLabel: Resource,
+    editLabel: Resource,
+    tradeParty: TradeParty? = null,
+    tradeParties: List<TradeParty>,
+    requiredIndicator: Boolean = false,
+    onSelect: (tradeParty: TradeParty?, savePermanently: Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var newProduct by remember { mutableStateOf<Product?>(null) }
-    val unsavedProduct by derivedStateOf {
-        products.find { !it.isSaved }
+    var newTradeParty by remember { mutableStateOf<TradeParty?>(null) }
+    val unsavedTradeParty by derivedStateOf {
+        tradeParties.find { !it.isSaved }
     }
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier,
     ) {
-        ProductSelectField(
+        TradePartyField(
             label = label,
-            product = product,
-            products = products,
+            tradeParty = tradeParty,
+            tradeParties = tradeParties,
+            requiredIndicator = requiredIndicator,
             onSelect = { selection ->
                 onSelect(selection, false)
             },
@@ -95,38 +99,44 @@ fun ProductSelectFieldWithAdd(
         )
 
         Tooltip(
-            text = addLabel.takeIf { unsavedProduct == null } ?: editLabel,
+            text = (addLabel.takeIf { unsavedTradeParty == null } ?: editLabel)
+                .translate()
+                .title(),
         ) {
             IconButton(
                 onClick = {
-                    newProduct = unsavedProduct ?: Product()
+                    newTradeParty = unsavedTradeParty ?: TradeParty(
+                        country = getSystemCountryCode(),
+                    )
                 },
                 modifier = Modifier,
             ) {
-                if (unsavedProduct == null) {
+                if (unsavedTradeParty == null) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = addLabel,
+                        contentDescription = addLabel.translate(),
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = editLabel,
+                        contentDescription = editLabel.translate(),
                     )
                 }
             }
         }
     }
 
-    if (newProduct != null) {
-        ProductDialog(
-            title = addLabel.takeIf { unsavedProduct == null } ?: editLabel,
-            value = newProduct!!,
+    if (newTradeParty != null) {
+        TradePartyDialog(
+            title = (addLabel.takeIf { unsavedTradeParty == null } ?: editLabel)
+                .translate()
+                .title(),
+            value = newTradeParty!!,
             permanentSaveOption = true,
-            onDismissRequest = { newProduct = null },
+            onDismissRequest = { newTradeParty = null },
             onSubmitRequest = { selection, savePermanently ->
                 onSelect(selection, savePermanently)
-                newProduct = null
+                newTradeParty = null
             },
         )
     }

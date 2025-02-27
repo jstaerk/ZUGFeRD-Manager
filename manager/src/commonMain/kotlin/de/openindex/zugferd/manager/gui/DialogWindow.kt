@@ -24,7 +24,10 @@ package de.openindex.zugferd.manager.gui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.LocalAppState
+import de.openindex.zugferd.manager.utils.pluralStringResource
+import de.openindex.zugferd.manager.utils.stringResource
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
 expect fun DialogWindow(
@@ -36,6 +39,43 @@ expect fun DialogWindow(
     content: @Composable () -> Unit,
 )
 
+@Composable
+fun DialogWindow(
+    title: StringResource,
+    onCloseRequest: () -> Unit,
+    width: Dp = 700.dp,
+    height: Dp = 600.dp,
+    resizable: Boolean = true,
+    content: @Composable () -> Unit,
+) = DialogWindow(
+    title = stringResource(title),
+    onCloseRequest = onCloseRequest,
+    width = width,
+    height = height,
+    resizable = resizable,
+    content = content,
+)
+
+@Composable
+@Suppress("unused")
+fun DialogWindow(
+    title: PluralStringResource,
+    titleQuantity: Int = 1,
+    onCloseRequest: () -> Unit,
+    width: Dp = 700.dp,
+    height: Dp = 600.dp,
+    resizable: Boolean = true,
+    content: @Composable () -> Unit,
+) = DialogWindow(
+    title = pluralStringResource(title, titleQuantity),
+    onCloseRequest = onCloseRequest,
+    width = width,
+    height = height,
+    resizable = resizable,
+    content = content,
+)
+
+/*
 @Composable
 fun LockingDialogWindow(
     title: String,
@@ -58,3 +98,4 @@ fun LockingDialogWindow(
         content = content,
     )
 }
+*/
