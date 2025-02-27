@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import de.openindex.zugferd.manager.theme.AppTheme
+import de.openindex.zugferd.manager.utils.DEFAULT_LANGUAGE
 import de.openindex.zugferd.manager.utils.ShutdownHandler
 import de.openindex.zugferd.manager.utils.getShutdownHandler
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -37,16 +38,17 @@ val APP_TITLE: String = APP_NAME.replace('-', ' ').trim()
 val APP_TITLE_FULL: String = "$APP_VENDOR $APP_TITLE"
 val APP_VERSION_SHORT: String = APP_VERSION.substringBefore('-').trim()
 
+val LocalLanguage = staticCompositionLocalOf { DEFAULT_LANGUAGE }
 val LocalShutdownHandler = staticCompositionLocalOf<ShutdownHandler?> { null }
 
 @Composable
 @Preview
-fun App() {
-    //println(AppInfo.Project.NAME)
+fun App() = AppTheme {
     val shutdownHandler = getShutdownHandler()
+    val language = LocalAppState.current.preferences.language
 
     CompositionLocalProvider(LocalShutdownHandler provides shutdownHandler) {
-        AppTheme {
+        CompositionLocalProvider(LocalLanguage provides language) {
             AppLayout()
         }
     }

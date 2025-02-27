@@ -21,20 +21,31 @@
 
 package de.openindex.zugferd.manager.utils
 
+import java.util.Currency
 import java.util.Locale
 
-actual fun getCountryCodes(): List<String> {
-    return Locale
+actual fun getCountryCodes(): List<String> =
+    Locale
         .getISOCountries()
         .asList()
         .sorted()
-}
 
-actual fun getCountryName(code: String): String {
-    return Locale
+actual fun getCountryName(code: String): String =
+    Locale
         .of("", code)
         .getDisplayCountry(Locale.getDefault())
-}
 
-actual fun getDefaultCountryCode(): String =
+actual fun getSystemCountryCode(): String =
     Locale.getDefault().country
+
+actual fun isValidCountryCode(code: String): Boolean =
+    Locale.getISOCountries().firstOrNull { it.equals(code, true) } != null
+
+actual fun getCountryDefaultCurrency(code: String): String? =
+    try {
+        Currency.getInstance(
+            Locale.of("", code)
+        )?.currencyCode
+    } catch (e: IllegalArgumentException) {
+        null
+    }

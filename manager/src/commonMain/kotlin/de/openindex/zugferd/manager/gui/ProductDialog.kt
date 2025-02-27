@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -45,34 +44,47 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
-import de.openindex.zugferd.manager.model.TaxCategoryCode
+import de.openindex.zugferd.manager.model.TaxCategory
 import de.openindex.zugferd.manager.model.UnitOfMeasurement
-import de.openindex.zugferd.manager.utils.formatAsPercentage
-import de.openindex.zugferd.manager.utils.formatAsPrice
-import de.openindex.zugferd.manager.utils.parsePercentage
-import de.openindex.zugferd.manager.utils.parsePrice
+import de.openindex.zugferd.manager.utils.getString
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.manager.utils.translate
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogCancel
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogGeneral
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogGeneralName
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogGeneralPricePerUnit
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogGeneralTax
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogGeneralTaxExemptionReason
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogNotes
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogNotesDescription
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogSavePermanently
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppProductDialogSubmit
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.Resource
+import org.jetbrains.compose.resources.StringResource
 
 private enum class ProductForm {
     GENERAL,
-    DESCRIPTION;
+    NOTES;
 
-    fun title(): String = when (this) {
-        GENERAL -> "Allgemein"
-        DESCRIPTION -> "Beschreibung"
+    fun title(): StringResource = when (this) {
+        GENERAL -> Res.string.AppProductDialogGeneral
+        NOTES -> Res.string.AppProductDialogNotes
     }
 }
 
@@ -84,13 +96,13 @@ fun ProductDialog(
     onDismissRequest: () -> Unit,
     onSubmitRequest: (product: Product, savePermanently: Boolean) -> Unit,
 ) {
-    val appState = LocalAppState.current
-    appState.setLocked(true)
+    //val appState = LocalAppState.current
+    //appState.setLocked(true)
 
     DialogWindow(
         onCloseRequest = {
             onDismissRequest()
-            appState.setLocked(false)
+            //appState.setLocked(false)
         },
         title = title,
         width = 700.dp,
@@ -103,11 +115,11 @@ fun ProductDialog(
             permanentSaveOption = permanentSaveOption,
             onDismissRequest = {
                 onDismissRequest()
-                appState.setLocked(false)
+                //appState.setLocked(false)
             },
             onSubmitRequest = { product, savePermanently ->
                 onSubmitRequest(product, savePermanently)
-                appState.setLocked(false)
+                //appState.setLocked(false)
             },
         )
     }
@@ -127,7 +139,26 @@ fun ProductDialog(
 }
 
 @Composable
-@Suppress("SameParameterValue")
+@Suppress("unused")
+fun ProductDialog(
+    title: Resource,
+    value: Product,
+    permanentSaveOption: Boolean = false,
+    onDismissRequest: () -> Unit,
+    onSubmitRequest: (product: Product, savePermanently: Boolean) -> Unit,
+) = ProductDialog(
+    title = title.translate().title(),
+    value = value,
+    permanentSaveOption = permanentSaveOption,
+    onDismissRequest = onDismissRequest,
+    onSubmitRequest = onSubmitRequest,
+)
+
+/**
+ * Contents of the product dialog.
+ */
+@Composable
+@Suppress("SameParameterValue", "DuplicatedCode")
 private fun ProductDialogContent(
     title: String?,
     value: Product,
@@ -153,6 +184,7 @@ private fun ProductDialogContent(
                 modifier = Modifier
                     .fillMaxSize(),
             ) {
+                // Dialog title, if available.
                 if (title != null) {
                     Row(
                         Modifier
@@ -162,13 +194,14 @@ private fun ProductDialogContent(
                     ) {
                         Text(
                             text = title,
+                            softWrap = false,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             style = MaterialTheme.typography.titleLarge,
-                            softWrap = false,
                         )
                     }
                 }
 
+                // Product form.
                 ProductForm(
                     value = product,
                     onUpdate = { product = it },
@@ -176,6 +209,7 @@ private fun ProductDialogContent(
 
                 Spacer(Modifier.weight(1f, true))
 
+                // Bottom row.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
@@ -183,6 +217,7 @@ private fun ProductDialogContent(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                 ) {
+                    // Submit button.
                     Button(
                         onClick = {
                             onSubmitRequest(
@@ -195,12 +230,12 @@ private fun ProductDialogContent(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     ) {
-                        Text(
-                            text = "Übernehmen",
-                            softWrap = false,
+                        Label(
+                            text = Res.string.AppProductDialogSubmit,
                         )
                     }
 
+                    // Save permanently toggle.
                     if (permanentSaveOption) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -212,9 +247,10 @@ private fun ProductDialogContent(
                                 checked = savePermanently,
                                 onCheckedChange = { savePermanently = it },
                             )
-                            Text(
-                                text = "dauerhaft speichern",
-                                softWrap = false,
+                            Label(
+                                // Evaluate translation string immediately,
+                                // to avoid title conversion within the label component.
+                                text = stringResource(Res.string.AppProductDialogSavePermanently),
                             )
                         }
                     }
@@ -224,12 +260,12 @@ private fun ProductDialogContent(
                             .weight(1f, true),
                     )
 
+                    // Cancel button.
                     Button(
                         onClick = { onDismissRequest() },
                     ) {
-                        Text(
-                            text = "Abbrechen",
-                            softWrap = false,
+                        Label(
+                            text = Res.string.AppProductDialogCancel,
                         )
                     }
                 }
@@ -238,7 +274,9 @@ private fun ProductDialogContent(
     }
 }
 
-
+/**
+ * Product form within the dialog.
+ */
 @Composable
 private fun ProductForm(
     value: Product,
@@ -246,6 +284,7 @@ private fun ProductForm(
 ) {
     var state by remember { mutableStateOf(0) }
 
+    // Available tabs.
     TabRow(
         selectedTabIndex = state,
     ) {
@@ -254,28 +293,31 @@ private fun ProductForm(
                 selected = state == index,
                 onClick = { state = index },
                 text = {
-                    Text(
+                    Label(
                         text = form.title(),
-                        softWrap = false,
                     )
                 },
             )
         }
     }
 
+    // Contents for each tab.
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth()
     ) {
+        // General form.
         AnimatedVisibility(visible = state == 0) {
             ProductFormGeneral(
                 value = value,
                 onUpdate = onUpdate,
             )
         }
+
+        // Notes form.
         AnimatedVisibility(visible = state == 1) {
-            ProductFormDescription(
+            ProductFormNotes(
                 value = value,
                 onUpdate = onUpdate,
             )
@@ -283,11 +325,16 @@ private fun ProductForm(
     }
 }
 
+/**
+ * Product general form.
+ */
 @Composable
 private fun ProductFormGeneral(
     value: Product,
     onUpdate: (product: Product) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
@@ -298,55 +345,47 @@ private fun ProductFormGeneral(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
+            // Product name field.
             TextField(
+                label = Res.string.AppProductDialogGeneralName,
                 value = value.name,
-                label = {
-                    Text(
-                        text = "Name*",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
+                requiredIndicator = true,
+                onValueChange = { newName ->
                     onUpdate(
-                        value.copy(name = it)
+                        value.copy(name = newName)
                     )
                 },
                 modifier = Modifier
                     .weight(1f, fill = true),
             )
 
-            UnitOfMeasurementDropDown(
+            // Unit of measurement field.
+            UnitOfMeasurementField(
                 value = UnitOfMeasurement.getByCode(value.unit) ?: UnitOfMeasurement.UNIT,
-                label = "Maßeinheit*",
-                onSelect = {
+                requiredIndicator = true,
+                onSelect = { newUnit ->
                     onUpdate(
-                        value.copy(unit = it.code)
+                        value.copy(unit = newUnit.code)
                     )
                 },
                 modifier = Modifier
                     .width(150.dp),
             )
 
-            TextField(
-                value = value._defaultPricePerUnit.formatAsPrice,
-                label = {
-                    Text(
-                        text = "Preis pro Einheit*",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
-                    val defaultPrice = parsePrice(it)
-                    if (defaultPrice != null) {
+            // Price per unit field.
+            DecimalField(
+                label = Res.string.AppProductDialogGeneralPricePerUnit,
+                value = value._defaultPricePerUnit,
+                requiredIndicator = true,
+                minPrecision = 2,
+                maxPrecision = 2,
+                onValueChange = { newPrice ->
+                    if (newPrice != null) {
                         onUpdate(
-                            value.copy(_defaultPricePerUnit = defaultPrice)
+                            value.copy(_defaultPricePerUnit = newPrice)
                         )
                     }
                 },
-                keyboardOptions = KeyboardOptions.Default
-                    .copy(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier
                     .width(150.dp),
             )
@@ -357,64 +396,67 @@ private fun ProductFormGeneral(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            TaxCategoryCodeDropDown(
-                value = TaxCategoryCode.getByCode(value.taxCategoryCode) ?: TaxCategoryCode.NORMAL_TAX,
-                label = "Besteuerung*",
-                onSelect = {
-                    onUpdate(
-                        value.copy(
-                            taxCategoryCode = it.code,
-                            vatPercent = it.defaultPercentage,
-                            taxExemptionReason = it.defaultExemptionReason,
+            val preferences = LocalAppState.current.preferences
+            val defaultTaxPercentage = preferences.vatPercentage
+
+            // Tax category field.
+            TaxCategoryField(
+                value = TaxCategory.getByCode(value.taxCategoryCode) ?: TaxCategory.NORMAL_TAX,
+                requiredIndicator = true,
+                onSelect = { newTax ->
+                    scope.launch {
+                        val taxExemptionReason = if (newTax.defaultExemptionReason != null)
+                            getString(newTax.defaultExemptionReason)
+                        else
+                            null
+
+                        onUpdate(
+                            value.copy(
+                                taxCategoryCode = newTax.code,
+                                vatPercent = defaultTaxPercentage.takeUnless { newTax.isZeroTax } ?: 0.toDouble(),
+                                taxExemptionReason = taxExemptionReason,
+                            )
                         )
-                    )
+                    }
                 },
                 modifier = Modifier
                     .weight(1f, fill = true),
             )
 
-            TextField(
-                value = value.vatPercent.formatAsPercentage,
-                label = {
-                    Text(
-                        text = "Steuersatz in %*",
-                        softWrap = false,
-                    )
-                },
-                singleLine = true,
-                onValueChange = {
-                    val vatPercent = parsePercentage(it)
-                    if (vatPercent != null) {
+            // Tax percentage field.
+            DecimalField(
+                label = Res.string.AppProductDialogGeneralTax,
+                value = value.vatPercent,
+                requiredIndicator = true,
+                maxPrecision = 1,
+                minPrecision = 0,
+                onValueChange = { newVat ->
+                    if (newVat != null) {
                         onUpdate(
                             value.copy(
-                                vatPercent = vatPercent,
-                                taxExemptionReason = if (vatPercent > 0) "" else value.taxExemptionReason,
+                                vatPercent = newVat,
+                                taxExemptionReason = if (newVat > 0) "" else value.taxExemptionReason,
                             )
                         )
                     }
                 },
-                keyboardOptions = KeyboardOptions.Default
-                    .copy(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier
                     .width(150.dp),
             )
         }
 
+        // Tax exemption reason field.
         AnimatedVisibility(visible = value.vatPercent <= 0.0) {
             TextField(
+                label = Res.string.AppProductDialogGeneralTaxExemptionReason,
                 value = value.taxExemptionReason ?: "",
-                label = {
-                    Text(
-                        text = "Begründung für fehlende Besteuerung*",
-                        softWrap = false,
-                    )
-                },
-                onValueChange = {
-                    onUpdate(
-                        value.copy(taxExemptionReason = it)
-                    )
-                },
+                requiredIndicator = true,
                 singleLine = false,
+                onValueChange = { newReason ->
+                    onUpdate(
+                        value.copy(taxExemptionReason = newReason)
+                    )
+                },
                 modifier = Modifier
                     .heightIn(min = 150.dp, max = 300.dp)
                     .fillMaxWidth(),
@@ -423,27 +465,26 @@ private fun ProductFormGeneral(
     }
 }
 
+/**
+ * Product notes form.
+ */
 @Composable
-private fun ProductFormDescription(
+private fun ProductFormNotes(
     value: Product,
     onUpdate: (product: Product) -> Unit,
 ) {
+    // Product description field.
     TextField(
+        label = Res.string.AppProductDialogNotesDescription,
         value = value.description ?: "",
-        label = {
-            Text(
-                text = "Beschreibung",
-                softWrap = false,
-            )
-        },
-        onValueChange = {
+        singleLine = false,
+        onValueChange = { newDescription ->
             onUpdate(
                 value.copy(
-                    description = it
+                    description = newDescription
                 )
             )
         },
-        singleLine = false,
         modifier = Modifier
             .heightIn(min = 150.dp, max = 300.dp)
             .fillMaxWidth(),

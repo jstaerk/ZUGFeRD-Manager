@@ -24,8 +24,8 @@ package de.openindex.zugferd.manager.model
 import de.openindex.zugferd.manager.utils.trimToNull
 import org.mustangproject.TradeParty as _TradeParty
 
-fun TradeParty.build(): _TradeParty? {
-    return _TradeParty()
+fun TradeParty.build(): _TradeParty? =
+    _TradeParty()
         .setName(name.trim())
         .setZIP(zip?.trimToNull())
         .setStreet(street?.trimToNull())
@@ -65,4 +65,3 @@ fun TradeParty.build(): _TradeParty? {
             party
         }
         .takeIf { it.name.isNotBlank() }
-}

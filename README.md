@@ -64,7 +64,7 @@ The application is written in [Kotlin / JVM](https://kotlinlang.org/) using [Com
 
 ### Development
 
-The application requires a certain version of the [Jetbrains JDK (bundled with JCEF)](https://github.com/JetBrains/JetBrainsRuntime). 
+The application requires the [Jetbrains JDK (bundled with JCEF)](https://github.com/JetBrains/JetBrainsRuntime). Other JDK's won't work. 
 
 -  Download the *Jetbrains JDK* for your operating system via:
 
@@ -119,7 +119,7 @@ The application requires a certain version of the [Jetbrains JDK (bundled with J
 
 ### Translations
 
-The application is currently only available in German language. Translation into other languages is currently not planned, but generally possible.
+The application is developed in English and translated into in German language. Translation into other languages are pretty straightforward. Please get in contact with us, if you like to translate the application into another language or help out with existing translations.
 
 
 ### Third party components

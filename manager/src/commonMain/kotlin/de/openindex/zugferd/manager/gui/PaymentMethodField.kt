@@ -22,24 +22,28 @@
 package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.utils.getCurrencies
+import de.openindex.zugferd.manager.model.PaymentMethod
+import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.Resource
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
-fun CurrencySelectField(
-    label: String = "Währung",
-    currency: String? = null,
-    onSelect: (String?) -> Unit,
+fun PaymentMethodField(
+    label: Resource = Res.plurals.PaymentMethod,
+    value: PaymentMethod? = null,
+    options: Map<PaymentMethod, StringResource> = buildMap {
+        PaymentMethod.entries.forEach { e -> put(e, e.title) }
+    },
+    requiredIndicator: Boolean = false,
+    onSelect: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
-) {
-    val currencies = remember { getCurrencies() }
-
-    AutoCompleteField(
-        label = label,
-        entry = currency,
-        entries = currencies,
-        onSelect = onSelect,
-        modifier = modifier,
-    )
-}
+) = DropDown(
+    label = label,
+    value = value,
+    options = options,
+    requiredIndicator = requiredIndicator,
+    onSelect = onSelect,
+    modifier = modifier,
+)

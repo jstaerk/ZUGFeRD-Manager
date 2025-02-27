@@ -21,25 +21,39 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import de.openindex.zugferd.manager.utils.getCountries
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontFamily
+import de.openindex.zugferd.manager.LocalAppState
+import de.openindex.zugferd.manager.utils.XmlVisualTransformation
 
 @Composable
-fun CountrySelectField(
-    label: String = "Land",
-    country: String? = null,
-    onSelect: (String?) -> Unit,
+fun XmlViewer(
+    xml: String,
     modifier: Modifier = Modifier,
 ) {
-    val countries = remember { getCountries() }
+    val preferences = LocalAppState.current.preferences
+    val systemIsDark = isSystemInDarkTheme()
+    val xmlVisualTransformation = remember(preferences.isThemeDark, systemIsDark) {
+        XmlVisualTransformation(darkMode = preferences.darkMode ?: systemIsDark)
+    }
+    val xmlTextStyle = MaterialTheme.typography.bodyMedium.copy(
+        fontFamily = FontFamily.Monospace,
+    )
 
-    AutoCompleteField(
-        label = label,
-        entry = country,
-        entries = countries,
-        onSelect = onSelect,
+    TextField(
+        value = xml,
+        onValueChange = {},
+        readOnly = true,
+        singleLine = false,
+        shape = RectangleShape,
+        textStyle = xmlTextStyle,
+        visualTransformation = xmlVisualTransformation,
         modifier = modifier,
     )
 }

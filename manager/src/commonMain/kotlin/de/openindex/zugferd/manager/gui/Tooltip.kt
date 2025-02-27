@@ -34,12 +34,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.utils.pluralStringResource
+import de.openindex.zugferd.manager.utils.stringResource
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.StringResource
+
+const val DEFAULT_DELAY_MILLIS = 150
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun Tooltip(
     text: String,
-    delayMillis: Int = 300,
+    delayMillis: Int = DEFAULT_DELAY_MILLIS,
     modifier: Modifier = Modifier,
     tooltipPlacement: TooltipPlacement = TooltipPlacement.CursorPoint(
         offset = DpOffset(0.dp, 16.dp)
@@ -72,3 +78,41 @@ fun Tooltip(
 ) {
     content()
 }
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+fun Tooltip(
+    text: StringResource,
+    delayMillis: Int = DEFAULT_DELAY_MILLIS,
+    modifier: Modifier = Modifier,
+    tooltipPlacement: TooltipPlacement = TooltipPlacement.CursorPoint(
+        offset = DpOffset(0.dp, 16.dp)
+    ),
+    content: @Composable () -> Unit
+) = Tooltip(
+    text = stringResource(text),
+    delayMillis = delayMillis,
+    modifier = modifier,
+    tooltipPlacement = tooltipPlacement,
+    content = content,
+)
+
+@Composable
+@Suppress("unused")
+@OptIn(ExperimentalFoundationApi::class)
+fun Tooltip(
+    text: PluralStringResource,
+    textQuantity: Int = 1,
+    delayMillis: Int = DEFAULT_DELAY_MILLIS,
+    modifier: Modifier = Modifier,
+    tooltipPlacement: TooltipPlacement = TooltipPlacement.CursorPoint(
+        offset = DpOffset(0.dp, 16.dp)
+    ),
+    content: @Composable () -> Unit
+) = Tooltip(
+    text = pluralStringResource(text, textQuantity),
+    delayMillis = delayMillis,
+    modifier = modifier,
+    tooltipPlacement = tooltipPlacement,
+    content = content,
+)

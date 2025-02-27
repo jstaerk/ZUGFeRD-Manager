@@ -21,8 +21,11 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -33,7 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.LocalAppState
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionDialogTitle
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -42,18 +46,19 @@ import kotlinx.datetime.toLocalDateTime
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("UNUSED_PARAMETER")
 fun DateDialog(
     value: LocalDate?,
     onValueChange: (LocalDate?) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val appState = LocalAppState.current
-    appState.setLocked(true)
+    //val appState = LocalAppState.current
+    //appState.setLocked(true)
 
     val dateState = rememberDatePickerState(
         initialSelectedDateMillis = value
-            ?.atStartOfDayIn(TimeZone.currentSystemDefault())
+            ?.atStartOfDayIn(TimeZone.UTC)
             ?.toEpochMilliseconds()
     )
 
@@ -76,22 +81,36 @@ fun DateDialog(
                     .date
             )
         }
-        appState.setLocked(false)
+        //appState.setLocked(false)
     }
 
     DialogWindow(
-        onCloseRequest = {
-            onDismiss()
-            appState.setLocked(false)
-        },
-        title = "Datum wählen",
+        title = Res.string.AppDateSelectionDialogTitle,
         width = 400.dp,
         height = 550.dp,
         resizable = false,
+        onCloseRequest = {
+            onDismiss()
+            //appState.setLocked(false)
+        },
     ) {
         DatePicker(
             state = dateState,
             showModeToggle = true,
+            headline = {
+                if (value == null) {
+                    return@DatePicker
+                }
+
+                DatePickerDefaults.DatePickerHeadline(
+                    selectedDateMillis = dateState.selectedDateMillis,
+                    displayMode = dateState.displayMode,
+                    dateFormatter = remember { DatePickerDefaults.dateFormatter() },
+                    modifier = Modifier
+                        //.padding(DatePickerHeadlinePadding)
+                        .padding(PaddingValues(start = 24.dp, end = 12.dp, bottom = 12.dp)),
+                )
+            },
             modifier = Modifier
                 .fillMaxSize(),
         )

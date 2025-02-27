@@ -90,6 +90,12 @@ fun getCefBrowser(url: String): CefBrowser {
     if (CEF_CLIENT == null) {
         try {
             CEF_CLIENT = CEF_APP!!.createClient()
+                // Disable Drag & Drop on the browser component,
+                // as we don't want external files to be dragged directly into the browser.
+                .also {
+                    it.removeDragHandler()
+                    it.addDragHandler { _, _, _ -> true }
+                }
         } catch (e: Exception) {
             APP_LOGGER.error("Browser is not properly initialized!", e)
             throw RuntimeException("Browser is not properly initialized!", e)

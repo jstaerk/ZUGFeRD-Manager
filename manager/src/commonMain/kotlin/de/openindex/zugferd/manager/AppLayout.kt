@@ -52,15 +52,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.gui.Label
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarQuit
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import de.openindex.zugferd.zugferd_manager.generated.resources.application
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AppLayout(
-) {
+fun AppLayout() {
     val appState = LocalAppState.current
+
     //val blur: Float by animateFloatAsState(
     //    targetValue = if (appState.locked) 10f else 0f,
     //    animationSpec = tween(
@@ -154,7 +158,9 @@ private fun AppNavigation() {
 
         //Text(text = "Item")
         AppSection.entries.forEach {
-            AppSectionNavigationItem(section = it)
+            AppSectionNavigationItem(
+                section = it,
+            )
         }
 
         Spacer(
@@ -177,7 +183,7 @@ private fun AppNavigation() {
         )
 
         AppNavigationItem(
-            label = "Beenden",
+            label = Res.string.AppSidebarQuit,
             activeIcon = Icons.Default.Cancel,
             selected = false,
             onClick = {
@@ -193,7 +199,7 @@ private fun AppNavigation() {
 
 @Composable
 private fun AppNavigationItem(
-    label: String,
+    label: StringResource,
     activeIcon: ImageVector,
     inactiveIcon: ImageVector = activeIcon,
     selected: Boolean,
@@ -205,13 +211,12 @@ private fun AppNavigationItem(
         icon = {
             Icon(
                 imageVector = if (selected) activeIcon else inactiveIcon,
-                contentDescription = label,
+                contentDescription = stringResource(label),
             )
         },
         enabled = true,
-        label = { Text(text = label) },
+        label = { Label(text = label) },
         alwaysShowLabel = true,
-        //colors = NavigationRailItemDefaults.colors(),
         colors = NavigationRailItemDefaults.colors(
             indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
             selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,

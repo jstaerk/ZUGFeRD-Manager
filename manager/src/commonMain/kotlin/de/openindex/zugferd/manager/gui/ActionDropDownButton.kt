@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
@@ -34,22 +35,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSectionMore
+import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import org.jetbrains.compose.resources.StringResource
 
 @Composable
-fun ActionsButton(
+@OptIn(ExperimentalFoundationApi::class)
+fun ActionDropDownButton(
     icon: ImageVector = Icons.Default.MoreVert,
-    iconDescription: String? = "Aktionen",
+    tooltipText: StringResource = Res.string.AppSettingsSectionMore,
     actions: @Composable ColumnScope.(doClose: () -> Unit) -> Unit,
+) = Tooltip(
+    text = tooltipText,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
     Box {
+        var expanded by remember { mutableStateOf(false) }
+
         IconButton(
             onClick = { expanded = true },
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = iconDescription,
+                contentDescription = stringResource(tooltipText),
             )
         }
 

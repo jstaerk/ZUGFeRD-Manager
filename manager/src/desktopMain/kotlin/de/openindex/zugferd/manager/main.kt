@@ -30,14 +30,8 @@ import androidx.compose.ui.window.rememberWindowState
 import ch.qos.logback.classic.ClassicConstants
 import de.openindex.zugferd.manager.utils.APP_LAUNCHER
 import de.openindex.zugferd.manager.utils.LOGS_DIR
-import de.openindex.zugferd.manager.utils.LocalPreferences
-import de.openindex.zugferd.manager.utils.LocalProducts
-import de.openindex.zugferd.manager.utils.LocalRecipients
-import de.openindex.zugferd.manager.utils.LocalSenders
 import de.openindex.zugferd.manager.utils.SHUTDOWN_HANDLER
 import de.openindex.zugferd.manager.utils.getPlatform
-import de.openindex.zugferd.manager.utils.loadPreferencesData
-import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.SystemUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,8 +42,6 @@ val APP_LOGGER: Logger by lazy {
     LoggerFactory.getLogger("de.openindex.zugferd.manager")
 }
 
-//val LocalDesktopWindow = staticCompositionLocalOf<ComposeWindow?> { null }
-//val LocalWindowState = staticCompositionLocalOf<WindowState?> { null }
 val LocalApplicationScope = staticCompositionLocalOf<ApplicationScope?> { null }
 
 fun main() {
@@ -100,24 +92,10 @@ fun main() {
 
 
     //
-    // Setup system properties for MacOSX.
+    // Create and init application state.
     //
 
-    if (SystemUtils.IS_OS_MAC) {
-        val preferencesData = try {
-            runBlocking { loadPreferencesData() }
-        } catch (e: Exception) {
-            APP_LOGGER.warn("Can't load preferences.", e)
-            null
-        }
-
-        //System.setProperty("apple.awt.application.name", "ZUGFeRD-UI")
-        if (preferencesData?.darkMode == true) {
-            System.setProperty("apple.awt.application.appearance", "NSAppearanceNameDarkAqua")
-        } else if (preferencesData?.darkMode == null) {
-            System.setProperty("apple.awt.application.appearance", "system")
-        }
-    }
+    val appState = _APP_STATE
 
 
     //
@@ -138,30 +116,15 @@ fun main() {
     //
 
     application {
-        // Initially load preferences within composable application.
-        val preferences = LocalPreferences.current
-
-        // Initially load senders within composable application.
-        @Suppress("UNUSED_VARIABLE")
-        val senders = LocalSenders.current
-
-        // Initially load recipients within composable application.
-        @Suppress("UNUSED_VARIABLE")
-        val recipients = LocalRecipients.current
-
-        // Initially load products within composable application.
-        @Suppress("UNUSED_VARIABLE")
-        val products = LocalProducts.current
-
         val windowState = rememberWindowState(
-            size = preferences.windowSize,
-            position = preferences.windowPosition,
+            size = appState.preferences.windowSize,
+            position = appState.preferences.windowPosition,
         )
 
         Runtime.getRuntime().addShutdownHook(Thread {
             APP_LOGGER.info("Shutdown hook was triggered...")
             SHUTDOWN_HANDLER.saveSettingsOnShutdown(
-                preferences = preferences,
+                preferences = appState.preferences,
                 windowState = windowState,
             )
         })
@@ -175,9 +138,7 @@ fun main() {
             },
         ) {
             CompositionLocalProvider(LocalApplicationScope provides this@application) {
-                //CompositionLocalProvider(LocalWindowState provides windowState) {
                 App()
-                //}
             }
         }
     }

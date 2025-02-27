@@ -27,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,9 +36,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import de.openindex.zugferd.manager.model.PaymentMethod
-import de.openindex.zugferd.manager.model.TaxCategoryCode
-import de.openindex.zugferd.manager.model.UnitOfMeasurement
+import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
+import de.openindex.zugferd.manager.utils.translate
+import org.jetbrains.compose.resources.Resource
+import org.jetbrains.compose.resources.StringResource
 
 /**
  * based on https://composables.com/material/exposeddropdownmenubox
@@ -50,6 +51,7 @@ fun <T> DropDown(
     label: String,
     value: T? = null,
     options: Map<T, String>,
+    requiredIndicator: Boolean = false,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -71,9 +73,9 @@ fun <T> DropDown(
             onValueChange = { textFieldValue = it },
             readOnly = true,
             label = {
-                Text(
-                    text = label,
-                    softWrap = false,
+                Label(
+                    text = label.title(),
+                    requiredIndicator = requiredIndicator,
                 )
             },
             trailingIcon = {
@@ -95,9 +97,8 @@ fun <T> DropDown(
                 .forEach { option ->
                     DropdownMenuItem(
                         text = {
-                            Text(
+                            Label(
                                 text = option.value,
-                                softWrap = false,
                             )
                         },
                         onClick = {
@@ -113,52 +114,20 @@ fun <T> DropDown(
 }
 
 @Composable
-fun TaxCategoryCodeDropDown(
-    label: String = "Besteuerung",
-    value: TaxCategoryCode? = null,
-    options: Map<TaxCategoryCode, String> = buildMap {
-        TaxCategoryCode.entries.forEach { e -> put(e, e.description) }
-    },
-    onSelect: (TaxCategoryCode) -> Unit,
+fun <T> DropDown(
+    label: Resource,
+    value: T? = null,
+    options: Map<T, StringResource>,
+    requiredIndicator: Boolean = false,
+    onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) = DropDown(
-    label = label,
+    label = label.translate(),
     value = value,
-    options = options,
-    onSelect = onSelect,
-    modifier = modifier,
-)
-
-@Composable
-fun UnitOfMeasurementDropDown(
-    label: String = "Maßeinheit",
-    value: UnitOfMeasurement? = null,
-    options: Map<UnitOfMeasurement, String> = buildMap {
-        UnitOfMeasurement.entries.forEach { e -> put(e, e.description) }
+    options = buildMap<T, String> {
+        options.entries.forEach { e -> put(e.key, stringResource(e.value)) }
     },
-    onSelect: (UnitOfMeasurement) -> Unit,
-    modifier: Modifier = Modifier,
-) = DropDown(
-    label = label,
-    value = value,
-    options = options,
-    onSelect = onSelect,
-    modifier = modifier,
-)
-
-@Composable
-fun PaymentMethodDropDown(
-    label: String = "Zahlungsart",
-    value: PaymentMethod? = null,
-    options: Map<PaymentMethod, String> = buildMap {
-        PaymentMethod.entries.forEach { e -> put(e, e.description) }
-    },
-    onSelect: (PaymentMethod) -> Unit,
-    modifier: Modifier = Modifier,
-) = DropDown(
-    label = label,
-    value = value,
-    options = options,
+    requiredIndicator = requiredIndicator,
     onSelect = onSelect,
     modifier = modifier,
 )

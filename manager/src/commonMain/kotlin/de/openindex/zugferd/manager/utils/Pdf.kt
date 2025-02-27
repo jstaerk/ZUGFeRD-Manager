@@ -38,3 +38,7 @@ suspend fun isPdfArchive(pdfFile: PlatformFile): Boolean =
 expect suspend fun getPdfArchiveVersion(pdfFile: PlatformFile): Int
 
 expect suspend fun convertToPdfArchive(pdfFile: PlatformFile): PlatformFile
+
+expect fun getXmlFromPdf(pdf: PlatformFile): String?
+
+expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
