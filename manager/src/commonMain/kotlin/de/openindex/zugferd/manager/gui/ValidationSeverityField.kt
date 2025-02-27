@@ -50,6 +50,7 @@ fun ValidationSeverityField(
 )
 
 @Composable
+@Suppress("unused")
 fun ValidationSeverityField(
     label: PluralStringResource = Res.plurals.ValidationSeverity,
     value: ValidationSeverity? = null,

@@ -50,6 +50,7 @@ fun ValidationTypeField(
 )
 
 @Composable
+@Suppress("unused")
 fun ValidationTypeField(
     label: PluralStringResource = Res.plurals.ValidationType,
     value: ValidationType? = null,
