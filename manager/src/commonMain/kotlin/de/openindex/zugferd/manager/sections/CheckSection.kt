@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager.sections
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,11 +36,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,6 +59,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -74,6 +75,7 @@ import de.openindex.zugferd.manager.gui.Label
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.SectionSubTitle
 import de.openindex.zugferd.manager.gui.SectionTitle
+import de.openindex.zugferd.manager.gui.Tooltip
 import de.openindex.zugferd.manager.gui.VerticalScrollBox
 import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
@@ -89,6 +91,7 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckDetailsH
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckDetailsPdf
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckDetailsXml
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckFailed
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessageMessageCopy
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessages
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessagesFilter
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckMessagesFilterSeverity
@@ -658,43 +661,76 @@ private fun ValidationMessages(state: CheckSectionState) {
  * A single validation message.
  */
 @Composable
-private fun ValidationMessage(message: ValidationMessage) {
+@OptIn(ExperimentalFoundationApi::class)
+private fun ValidationMessage(message: ValidationMessage) =
     Card(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
             modifier = Modifier
-                .padding(vertical = 8.dp, horizontal = 16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
         ) {
-            Icon(
-                imageVector = when (message.severity) {
-                    ValidationSeverity.FATAL, ValidationSeverity.ERROR -> Icons.Default.Error
-                    ValidationSeverity.WARNING -> Icons.Default.Warning
-                    ValidationSeverity.NOTICE -> Icons.Default.Info
-                },
-                contentDescription = "",
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .size(36.dp)
-            )
+                    .padding(top = 8.dp, start = 16.dp, end = 16.dp)
+                    .fillMaxWidth(),
+            ) {
+                val isDarkMode = LocalAppState.current.preferences.darkMode ?: isSystemInDarkTheme()
+                val clipboard = LocalClipboardManager.current
 
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
+                Icon(
+                    imageVector = message.severity.icon,
+                    tint = if (isDarkMode)
+                        message.severity.darkModeColor
+                    else
+                        message.severity.lightModeColor,
+                    contentDescription = stringResource(message.severity.title),
+                    modifier = Modifier
+                        .size(36.dp)
+                )
+
+                Text(
+                    text = buildString {
                         append(stringResource(message.severity.title).title())
                         append(" (")
                         append(stringResource(message.type.title))
-                        append(")\n")
-                    }
+                        append(")")
+                    },
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge
+                        .copy(lineHeight = 1.em),
+                )
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(message.message.trim())
+                HorizontalDivider(
+                    modifier = Modifier
+                        .weight(1f, fill = true),
+                )
+
+                Tooltip(
+                    text = stringResource(Res.string.AppCheckMessageMessageCopy),
+                ) {
+                    Button(
+                        onClick = {
+                            clipboard.setText(
+                                AnnotatedString(message.message)
+                            )
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = stringResource(Res.string.AppCheckMessageMessageCopy),
+                        )
                     }
-                },
-                style = MaterialTheme.typography.bodyLarge,
+                }
+            }
+
+            Text(
+                text = message.message.trim(),
+                modifier = Modifier
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
             )
         }
     }
-}

@@ -21,6 +21,12 @@
 
 package de.openindex.zugferd.manager.model
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_ERROR
@@ -29,18 +35,35 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeveri
 import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_WARNING
 import org.jetbrains.compose.resources.StringResource
 
-enum class ValidationSeverity(val title: StringResource) {
+enum class ValidationSeverity(
+    val title: StringResource,
+    val icon: ImageVector,
+    val lightModeColor: Color,
+    val darkModeColor: Color,
+) {
     NOTICE(
         title = Res.string.ValidationSeverity_NOTICE,
+        icon = Icons.Default.Info,
+        lightModeColor = Color(0xFF00008B),
+        darkModeColor = Color(0xFF90D5FF),
     ),
     WARNING(
         title = Res.string.ValidationSeverity_WARNING,
+        icon = Icons.Default.Warning,
+        lightModeColor = Color(0xFFFF8800),
+        darkModeColor = Color(0xFFFF8800),
     ),
     ERROR(
         title = Res.string.ValidationSeverity_ERROR,
+        icon = Icons.Default.Error,
+        lightModeColor = Color(0xFFFF4400),
+        darkModeColor = Color(0xFFFF4400),
     ),
     FATAL(
         title = Res.string.ValidationSeverity_FATAL,
+        icon = Icons.Default.Error,
+        lightModeColor = Color(0xFFFF4400),
+        darkModeColor = Color(0xFFFF4400),
     ),
 
     ;
