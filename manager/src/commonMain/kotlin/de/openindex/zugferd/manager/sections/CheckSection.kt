@@ -352,34 +352,40 @@ private fun CheckView(state: CheckSectionState) {
                                         )
                                 )
 
-                                ValidationType.entries.forEach { type ->
-                                    val isSelected = state.filterType.contains(type)
+                                ValidationType.entries
+                                    .filter { type ->
+                                        validation.messages.firstOrNull {
+                                            it.type == type
+                                        } != null
+                                    }
+                                    .forEach { type ->
+                                        val isSelected = state.filterType.contains(type)
 
-                                    DropdownMenuItem(
-                                        text = {
-                                            Label(
-                                                text = stringResource(type.title),
-                                            )
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = if (isSelected)
-                                                    Icons.Default.CheckBox
-                                                else
-                                                    Icons.Default.CheckBoxOutlineBlank,
-                                                contentDescription = stringResource(type.title),
-                                            )
-                                        },
-                                        onClick = {
-                                            state.setFilterType(
-                                                if (state.filterType.contains(type))
-                                                    state.filterType.minus(type)
-                                                else
-                                                    state.filterType.plus(type)
-                                            )
-                                        }
-                                    )
-                                }
+                                        DropdownMenuItem(
+                                            text = {
+                                                Label(
+                                                    text = stringResource(type.title),
+                                                )
+                                            },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = if (isSelected)
+                                                        Icons.Default.CheckBox
+                                                    else
+                                                        Icons.Default.CheckBoxOutlineBlank,
+                                                    contentDescription = stringResource(type.title),
+                                                )
+                                            },
+                                            onClick = {
+                                                state.setFilterType(
+                                                    if (state.filterType.contains(type))
+                                                        state.filterType.minus(type)
+                                                    else
+                                                        state.filterType.plus(type)
+                                                )
+                                            }
+                                        )
+                                    }
 
                                 HorizontalDivider()
 
@@ -394,34 +400,40 @@ private fun CheckView(state: CheckSectionState) {
                                         )
                                 )
 
-                                ValidationSeverity.entries.forEach { severity ->
-                                    val isSelected = state.filterSeverity.contains(severity)
+                                ValidationSeverity.entries
+                                    .filter { severity ->
+                                        validation.messages.firstOrNull {
+                                            it.severity == severity
+                                        } != null
+                                    }
+                                    .forEach { severity ->
+                                        val isSelected = state.filterSeverity.contains(severity)
 
-                                    DropdownMenuItem(
-                                        text = {
-                                            Label(
-                                                text = stringResource(severity.title),
-                                            )
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = if (isSelected)
-                                                    Icons.Default.CheckBox
-                                                else
-                                                    Icons.Default.CheckBoxOutlineBlank,
-                                                contentDescription = stringResource(severity.title),
-                                            )
-                                        },
-                                        onClick = {
-                                            state.setFilterSeverity(
-                                                if (state.filterSeverity.contains(severity))
-                                                    state.filterSeverity.minus(severity)
-                                                else
-                                                    state.filterSeverity.plus(severity)
-                                            )
-                                        }
-                                    )
-                                }
+                                        DropdownMenuItem(
+                                            text = {
+                                                Label(
+                                                    text = stringResource(severity.title),
+                                                )
+                                            },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = if (isSelected)
+                                                        Icons.Default.CheckBox
+                                                    else
+                                                        Icons.Default.CheckBoxOutlineBlank,
+                                                    contentDescription = stringResource(severity.title),
+                                                )
+                                            },
+                                            onClick = {
+                                                state.setFilterSeverity(
+                                                    if (state.filterSeverity.contains(severity))
+                                                        state.filterSeverity.minus(severity)
+                                                    else
+                                                        state.filterSeverity.plus(severity)
+                                                )
+                                            }
+                                        )
+                                    }
                             }
                         }
                     }
