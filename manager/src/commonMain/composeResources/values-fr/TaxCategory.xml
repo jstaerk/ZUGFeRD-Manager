@@ -40,7 +40,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="TaxCategory_G">Exportation en dehors de l'UE</string>
     <string name="TaxCategory_G_DefaultExemptionReason">Exportation vers un pays non membre de l'UE</string>
     <string name="TaxCategory_O">Prestation non imposée</string>
-    <string name="TaxCategory_O_DefaultExemptionReason">Prestation hors du champ d'application de la taxe<string>
+    <string name="TaxCategory_O_DefaultExemptionReason">Prestation hors du champ d'application de la taxe</string>
     <string name="TaxCategory_L">Imposition indirecte aux îles Canaries</string>
     <string name="TaxCategory_M">Production / prestation / importation vers Ceuta et Melilla</string>         <!-- Frage der Groß-/Kleinschreibung des jeweils ersten Wortes dieser Strings ist kontextabhängig  -->
 </resources>
