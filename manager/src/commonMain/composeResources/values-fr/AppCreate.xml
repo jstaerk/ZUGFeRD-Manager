@@ -40,7 +40,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     </string>
     <string name="AppCreateGenerateFileSuffix">facture électronique</string>
 
-    <string name="AppCreateConvert">convertir en PDF/A-3<string>   
+    <string name="AppCreateConvert">convertir en PDF/A-3</string>
     <string name="AppCreateConvertInfo">
         Cela peut causer des erreurs dans la facture électronique .[br]
         Il est préférable d'exporter la facture en PDF/A-3 par exemple à partir de Word. [br]
@@ -79,7 +79,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateItemsItemRemove">Supprimer ce poste de facture.</string>
     <string name="AppCreateItemsItemDescription">Notes</string>
     <string name="AppCreateItemsItemSummaryNet">montant net</string>
-    <string name="AppCreateItemsItemSummaryTax">taxe</string>         <!-- kontextabhängig; wäre zu prüfen: "Steuer " kann taxe oder impôt sein   --->
+    <string name="AppCreateItemsItemSummaryTax">taxe</string>         <!-- kontextabhängig; wäre zu prüfen: "Steuer " kann taxe oder impôt sein   -->
     <string name="AppCreateItemsItemSummaryGross">montant brut</string>
 
     <string name="AppCreateSummary">modifier le poste de facture</string>              <!-- Annahme: "Rechnungsposten" ist Singular   -->

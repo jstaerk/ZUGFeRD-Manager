@@ -36,7 +36,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="PaymentMethod_48">Paiement par carte</string>
     <string name="PaymentMethod_49">Prélèvement</string>
     <string name="PaymentMethod_57">ordre permanent</string>
-    <string name="PaymentMethod_58">Virement SEPA<string>
+    <string name="PaymentMethod_58">Virement SEPA</string>
     <string name="PaymentMethod_59">Prélèvement SEPA</string>
     <string name="PaymentMethod_97">compensation en partenariat</string>
 </resources>
