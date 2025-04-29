@@ -45,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppXmlDialogClose
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppXmlDialogTitle
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppXmlDialogClose
+import de.openindex.zugferd.quba.generated.resources.AppXmlDialogTitle
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 

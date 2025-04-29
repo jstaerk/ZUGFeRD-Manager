@@ -24,8 +24,8 @@ package de.openindex.zugferd.manager.gui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.openindex.zugferd.manager.model.PaymentMethod
-import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.PaymentMethod
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.Resource
 import org.jetbrains.compose.resources.StringResource
 

@@ -25,8 +25,8 @@ import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.formatPrice
 import de.openindex.zugferd.manager.utils.getString
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppPricePerUnit
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppPricePerUnit
+import de.openindex.zugferd.quba.generated.resources.Res
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 

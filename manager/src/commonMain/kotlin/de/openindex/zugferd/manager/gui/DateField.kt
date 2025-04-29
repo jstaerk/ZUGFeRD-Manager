@@ -40,9 +40,9 @@ import de.openindex.zugferd.manager.utils.formatAsMediumDate
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionFieldClear
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppDateSelectionFieldSelect
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppDateSelectionFieldClear
+import de.openindex.zugferd.quba.generated.resources.AppDateSelectionFieldSelect
+import de.openindex.zugferd.quba.generated.resources.Res
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource

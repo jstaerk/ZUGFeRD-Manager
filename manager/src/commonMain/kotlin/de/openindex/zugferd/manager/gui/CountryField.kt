@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.utils.getCountries
 import de.openindex.zugferd.manager.utils.translate
-import de.openindex.zugferd.zugferd_manager.generated.resources.Country
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.Country
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.Resource
 
 @Composable

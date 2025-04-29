@@ -36,8 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import de.openindex.zugferd.manager.utils.stringResource
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSectionMore
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppSettingsSectionMore
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.StringResource
 
 @Composable

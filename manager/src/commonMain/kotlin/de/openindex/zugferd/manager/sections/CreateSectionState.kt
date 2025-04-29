@@ -40,9 +40,9 @@ import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.isSupportedPdfArchiveVersion
 import de.openindex.zugferd.manager.utils.title
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateGenerateFileSuffix
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectFile
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppCreateGenerateFileSuffix
+import de.openindex.zugferd.quba.generated.resources.AppCreateSelectFile
+import de.openindex.zugferd.quba.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
