@@ -40,4 +40,4 @@ dependencyResolutionManagement {
 }
 
 include(":manager")
-project(":manager").name = "ZUGFeRD-Manager"
+project(":manager").name = "Quba"

@@ -5,21 +5,21 @@
 ### Verify signature
 
 ```bash
-BINARY="ZUGFeRD-Manager.app"
+BINARY="Quba.app"
 codesign -v -v "${BINARY}"
 ```
 
 ### Show signature details
 
 ```bash
-BINARY="ZUGFeRD-Manager.app"
+BINARY="Quba.app"
 codesign --display -vvv "${BINARY}"
 ```
 
 ### Start notarization
 
 ```bash
-APP="ZUGFeRD-Manager.dmg"
+APP="Quba.dmg"
 APPLE_ID=""
 TEAM_ID=""
 PASSWORD=""
@@ -51,14 +51,14 @@ xcrun notarytool log \
 ### Verify, if Gatekeeper allows execution 
 
 ```bash
-APP_BUNDLE="ZUGFeRD-Manager.app"
+APP_BUNDLE="Quba.app"
 spctl -a -t exec --ignore-cache -vv "${APP_BUNDLE}"
 ```
 
 ### Staple after successful notarization
 
 ```bash
-APP="ZUGFeRD-Manager.dmg"
+APP="Quba.dmg"
 xcrun stapler staple "${APP}"
 ```
 
