@@ -21,34 +21,27 @@
 
 package de.openindex.zugferd.manager.sections
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import de.openindex.zugferd.manager.AppState
-import de.openindex.zugferd.manager.model.ValidationSeverity
-import de.openindex.zugferd.manager.model.ValidationType
 import de.openindex.zugferd.manager.utils.SectionState
-import de.openindex.zugferd.manager.utils.Validation
-import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
-import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
-import de.openindex.zugferd.manager.utils.getString
-import de.openindex.zugferd.manager.utils.getXmlFromPdf
-import de.openindex.zugferd.manager.utils.title
-import de.openindex.zugferd.manager.utils.trimToNull
-import de.openindex.zugferd.manager.utils.validatePdf
-import de.openindex.zugferd.manager.utils.writeJson
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectFile
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import io.github.vinceglb.filekit.core.FileKit
-import io.github.vinceglb.filekit.core.PickerMode
-import io.github.vinceglb.filekit.core.PickerType
-import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
-class NewVisualisationSectionState : SectionState() {
-    // Hier können Sie z. B. den Zustand der Visualisierung verwalten
-    fun getContent(): @Composable () -> Unit {
-        return { /* Ihre neue Visualisierung als Composable */ }
-    }
-}
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+class VisualsSectionState : SectionState() {
+    var selectedText by mutableStateOf("Bitte einen Knopf auswählen")
+
+ }

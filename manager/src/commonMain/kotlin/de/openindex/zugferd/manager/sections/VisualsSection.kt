@@ -28,15 +28,21 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
@@ -46,6 +52,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -71,8 +78,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
+import de.openindex.zugferd.manager.gui.CountryField
+import de.openindex.zugferd.manager.gui.CurrencyField
+import de.openindex.zugferd.manager.gui.DecimalField
 import de.openindex.zugferd.manager.gui.Label
+import de.openindex.zugferd.manager.gui.LanguageField
 import de.openindex.zugferd.manager.gui.PdfViewer
+import de.openindex.zugferd.manager.gui.SectionInfo
 import de.openindex.zugferd.manager.gui.SectionSubTitle
 import de.openindex.zugferd.manager.gui.SectionTitle
 import de.openindex.zugferd.manager.gui.Tooltip
@@ -81,8 +93,11 @@ import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.ValidationSeverity
 import de.openindex.zugferd.manager.model.ValidationType
+import de.openindex.zugferd.manager.utils.Language
 import de.openindex.zugferd.manager.utils.ValidationMessage
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
+import de.openindex.zugferd.manager.utils.getCountryDefaultCurrency
+import de.openindex.zugferd.manager.utils.getCountryDefaultTax
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -110,579 +125,43 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryS
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryUnknown
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryVersion
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSummaryWarnings
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneral
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralCountry
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralCurrency
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralInfo
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralLanguage
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsGeneralVat
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsSectionInfo
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 
 /**
  * Main view of the check section.
  */
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
-fun VisualsSection(state: NewVisualisationSectionState) {
+fun VisualsSection(state: VisualsSectionState) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { state.selectedText = "Mustertext 1" }) {
+                Text("Knopf 1")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { state.selectedText = "Mustertext 2" }) {
+                Text("Knopf 2")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { state.selectedText = "Mustertext 3" }) {
+                Text("Knopf 3")
+            }
+        }
 
-}
+        Spacer(modifier = Modifier.height(24.dp))
 
-/**
- * Action buttons of the check section, shown on the top right.
- */
-@Composable
-fun VisualsSectionAction(state: NewVisualisationSectionState) {
-    val scope = rememberCoroutineScope()
-    val appState = LocalAppState.current
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .padding(end = 8.dp),
-    ) {
-        // Add button to select a PDF file for validation.
-        ActionButtonWithTooltip(
-            label = Res.string.AppCheckSelect,
-            tooltip = Res.string.AppCheckSelectInfo,
-            onClick = {
-                scope.launch(Dispatchers.IO) {
-
-
-                }
-            },
+        Text(
+            text = state.selectedText,
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }
-
-/**
- * Empty view of the check section.
- * This is shown, if no PDF file was selected by the user.
- */
-@Composable
-@Suppress("UNUSED_PARAMETER")
-private fun EmptyView(state: CheckSectionState) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxSize(),
-        ) {
-            // Request user to select a PDF file.
-            Text(
-                text = stringResource(Res.string.AppCheckSelectMessage),
-                textAlign = TextAlign.Center,
-                softWrap = true,
-            )
-        }
-    }
-}
-
-/**
- * Left side view of the check section.
- * This provides the validation view.
- */
-@Composable
-private fun CheckView(state: CheckSectionState) {
-    val scope = rememberCoroutineScope()
-    val selectedPdf = state.selectedPdf!!
-    val validation = state.selectedPdfValidation
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 20.dp)
-    ) {
-        // Section title with validation icon.
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            AnimatedVisibility(visible = validation != null) {
-                Icon(
-                    imageVector = Icons.Default.ThumbUp
-                        .takeIf { validation?.isValid == true }
-                        ?: Icons.Default.ThumbDown,
-                    contentDescription = stringResource(
-                        Res.string.AppCheckPassed
-                            .takeIf { validation?.isValid == true }
-                            ?: Res.string.AppCheckFailed,
-                        selectedPdf.name,
-                    ),
-                    modifier = Modifier
-                        .size(32.dp)
-                )
-            }
-
-            SectionTitle(
-                text = when (validation?.isValid) {
-                    true -> stringResource(Res.string.AppCheckPassed, selectedPdf.name)
-                    false -> stringResource(Res.string.AppCheckFailed, selectedPdf.name)
-                    else -> stringResource(Res.string.AppCheck, selectedPdf.name)
-                },
-                modifier = Modifier
-                    .weight(1f, fill = true),
-            )
-        }
-
-        // Validation result.
-        if (validation == null) {
-            CircularProgressIndicator()
-        } else {
-            // Subsection with validation summary.
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                SectionSubTitle(
-                    text = Res.string.AppCheckSummary,
-                ) {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                state.exportValidation(validation)
-                            }
-                        },
-                    ) {
-                        Label(
-                            text = Res.string.AppCheckSummaryExport,
-                        )
-                    }
-                }
-
-                ValidationSummary(state)
-            }
-
-            // Subsection with validation messages.
-            if (validation.messages.isNotEmpty()) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    SectionSubTitle(
-                        text = Res.string.AppCheckMessages,
-                    ) {
-                        Box {
-                            var expanded by remember { mutableStateOf(false) }
-
-                            Button(
-                                onClick = { expanded = true },
-                            ) {
-                                Label(
-                                    text = Res.string.AppCheckMessagesFilter,
-                                )
-                            }
-
-                            DropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false },
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.AppCheckMessagesFilterType),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    softWrap = false,
-                                    modifier = Modifier
-                                        .padding(
-                                            horizontal = 12.dp,
-                                            vertical = 12.dp,
-                                        )
-                                )
-
-                                ValidationType.entries
-                                    .filter { type ->
-                                        validation.messages.firstOrNull {
-                                            it.type == type
-                                        } != null
-                                    }
-                                    .forEach { type ->
-                                        val isSelected = state.filterType.contains(type)
-
-                                        DropdownMenuItem(
-                                            text = {
-                                                Label(
-                                                    text = stringResource(type.title),
-                                                )
-                                            },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = if (isSelected)
-                                                        Icons.Default.CheckBox
-                                                    else
-                                                        Icons.Default.CheckBoxOutlineBlank,
-                                                    contentDescription = stringResource(type.title),
-                                                )
-                                            },
-                                            onClick = {
-                                                state.setFilterType(
-                                                    if (state.filterType.contains(type))
-                                                        state.filterType.minus(type)
-                                                    else
-                                                        state.filterType.plus(type)
-                                                )
-                                            }
-                                        )
-                                    }
-
-                                HorizontalDivider()
-
-                                Text(
-                                    text = stringResource(Res.string.AppCheckMessagesFilterSeverity),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    softWrap = false,
-                                    modifier = Modifier
-                                        .padding(
-                                            horizontal = 12.dp,
-                                            vertical = 12.dp,
-                                        )
-                                )
-
-                                ValidationSeverity.entries
-                                    .filter { severity ->
-                                        validation.messages.firstOrNull {
-                                            it.severity == severity
-                                        } != null
-                                    }
-                                    .forEach { severity ->
-                                        val isSelected = state.filterSeverity.contains(severity)
-
-                                        DropdownMenuItem(
-                                            text = {
-                                                Label(
-                                                    text = stringResource(severity.title),
-                                                )
-                                            },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = if (isSelected)
-                                                        Icons.Default.CheckBox
-                                                    else
-                                                        Icons.Default.CheckBoxOutlineBlank,
-                                                    contentDescription = stringResource(severity.title),
-                                                )
-                                            },
-                                            onClick = {
-                                                state.setFilterSeverity(
-                                                    if (state.filterSeverity.contains(severity))
-                                                        state.filterSeverity.minus(severity)
-                                                    else
-                                                        state.filterSeverity.plus(severity)
-                                                )
-                                            }
-                                        )
-                                    }
-                            }
-                        }
-                    }
-
-                    ValidationMessages(state)
-                }
-            }
-        }
-    }
-
-    /*TextField(
-        value = JSON_EXPORT.encodeToString(validation),
-        readOnly = true,
-        singleLine = false,
-        onValueChange = {},
-        modifier = Modifier.fillMaxSize(),
-    )*/
-}
-
-/**
- * Right side view of the check section.
- * This provides the PDF- / HTML- / XML-viewer.
- */
-@Composable
-private fun DetailsView(state: CheckSectionState) {
-    val selectedPdf = state.selectedPdf
-    var tabState by remember { mutableStateOf(0) }
-    val isPdfTabSelected by derivedStateOf { tabState == 0 }
-    val isHtmlTabSelected by derivedStateOf { tabState == 1 && state.selectedPdfHtml != null }
-    val isXmlTabSelected by derivedStateOf { tabState == 2 && state.selectedPdfXml != null }
-
-    TabRow(
-        selectedTabIndex = tabState,
-    ) {
-        // Add tab for PDF viewer.
-        Tab(
-            selected = isPdfTabSelected,
-            onClick = { tabState = 0 },
-            text = {
-                Label(
-                    text = Res.string.AppCheckDetailsPdf,
-                )
-            },
-        )
-
-        // Add tab for HTML viewer.
-        if (state.selectedPdfHtml != null) {
-            Tab(
-                selected = isHtmlTabSelected,
-                onClick = { tabState = 1 },
-                text = {
-                    Label(
-                        text = Res.string.AppCheckDetailsHtml,
-                    )
-                },
-            )
-        }
-
-        // Add tab for XML viewer.
-        if (state.selectedPdfXml != null) {
-            Tab(
-                selected = isXmlTabSelected,
-                onClick = { tabState = 2 },
-                text = {
-                    Label(
-                        text = Res.string.AppCheckDetailsXml,
-                    )
-                },
-            )
-        }
-    }
-
-    // Show PDF viewer.
-    if (isPdfTabSelected) {
-        PdfViewer(
-            pdf = selectedPdf!!,
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-
-    // Show HTML viewer.
-    if (isHtmlTabSelected) {
-        WebViewer(
-            html = state.selectedPdfHtml ?: "",
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-
-    // Show XML viewer.
-    if (isXmlTabSelected) {
-        XmlViewer(
-            xml = state.selectedPdfXml ?: "",
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-}
-
-/**
- * Summary about the validation.
- */
-@Composable
-private fun ValidationSummary(state: CheckSectionState) {
-    val validation = state.selectedPdfValidation!!
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .padding(vertical = 8.dp, horizontal = 16.dp)
-                .fillMaxWidth(),
-        ) {
-            // Invoice details on the left side.
-            Text(
-                text = buildAnnotatedString {
-                    val bold = SpanStyle(fontWeight = FontWeight.Bold)
-                    val unknown = SpanStyle(fontStyle = FontStyle.Normal)
-
-                    // Invoice profile.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummaryProfile).title())
-                        append("\n")
-                    }
-                    withStyle(style = bold.takeIf { validation.profile != null } ?: unknown) {
-                        append(
-                            validation.profile?.split(":")?.joinToString("\n")
-                                ?: stringResource(Res.string.AppCheckSummaryUnknown)
-                        )
-                        append("\n")
-                    }
-
-                    // Invoice version.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummaryVersion).title())
-                        append("\n")
-                    }
-                    withStyle(style = bold.takeIf { validation.version != null } ?: unknown) {
-                        append(
-                            validation.version
-                                ?: stringResource(Res.string.AppCheckSummaryUnknown)
-                        )
-                        append("\n")
-                    }
-
-                    // Invoice signature.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummarySignature).title())
-                        append("\n")
-                    }
-                    withStyle(style = bold.takeIf { validation.signature != null } ?: unknown) {
-                        append(
-                            validation.signature
-                                ?: stringResource(Res.string.AppCheckSummaryUnknown)
-                        )
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge,
-            )
-
-            // Message count on the right side.
-            Text(
-                text = buildAnnotatedString {
-                    // Title.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummaryMessages).title())
-                        append("\n")
-                    }
-
-                    // Total number of errors.
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(
-                            pluralStringResource(
-                                Res.plurals.AppCheckSummaryErrors,
-                                validation.countErrors,
-                                validation.countErrors
-                            )
-                        )
-                        append("\n")
-                    }
-
-                    // Total number of warnings.
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(
-                            pluralStringResource(
-                                Res.plurals.AppCheckSummaryWarnings,
-                                validation.countWarnings,
-                                validation.countWarnings,
-                            )
-                        )
-                        append("\n")
-                    }
-
-                    // Total number of notices.
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(
-                            pluralStringResource(
-                                Res.plurals.AppCheckSummaryNotices,
-                                validation.countNotices,
-                                validation.countNotices
-                            )
-                        )
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                softWrap = false,
-            )
-        }
-    }
-}
-
-/**
- * List of validation messages.
- */
-@Composable
-private fun ValidationMessages(state: CheckSectionState) {
-    val validation = state.selectedPdfValidation!!
-    val filterType = state.filterType
-    val filterSeverity = state.filterSeverity
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-        validation.messages
-            .filter { filterType.contains(it.type) }
-            .filter { filterSeverity.contains(it.severity) }
-            .forEach {
-                ValidationMessage(it)
-            }
-    }
-}
-
-/**
- * A single validation message.
- */
-@Composable
-@OptIn(ExperimentalFoundationApi::class)
-private fun ValidationMessage(message: ValidationMessage) =
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(top = 8.dp, start = 16.dp, end = 16.dp)
-                    .fillMaxWidth(),
-            ) {
-                val isDarkMode = LocalAppState.current.preferences.darkMode ?: isSystemInDarkTheme()
-                val clipboard = LocalClipboardManager.current
-
-                Icon(
-                    imageVector = message.severity.icon,
-                    tint = if (isDarkMode)
-                        message.severity.darkModeColor
-                    else
-                        message.severity.lightModeColor,
-                    contentDescription = stringResource(message.severity.title),
-                    modifier = Modifier
-                        .size(36.dp)
-                )
-
-                Text(
-                    text = buildString {
-                        append(stringResource(message.severity.title).title())
-                        append(" (")
-                        append(stringResource(message.type.title))
-                        append(")")
-                    },
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge
-                        .copy(lineHeight = 1.em),
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .weight(1f, fill = true),
-                )
-
-                Tooltip(
-                    text = stringResource(Res.string.AppCheckMessageMessageCopy),
-                ) {
-                    Button(
-                        onClick = {
-                            clipboard.setText(
-                                AnnotatedString(message.message)
-                            )
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = stringResource(Res.string.AppCheckMessageMessageCopy),
-                        )
-                    }
-                }
-            }
-
-            Text(
-                text = message.message.trim(),
-                modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-            )
-        }
-    }

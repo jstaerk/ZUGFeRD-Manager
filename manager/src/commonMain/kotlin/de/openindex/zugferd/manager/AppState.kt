@@ -35,10 +35,10 @@ import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.sections.CreateSection
 import de.openindex.zugferd.manager.sections.CreateSectionActions
 import de.openindex.zugferd.manager.sections.CreateSectionState
-import de.openindex.zugferd.manager.sections.NewVisualisationSectionState
 import de.openindex.zugferd.manager.sections.SettingsSection
 import de.openindex.zugferd.manager.sections.SettingsSectionState
 import de.openindex.zugferd.manager.sections.VisualsSection
+import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.Products
@@ -111,7 +111,7 @@ enum class AppSection(
     CREATE(CreateSectionState()),
     CHECK(CheckSectionState()),
     SETTINGS(SettingsSectionState()),
-    VISUALISATION(NewVisualisationSectionState());
+    VISUALISATION(VisualsSectionState());
 
     val label: StringResource
         get() = when (this) {
@@ -143,7 +143,7 @@ enum class AppSection(
             CREATE -> CreateSection(state = state as CreateSectionState)
             CHECK -> CheckSection(state = state as CheckSectionState)
             SETTINGS -> SettingsSection(state = state as SettingsSectionState)
-            VISUALISATION -> VisualsSection(state = state as NewVisualisationSectionState)
+            VISUALISATION -> VisualsSection(state = state as VisualsSectionState)
         }
     }
 
