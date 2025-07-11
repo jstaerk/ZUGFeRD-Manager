@@ -35,8 +35,10 @@ import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.sections.CreateSection
 import de.openindex.zugferd.manager.sections.CreateSectionActions
 import de.openindex.zugferd.manager.sections.CreateSectionState
+import de.openindex.zugferd.manager.sections.NewVisualisationSectionState
 import de.openindex.zugferd.manager.sections.SettingsSection
 import de.openindex.zugferd.manager.sections.SettingsSectionState
+import de.openindex.zugferd.manager.sections.VisualsSection
 import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.Products
@@ -54,7 +56,9 @@ import de.openindex.zugferd.manager.utils.loadSenders
 import de.openindex.zugferd.manager.utils.setCurrentLanguage
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCheck
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCreate
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarNewVisualisation
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarSettings
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarVisualisation
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
@@ -106,13 +110,15 @@ enum class AppSection(
 ) {
     CREATE(CreateSectionState()),
     CHECK(CheckSectionState()),
-    SETTINGS(SettingsSectionState());
+    SETTINGS(SettingsSectionState()),
+    VISUALISATION(NewVisualisationSectionState());
 
     val label: StringResource
         get() = when (this) {
             CREATE -> Res.string.AppSidebarCreate
             CHECK -> Res.string.AppSidebarCheck
             SETTINGS -> Res.string.AppSidebarSettings
+            VISUALISATION -> Res.string.AppSidebarNewVisualisation
         }
 
     val activeIcon: ImageVector
@@ -120,6 +126,7 @@ enum class AppSection(
             CREATE -> Icons.Default.EditNote
             CHECK -> Icons.Default.Search
             SETTINGS -> Icons.Default.Settings
+            VISUALISATION -> Icons.Default.Settings
         }
 
     val inactiveIcon: ImageVector
@@ -127,6 +134,7 @@ enum class AppSection(
             CREATE -> Icons.Default.EditNote
             CHECK -> Icons.Default.Search
             SETTINGS -> Icons.Default.Settings
+            VISUALISATION -> Icons.Default.Settings
         }
 
     @Composable
@@ -135,6 +143,7 @@ enum class AppSection(
             CREATE -> CreateSection(state = state as CreateSectionState)
             CHECK -> CheckSection(state = state as CheckSectionState)
             SETTINGS -> SettingsSection(state = state as SettingsSectionState)
+            VISUALISATION -> VisualsSection(state = state as NewVisualisationSectionState)
         }
     }
 
@@ -144,6 +153,7 @@ enum class AppSection(
             CREATE -> CreateSectionActions(state = state as CreateSectionState)
             CHECK -> CheckSectionActions(state = state as CheckSectionState)
             SETTINGS -> {}
+            VISUALISATION -> {}
         }
     }
 }

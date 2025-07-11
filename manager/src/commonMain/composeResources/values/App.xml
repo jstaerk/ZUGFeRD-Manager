@@ -27,6 +27,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSidebarCreate">create</string>
     <string name="AppSidebarCheck">check</string>
     <string name="AppSidebarSettings">options</string>
+    <string name="AppSidebarNewVisualisation">Visualisation</string>
     <string name="AppSidebarQuit">quit</string>
 
     <string name="AppMoreActions">further actions</string>
