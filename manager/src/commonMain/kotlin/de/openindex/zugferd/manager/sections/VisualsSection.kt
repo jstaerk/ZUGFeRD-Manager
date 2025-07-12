@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.PdfViewer
+import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.sections.CheckSectionState
@@ -52,6 +53,7 @@ import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckDetailsHtml
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectMessage
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectMessage
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
@@ -173,7 +175,6 @@ fun chooseFile(): File? {
     } else null
 }
 */
-
 
 
 /*
@@ -393,7 +394,6 @@ fun TagView(text: String) {
  */
 
 
-
 /*
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -504,6 +504,8 @@ fun VisualsSection(state: VisualsSectionState) {
 fun VisualsSection(state: VisualsSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
+    var tabState by remember { mutableStateOf(0) }
+    val isHtmlTabSelected by derivedStateOf { tabState == 1 && state.selectedPdfHtml != null }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // Tabs mit + Button
@@ -563,6 +565,7 @@ fun VisualsSection(state: VisualsSectionState) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        /*
         if (state.documents.isNotEmpty()) {
             val currentTab = state.documents[state.selectedIndex]
 
@@ -602,10 +605,22 @@ fun VisualsSection(state: VisualsSectionState) {
 //                                    "XML Vorschau oder andere Infos...",
 //                                    modifier = Modifier.padding(16.dp)
 //                                )
-                                XmlViewer(
-                                    xml = state.selectedPdfXml ?: "",
-                                    modifier = Modifier.fillMaxSize(),
-                                )
+//                                XmlViewer(
+//                                    xml = state.selectedPdfXml ?: "",
+//                                    modifier = Modifier.fillMaxSize(),
+//                                )
+
+                                if (state.selectedPdfHtml != null) {
+                                    Tab(
+                                        selected = isHtmlTabSelected,
+                                        onClick = { tabState = 1 },
+                                        text = {
+                                            de.openindex.zugferd.manager.gui.Label(
+                                                text = Res.string.AppCheckDetailsHtml,
+                                            )
+                                        },
+                                    )
+                                }
                             }
                         },
                         rightContent = {
@@ -630,6 +645,101 @@ fun VisualsSection(state: VisualsSectionState) {
 
             }
         }
+
+         */
+
+        if (state.documents.isNotEmpty()) {
+            val currentTab = state.documents[state.selectedIndex]
+            val isHtmlTabSelected by derivedStateOf { tabState == 0 }
+            val isXmlTabSelected by derivedStateOf { tabState == 1 && currentTab.xml != null }
+
+            val dragAndDropCallback = remember(currentTab) {
+                createDragAndDropTarget { pdfFile ->
+                    scope.launch {
+                        state.loadPdfInTab(currentTab, pdfFile, appState)
+                    }
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .dragAndDropTarget(
+                        target = dragAndDropCallback,
+                        shouldStartDragAndDrop = { true }
+                    )
+            ) {
+                if (currentTab.pdf == null) {
+                    EmptyVisualsView()
+                } else {
+                    ResizableSplitPane(
+                        modifier = Modifier.fillMaxSize(),
+                        leftContent = {
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                // Tab-Auswahl für HTML/XML
+                                TabRow(selectedTabIndex = tabState) {
+                                    if (currentTab.html != null) {
+                                        Tab(
+                                            selected = isHtmlTabSelected,
+                                            onClick = { tabState = 0 },
+                                            text = { Text("HTML Vorschau") }
+                                        )
+                                    }
+
+                                    if (currentTab.xml != null) {
+                                        Tab(
+                                            selected = isXmlTabSelected,
+                                            onClick = { tabState = 1 },
+                                            text = { Text("XML") }
+                                        )
+                                    }
+                                }
+
+                                // Inhalt je nach ausgewähltem Tab
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    when {
+                                        isHtmlTabSelected && currentTab.html != null -> {
+                                            WebViewer(
+                                                html = currentTab.html!!,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        }
+
+                                        isXmlTabSelected && currentTab.xml != null -> {
+                                            XmlViewer(
+                                                xml = currentTab.xml!!,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        rightContent = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(
+                                        width = 2.dp,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(8.dp)
+                            ) {
+                                PdfViewer(
+                                    pdf = currentTab.pdf!!,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+
+                            }
+
+                        }
+                    )
+
+                }
+            }
+        }
+
     }
 }
 

@@ -31,6 +31,10 @@ import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.directory
+import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
+import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
+import de.openindex.zugferd.manager.utils.getXmlFromPdf
+import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.PlatformFile
 
 /*
@@ -80,7 +84,6 @@ class VisualsSectionState : SectionState() {
     var selectedIndex by mutableStateOf(0)
 
 
-
     fun addNewTab() {
         documents.add(DocumentTab(name = "", pdf = null))
         selectedIndex = documents.lastIndex
@@ -93,19 +96,38 @@ class VisualsSectionState : SectionState() {
         }
     }
 
-     fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
+    /*
+         fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
+            tab.name = pdfFile.name
+            tab.pdf = pdfFile
+            tab.tags = listOf()
+
+            pdfFile.directory?.let {
+                appState.preferences.setPreviousPdfLocation(it)
+            }
+        }
+
+     */
+    suspend fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
         tab.name = pdfFile.name
         tab.pdf = pdfFile
         tab.tags = listOf()
+
+        // HTML und XML für die Vorschau extrahieren
+        tab.html = getHtmlVisualizationFromPdf(pdfFile)
+        tab.xml = getXmlFromPdf(pdfFile)?.let { getPrettyPrintedXml(it) }?.trimToNull()
 
         pdfFile.directory?.let {
             appState.preferences.setPreviousPdfLocation(it)
         }
     }
 
-
     private var _selectedPdfXml = mutableStateOf<String?>(null)
     val selectedPdfXml: String?
         get() = _selectedPdfXml.value
 
+
+    private var _selectedPdfHtml = mutableStateOf<String?>(null)
+    val selectedPdfHtml: String?
+        get() = _selectedPdfHtml.value
 }
