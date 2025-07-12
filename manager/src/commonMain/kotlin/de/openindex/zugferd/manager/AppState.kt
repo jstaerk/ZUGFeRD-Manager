@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager
 
+import VisualsSection
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Search
@@ -37,7 +38,6 @@ import de.openindex.zugferd.manager.sections.CreateSectionActions
 import de.openindex.zugferd.manager.sections.CreateSectionState
 import de.openindex.zugferd.manager.sections.SettingsSection
 import de.openindex.zugferd.manager.sections.SettingsSectionState
-import de.openindex.zugferd.manager.sections.VisualsSection
 import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.Preferences
@@ -111,7 +111,7 @@ enum class AppSection(
     CREATE(CreateSectionState()),
     CHECK(CheckSectionState()),
     SETTINGS(SettingsSectionState()),
-    VISUALISATION(VisualsSectionState());
+    VISUALISATION( VisualsSectionState());
 
     val label: StringResource
         get() = when (this) {
