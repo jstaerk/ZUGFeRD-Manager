@@ -22,7 +22,6 @@
 import androidx.compose.foundation.*
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
@@ -32,36 +31,25 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
-import de.openindex.zugferd.manager.model.DocumentTab
-import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.sections.VisualsSectionState
-import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.stringResource
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckDetailsHtml
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectMessage
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectMessage
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.awt.Cursor
-import java.io.File
-import javax.swing.JFileChooser
+
 
 /*
 @Composable
@@ -465,7 +453,7 @@ fun VisualsSection(state: VisualsSectionState) {
         if (state.documents.isNotEmpty()) {
             val currentTab = state.documents[state.selectedIndex]
 
-            // ✅ dragAndDropCallback NEU: kein plain remember, sondern abhängig vom currentTab
+            // dragAndDropCallback NEU: kein plain remember, sondern abhängig vom currentTab
             val dragAndDropCallback = remember(currentTab) {
                 createDragAndDropTarget { pdfFile ->
                     scope.launch {

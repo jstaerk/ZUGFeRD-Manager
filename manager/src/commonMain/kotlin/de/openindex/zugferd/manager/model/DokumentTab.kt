@@ -7,15 +7,6 @@ import io.github.vinceglb.filekit.core.PlatformFile
 
 
 /*
-// diese Code nur für Tabs und + button
-data class DocumentTab(
-    val name: String,
-    val content: String
-)
-
- */
-
-/*
 class DocumentTab(
     name: String = "",
     pdf: PlatformFile? = null,
