@@ -58,7 +58,6 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCheck
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCreate
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarNewVisualisation
 import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarSettings
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarVisualisation
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
