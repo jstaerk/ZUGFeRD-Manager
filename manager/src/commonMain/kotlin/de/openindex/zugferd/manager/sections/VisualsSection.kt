@@ -35,7 +35,9 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -55,6 +57,7 @@ import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectM
 import de.openindex.zugferd.zugferd_manager.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.awt.Cursor
 import java.io.File
 import javax.swing.JFileChooser
 
@@ -583,20 +586,48 @@ fun VisualsSection(state: VisualsSectionState) {
                     EmptyVisualsView()
                 } else {
                     ResizableSplitPane(
+                        modifier = Modifier.fillMaxSize(),
                         leftContent = {
-                            Text(
-                                "XML Vorschau oder andere Infos...",
-                                modifier = Modifier.padding(16.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(
+                                        width = 2.dp,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(8.dp)
+                            ) {
+//                                Text(
+//                                    "XML Vorschau oder andere Infos...",
+//                                    modifier = Modifier.padding(16.dp)
+//                                )
+                                XmlViewer(
+                                    xml = state.selectedPdfXml ?: "",
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
                         },
                         rightContent = {
-                            PdfViewer(
-                                pdf = currentTab.pdf!!,
-                                modifier = Modifier.fillMaxSize()
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(
+                                        width = 2.dp,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(8.dp)
+                            ) {
+                                PdfViewer(
+                                    pdf = currentTab.pdf!!,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
                     )
                 }
+
             }
         }
     }
@@ -617,6 +648,8 @@ private fun EmptyVisualsView() {
 
 @Composable
 fun ResizableSplitPane(
+
+
     modifier: Modifier = Modifier,
     initialRatio: Float = 0.5f,
     minRatio: Float = 0.1f,
@@ -627,6 +660,7 @@ fun ResizableSplitPane(
     var dragOffset by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
     var ratio by remember { mutableStateOf(initialRatio) }
+
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val totalWidthPx = with(density) { maxWidth.toPx() }
@@ -644,22 +678,23 @@ fun ResizableSplitPane(
                 leftContent()
             }
 
+            //val totalWidthPx = with(density) { constraints.maxWidth.toFloat() }
+
             Box(
                 modifier = Modifier
-                    .width(8.dp)
+                    .width(2.dp)
                     .fillMaxHeight()
                     .background(Color.Gray)
+                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                     .draggable(
                         orientation = Orientation.Horizontal,
                         state = rememberDraggableState { delta ->
-                            dragOffset += delta
-                        },
-                        onDragStopped = {
-                            ratio = ((leftWidthPx + dragOffset) / totalWidthPx)
-                            dragOffset = 0f
+                            // Update ratio direkt während Drag
+                            ratio = (ratio * totalWidthPx + delta).coerceIn(100f, totalWidthPx - 100f) / totalWidthPx
                         }
                     )
             )
+
 
             Box(
                 modifier = Modifier.fillMaxSize()

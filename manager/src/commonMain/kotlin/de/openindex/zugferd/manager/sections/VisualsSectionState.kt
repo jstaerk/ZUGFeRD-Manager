@@ -79,6 +79,8 @@ class VisualsSectionState : SectionState() {
     val documents = mutableStateListOf<DocumentTab>()
     var selectedIndex by mutableStateOf(0)
 
+
+
     fun addNewTab() {
         documents.add(DocumentTab(name = "", pdf = null))
         selectedIndex = documents.lastIndex
@@ -100,5 +102,10 @@ class VisualsSectionState : SectionState() {
             appState.preferences.setPreviousPdfLocation(it)
         }
     }
+
+
+    private var _selectedPdfXml = mutableStateOf<String?>(null)
+    val selectedPdfXml: String?
+        get() = _selectedPdfXml.value
 
 }
