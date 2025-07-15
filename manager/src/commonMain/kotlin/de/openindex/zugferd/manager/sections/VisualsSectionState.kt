@@ -78,6 +78,18 @@ class VisualsSectionState : SectionState() {
  */
 
 
+/*
+      fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
+         tab.name = pdfFile.name
+         tab.pdf = pdfFile
+         tab.tags = listOf()
+
+         pdfFile.directory?.let {
+             appState.preferences.setPreviousPdfLocation(it)
+         }
+     }
+
+  */
 
 class VisualsSectionState : SectionState() {
     val documents = mutableStateListOf<DocumentTab>()
@@ -96,18 +108,7 @@ class VisualsSectionState : SectionState() {
         }
     }
 
-    /*
-         fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
-            tab.name = pdfFile.name
-            tab.pdf = pdfFile
-            tab.tags = listOf()
 
-            pdfFile.directory?.let {
-                appState.preferences.setPreviousPdfLocation(it)
-            }
-        }
-
-     */
     suspend fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
         tab.name = pdfFile.name
         tab.pdf = pdfFile
@@ -121,6 +122,22 @@ class VisualsSectionState : SectionState() {
             appState.preferences.setPreviousPdfLocation(it)
         }
     }
+
+    /*
+    suspend fun loadXmlInTab(tab: DocumentTab, xmlFile: PlatformFile, appState: AppState) {
+        val xml = xmlFile.readBytes().decodeToString()
+
+        tab.name = xmlFile.name
+        tab.xml = getPrettyPrintedXml(xml)?.trimToNull()
+        tab.html = getHtmlVisualizationFromXml(xml)
+        tab.pdf = null
+        tab.tags = listOf()
+
+        xmlFile.directory?.let {
+            appState.preferences.setPreviousPdfLocation(it)
+        }
+    }
+     */
 
     private var _selectedPdfXml = mutableStateOf<String?>(null)
     val selectedPdfXml: String?
