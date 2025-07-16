@@ -46,8 +46,8 @@ import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.stringResource
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCreateSelectMessage
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppCreateSelectMessage
+import de.openindex.zugferd.quba.generated.resources.Res
 import kotlinx.coroutines.launch
 import java.awt.Cursor
 

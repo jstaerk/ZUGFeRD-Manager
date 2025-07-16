@@ -54,11 +54,11 @@ import de.openindex.zugferd.manager.utils.loadProducts
 import de.openindex.zugferd.manager.utils.loadRecipients
 import de.openindex.zugferd.manager.utils.loadSenders
 import de.openindex.zugferd.manager.utils.setCurrentLanguage
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCheck
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarCreate
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarNewVisualisation
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarSettings
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppSidebarCheck
+import de.openindex.zugferd.quba.generated.resources.AppSidebarCreate
+import de.openindex.zugferd.quba.generated.resources.AppSidebarNewVisualisation
+import de.openindex.zugferd.quba.generated.resources.AppSidebarSettings
+import de.openindex.zugferd.quba.generated.resources.Res
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 

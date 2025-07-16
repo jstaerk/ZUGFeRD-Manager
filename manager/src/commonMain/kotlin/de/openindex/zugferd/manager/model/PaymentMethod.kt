@@ -22,9 +22,9 @@
 package de.openindex.zugferd.manager.model
 
 import de.openindex.zugferd.manager.utils.getString
-import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod_58
-import de.openindex.zugferd.zugferd_manager.generated.resources.PaymentMethod_59
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.PaymentMethod_58
+import de.openindex.zugferd.quba.generated.resources.PaymentMethod_59
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.StringResource
 
 /**

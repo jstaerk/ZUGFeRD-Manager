@@ -41,9 +41,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.utils.stringResource
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppQuestionDialogNo
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppQuestionDialogYes
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppQuestionDialogNo
+import de.openindex.zugferd.quba.generated.resources.AppQuestionDialogYes
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.StringResource
 
 @Composable

@@ -54,9 +54,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.gui.Label
 import de.openindex.zugferd.manager.utils.stringResource
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSidebarQuit
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.application
+import de.openindex.zugferd.quba.generated.resources.AppSidebarQuit
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.application
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 

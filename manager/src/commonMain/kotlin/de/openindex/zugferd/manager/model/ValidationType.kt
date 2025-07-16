@@ -22,10 +22,10 @@
 package de.openindex.zugferd.manager.model
 
 import de.openindex.zugferd.manager.utils.getString
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_OTHER
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_PDF
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationType_XML
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.ValidationType_OTHER
+import de.openindex.zugferd.quba.generated.resources.ValidationType_PDF
+import de.openindex.zugferd.quba.generated.resources.ValidationType_XML
 import org.jetbrains.compose.resources.StringResource
 
 enum class ValidationType(val title: StringResource) {

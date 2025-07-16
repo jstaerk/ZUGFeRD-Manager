@@ -21,8 +21,8 @@
 
 package de.openindex.zugferd.manager.utils
 
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.allStringResources
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.allStringResources
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 expect fun getCountryCodes(): List<String>

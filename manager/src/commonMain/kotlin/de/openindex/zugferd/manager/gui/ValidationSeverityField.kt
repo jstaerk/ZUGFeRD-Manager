@@ -24,8 +24,8 @@ package de.openindex.zugferd.manager.gui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.openindex.zugferd.manager.model.ValidationSeverity
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.ValidationSeverity
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 

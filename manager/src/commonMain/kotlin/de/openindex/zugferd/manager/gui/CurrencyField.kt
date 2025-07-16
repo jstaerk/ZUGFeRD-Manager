@@ -28,8 +28,8 @@ import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.utils.getCurrenciesByName
 import de.openindex.zugferd.manager.utils.getCurrenciesBySymbol
 import de.openindex.zugferd.manager.utils.translate
-import de.openindex.zugferd.zugferd_manager.generated.resources.Currency
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.Currency
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.Resource
 
 @Composable

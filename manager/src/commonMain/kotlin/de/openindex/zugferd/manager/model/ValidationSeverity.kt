@@ -28,11 +28,11 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import de.openindex.zugferd.manager.utils.getString
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_ERROR
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_FATAL
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_NOTICE
-import de.openindex.zugferd.zugferd_manager.generated.resources.ValidationSeverity_WARNING
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.ValidationSeverity_ERROR
+import de.openindex.zugferd.quba.generated.resources.ValidationSeverity_FATAL
+import de.openindex.zugferd.quba.generated.resources.ValidationSeverity_NOTICE
+import de.openindex.zugferd.quba.generated.resources.ValidationSeverity_WARNING
 import org.jetbrains.compose.resources.StringResource
 
 enum class ValidationSeverity(

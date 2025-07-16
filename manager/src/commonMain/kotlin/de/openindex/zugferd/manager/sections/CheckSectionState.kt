@@ -35,8 +35,8 @@ import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.trimToNull
 import de.openindex.zugferd.manager.utils.validatePdf
 import de.openindex.zugferd.manager.utils.writeJson
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppCheckSelectFile
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppCheckSelectFile
+import de.openindex.zugferd.quba.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType

@@ -48,6 +48,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -326,21 +327,11 @@ actual fun getXmlFromPdf(pdf: PlatformFile): String? {
         null
     }
 }
-
-actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
-    val xmlData = getXmlFromPdf(pdf) ?: return null
-    val tempXmlFile = withContext(Dispatchers.IO) {
-        val tempXmlFile = Files.createTempFile("zugferd-", ".xml")
-        tempXmlFile.writer().use { writer ->
-            writer.write(xmlData)
-        }
-        tempXmlFile
-    }
-
+actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
     return try {
         ZUGFeRDVisualizer()
             .visualize(
-                tempXmlFile.pathString,
+                xml.pathString,
                 ZUGFeRDVisualizer.Language.DE,
             )
             // HACK: Apply custom css.
@@ -355,6 +346,19 @@ actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
         null
     }
 
+}
+
+actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
+    val xmlData = getXmlFromPdf(pdf) ?: return null
+    val tempXmlFile = withContext(Dispatchers.IO) {
+        val tempXmlFile = Files.createTempFile("zugferd-", ".xml")
+        tempXmlFile.writer().use { writer ->
+            writer.write(xmlData)
+        }
+        tempXmlFile
+    }
+
+    return getHtmlVisualizationFromXML(tempXmlFile)
     /*
     try {
         ExportResource("/xrechnung-viewer.css")

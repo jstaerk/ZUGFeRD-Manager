@@ -50,10 +50,10 @@ import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
 import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.utils.trimToNull
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsItemAdd
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsItemEdit
-import de.openindex.zugferd.zugferd_manager.generated.resources.AppSettingsItemRemove
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.AppSettingsItemAdd
+import de.openindex.zugferd.quba.generated.resources.AppSettingsItemEdit
+import de.openindex.zugferd.quba.generated.resources.AppSettingsItemRemove
+import de.openindex.zugferd.quba.generated.resources.Res
 
 interface ItemSettingsContext {
     fun closeDialog()

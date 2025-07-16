@@ -28,9 +28,9 @@ import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.removeEmbeddedFiles
 import de.openindex.zugferd.manager.utils.toJavaDate
 import de.openindex.zugferd.manager.utils.trimToNull
-import de.openindex.zugferd.zugferd_manager.generated.resources.InvoicePaymentTermDescriptionSepaCreditTransfer
-import de.openindex.zugferd.zugferd_manager.generated.resources.InvoicePaymentTermDescriptionSepaDirectDebit
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.InvoicePaymentTermDescriptionSepaCreditTransfer
+import de.openindex.zugferd.quba.generated.resources.InvoicePaymentTermDescriptionSepaDirectDebit
+import de.openindex.zugferd.quba.generated.resources.Res
 import io.github.vinceglb.filekit.core.PlatformFile
 import org.apache.pdfbox.Loader
 import kotlinx.coroutines.runBlocking

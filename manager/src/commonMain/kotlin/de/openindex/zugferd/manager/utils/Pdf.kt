@@ -22,6 +22,7 @@
 package de.openindex.zugferd.manager.utils
 
 import io.github.vinceglb.filekit.core.PlatformFile
+import java.nio.file.Path
 
 const val MAX_PDF_ARCHIVE_VERSION = 3
 
@@ -42,3 +43,5 @@ expect suspend fun convertToPdfArchive(pdfFile: PlatformFile): PlatformFile
 expect fun getXmlFromPdf(pdf: PlatformFile): String?
 
 expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
+
+expect suspend fun getHtmlVisualizationFromXML(xml: Path): String?

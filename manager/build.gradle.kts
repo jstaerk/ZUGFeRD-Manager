@@ -12,7 +12,7 @@ import kotlin.io.path.name
 project.group = "de.openindex.zugferd"
 project.version = libs.versions.application.version.get()
 
-val applicationPackageName = "ZUGFeRD-Manager"
+val applicationPackageName = "Quba"
 
 val isLinux = SystemUtils.IS_OS_LINUX
 val isMac = SystemUtils.IS_OS_MAC

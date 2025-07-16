@@ -29,8 +29,8 @@ import de.openindex.zugferd.manager.utils.Language
 import de.openindex.zugferd.manager.utils.getLanguageName
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.translate
-import de.openindex.zugferd.zugferd_manager.generated.resources.Language
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.Language
+import de.openindex.zugferd.quba.generated.resources.Res
 import org.jetbrains.compose.resources.Resource
 
 @Composable

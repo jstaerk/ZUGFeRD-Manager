@@ -22,19 +22,19 @@
 package de.openindex.zugferd.manager.model
 
 import de.openindex.zugferd.manager.utils.getString
-import de.openindex.zugferd.zugferd_manager.generated.resources.Res
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_AE
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_E
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_E_DefaultExemptionReason
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_G
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_G_DefaultExemptionReason
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_K
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_K_DefaultExemptionReason
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_O
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_O_DefaultExemptionReason
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_S
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_Z
-import de.openindex.zugferd.zugferd_manager.generated.resources.TaxCategory_Z_DefaultExemptionReason
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_AE
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_E
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_E_DefaultExemptionReason
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_G
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_G_DefaultExemptionReason
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_K
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_K_DefaultExemptionReason
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_O
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_O_DefaultExemptionReason
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_S
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_Z
+import de.openindex.zugferd.quba.generated.resources.TaxCategory_Z_DefaultExemptionReason
 import org.jetbrains.compose.resources.StringResource
 
 /**

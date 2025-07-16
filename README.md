@@ -1,6 +1,6 @@
-# OpenIndex ZUGFeRD-Manager 1.3.2
+# OpenIndex Quba 1.3.2
 
-<img src="./share/icons/application.svg" align="right" height="125" alt="OpenIndex ZUGFeRD-Manager">
+<img src="./share/icons/application.svg" align="right" height="125" alt="OpenIndex Quba">
 
 🇩🇪 Dies ist eine kostenfreie Desktop-Anwendung für Windows, MacOS & Linux zur Erstellung und Überprüfung von E-Rechnungen im ZUGFeRD-Format.
 
@@ -12,11 +12,11 @@
 | Windows                                                                                                                                  | MacOS                                                                                                                                        | Linux                                                                                                                                     |
 |------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | <img src="./share/os-logos/windows.png" width="100" alt="Windows">                                                                       | <img src="./share/os-logos/apple.png" width="90" alt="MacOS">                                                                                | <img src="./share/os-logos/linux.png" width="100" alt="Linux">                                                                            |
-| [EXE-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.2/ZUGFeRD-Manager-1.3.2-windows-x64.exe)<br>(x86_64) | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.2/ZUGFeRD-Manager-1.3.2-macos-arm64.dmg)<br>(M1 oder neuer) | [DEB-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.2/ZUGFeRD-Manager-1.3.2-linux-x64.deb)<br>(x86_64)    |
-| [ZIP-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.2/ZUGFeRD-Manager-1.3.2-windows-x64.zip)<br>(x86_64)    | [DMG-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.2/ZUGFeRD-Manager-1.3.2-macos-x64.dmg)<br>(Intel)           | [RPM-Installer](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.2/ZUGFeRD-Manager-1.3.2-linux-x64.rpm)<br>(x86_64)    |
-|                                                                                                                                          |                                                                                                                                              | [TAR.GZ-Archiv](https://github.com/OpenIndex/ZUGFeRD-Manager/releases/download/v1.3.2/ZUGFeRD-Manager-1.3.2-linux-x64.tar.gz)<br>(x86_64) |
+| [EXE-Installer](https://github.com/OpenIndex/Quba/releases/download/v1.3.2/Quba-1.3.2-windows-x64.exe)<br>(x86_64) | [DMG-Archiv](https://github.com/OpenIndex/Quba/releases/download/v1.3.2/Quba-1.3.2-macos-arm64.dmg)<br>(M1 oder neuer) | [DEB-Installer](https://github.com/OpenIndex/Quba/releases/download/v1.3.2/Quba-1.3.2-linux-x64.deb)<br>(x86_64)    |
+| [ZIP-Archiv](https://github.com/OpenIndex/Quba/releases/download/v1.3.2/Quba-1.3.2-windows-x64.zip)<br>(x86_64)    | [DMG-Archiv](https://github.com/OpenIndex/Quba/releases/download/v1.3.2/Quba-1.3.2-macos-x64.dmg)<br>(Intel)           | [RPM-Installer](https://github.com/OpenIndex/Quba/releases/download/v1.3.2/Quba-1.3.2-linux-x64.rpm)<br>(x86_64)    |
+|                                                                                                                                          |                                                                                                                                              | [TAR.GZ-Archiv](https://github.com/OpenIndex/Quba/releases/download/v1.3.2/Quba-1.3.2-linux-x64.tar.gz)<br>(x86_64) |
 
-Ältere Versionen sind in der [Release-Übersicht](https://github.com/OpenIndex/ZUGFeRD-Manager/releases) zu finden.
+Ältere Versionen sind in der [Release-Übersicht](https://github.com/OpenIndex/Quba/releases) zu finden.
 
 
 ## Zielgruppe
@@ -34,9 +34,9 @@ Die Anwendung richtet sich an **kleine** Unternehmen, die eine einfache und mög
 
    <img src="./share/screenshots/pdfa-libreoffice.png" width="400" alt="PDF/A Format beim PDF-Export in LibreOffice aktivieren">
 
-   **Hinweis:** *ZUGFeRD-Manager* kann auch normale PDF-Dateien verarbeiten und in das PDF-Archivformat umwandeln. Dies kann aber unter Umständen zu Fehlern und ungültigen ZUGFeRD-Rechnungen führen - vor allem, wenn die Rechnungen aufwändige Gestaltungselemente enthalten oder die verwendeten Schriften nicht eingebettet sind.
+   **Hinweis:** *Quba* kann auch normale PDF-Dateien verarbeiten und in das PDF-Archivformat umwandeln. Dies kann aber unter Umständen zu Fehlern und ungültigen ZUGFeRD-Rechnungen führen - vor allem, wenn die Rechnungen aufwändige Gestaltungselemente enthalten oder die verwendeten Schriften nicht eingebettet sind.
 
-3. Öffnen Sie den *ZUGFeRD-Manager*, klicken Sie links auf den Bereich **"Erzeugen"** und dann oben rechts auf **"PDF wählen"**. Wählen Sie die zuvor erzeugte PDF-Datei aus und tragen Sie im *ZUGFeRD-Manager* die Details zur Rechnung ein (Datum Rechnungsempfänger, Rechnungsposten, etc.).
+3. Öffnen Sie den *Quba*, klicken Sie links auf den Bereich **"Erzeugen"** und dann oben rechts auf **"PDF wählen"**. Wählen Sie die zuvor erzeugte PDF-Datei aus und tragen Sie im *Quba* die Details zur Rechnung ein (Datum Rechnungsempfänger, Rechnungsposten, etc.).
 
    <img src="./share/screenshots/create-start.png" width="400" alt="Erzeugung einer ZUGFeRD-Rechnung beginnen">
 
@@ -44,18 +44,18 @@ Die Anwendung richtet sich an **kleine** Unternehmen, die eine einfache und mög
 
    <img src="./share/screenshots/create-finish.png" width="400" alt="Erzeugung einer ZUGFeRD-Rechnung abschließen">
 
-**Hinweis:** Die erzeugte ZUGFeRD-Rechnung kann wie eine normale PDF-Datei von Ihren Kunden geöffnet und angesehen werden, enthält aber auch die weiteren maschinenlesbare Informationen, welche Sie im *ZUGFeRD-Manager* eingetragen haben.
+**Hinweis:** Die erzeugte ZUGFeRD-Rechnung kann wie eine normale PDF-Datei von Ihren Kunden geöffnet und angesehen werden, enthält aber auch die weiteren maschinenlesbare Informationen, welche Sie im *Quba* eingetragen haben.
 
 
 ## Wie prüft man eine ZUGFeRD-Rechnung?
 
 Sie können und sollten Ihre eigenen erzeugten E-Rechnungen sowie auch von Anderen erhaltene E-Rechnungen prüfen, um mögliche Probleme mit dem Finanzamt im späteren Verlaufe zu vermeiden.
 
-1. Öffnen Sie den *ZUGFeRD-Manager*, klicken Sie links auf den Bereich **"Prüfen"** und dann oben rechts auf **"E-Rechnung wählen"**. Wählen Sie eine eigene oder fremde E-Rechnung zur Prüfung aus.
+1. Öffnen Sie den *Quba*, klicken Sie links auf den Bereich **"Prüfen"** und dann oben rechts auf **"E-Rechnung wählen"**. Wählen Sie eine eigene oder fremde E-Rechnung zur Prüfung aus.
 
    <img src="./share/screenshots/verify-start.png" width="400" alt="Prüfung einer ZUGFeRD-Rechnung beginnen">
 
-2. Der *ZUGFeRD-Manager* wird die in der E-Rechnung enthaltenen maschinenlesbaren Daten auslesen, auf Gültigkeit prüfen und Ihnen eine Zusammenfassung von ggf. enthaltenen Fehlern anzeigen.
+2. Der *Quba* wird die in der E-Rechnung enthaltenen maschinenlesbaren Daten auslesen, auf Gültigkeit prüfen und Ihnen eine Zusammenfassung von ggf. enthaltenen Fehlern anzeigen.
 
    <img src="./share/screenshots/verify-summary.png" width="400" alt="Zusammenfassung zur Prüfung einer ZUGFeRD-Rechnung">
 

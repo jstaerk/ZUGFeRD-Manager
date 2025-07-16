@@ -25,6 +25,6 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          name: ZUGFeRD-Manager ${{ steps.version.outputs.version-without-v }}
+          name: Quba ${{ steps.version.outputs.version-without-v }}
           token: ${{ secrets.RELEASE_TOKEN }}
           prerelease: ${{ env.BRANCH_NAME != 'master' }}
