@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
@@ -125,7 +126,7 @@ enum class AppSection(
             CREATE -> Icons.Default.EditNote
             CHECK -> Icons.Default.Search
             SETTINGS -> Icons.Default.Settings
-            VISUALISATION -> Icons.Default.Settings
+            VISUALISATION -> Icons.Default.Visibility
         }
 
     val inactiveIcon: ImageVector
@@ -133,7 +134,7 @@ enum class AppSection(
             CREATE -> Icons.Default.EditNote
             CHECK -> Icons.Default.Search
             SETTINGS -> Icons.Default.Settings
-            VISUALISATION -> Icons.Default.Settings
+            VISUALISATION -> Icons.Default.Visibility
         }
 
     @Composable

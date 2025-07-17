@@ -32,6 +32,7 @@ import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
+import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
 import de.openindex.zugferd.manager.utils.trimToNull
@@ -108,7 +109,7 @@ class VisualsSectionState : SectionState() {
         }
     }
 
-
+    /*
     suspend fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
         tab.name = pdfFile.name
         tab.pdf = pdfFile
@@ -123,21 +124,42 @@ class VisualsSectionState : SectionState() {
         }
     }
 
-    /*
-    suspend fun loadXmlInTab(tab: DocumentTab, xmlFile: PlatformFile, appState: AppState) {
-        val xml = xmlFile.readBytes().decodeToString()
+     */
 
-        tab.name = xmlFile.name
-        tab.xml = getPrettyPrintedXml(xml)?.trimToNull()
-        tab.html = getHtmlVisualizationFromXml(xml)
+
+    suspend fun loadFileInTab(tab: DocumentTab, file: PlatformFile, appState: AppState) {
+        tab.name = file.name
         tab.pdf = null
+        tab.html = null
+        tab.xml = null
         tab.tags = listOf()
 
-        xmlFile.directory?.let {
-            appState.preferences.setPreviousPdfLocation(it)
+        val fileText = file.file.readText()
+        val filePath = file.file.toPath()
+
+        val isXml = file.name.lowercase().endsWith(".xml") || fileText.trimStart().startsWith("<")
+
+        if (isXml) {
+            tab.xml = fileText.trimToNull()
+            tab.html = getHtmlVisualizationFromXML(filePath)?.trimToNull()
+        }
+
+        else {
+            val isPdf = fileText.trimStart().startsWith("%PDF")
+            if (isPdf) {
+                tab.pdf = file
+                tab.html = getHtmlVisualizationFromPdf(file)
+                tab.xml = getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
+                file.directory?.let {
+                    appState.preferences.setPreviousPdfLocation(it)
+                }
+            }
         }
     }
-     */
+
+
+
+
 
     private var _selectedPdfXml = mutableStateOf<String?>(null)
     val selectedPdfXml: String?

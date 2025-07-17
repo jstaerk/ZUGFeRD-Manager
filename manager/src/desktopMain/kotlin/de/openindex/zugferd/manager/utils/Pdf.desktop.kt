@@ -345,7 +345,6 @@ actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
         APP_LOGGER.error("Can't create HTML visualization.", e)
         null
     }
-
 }
 
 actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {

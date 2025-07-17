@@ -28,6 +28,7 @@ import androidx.compose.ui.draganddrop.DragData
 import androidx.compose.ui.draganddrop.dragData
 import io.github.vinceglb.filekit.core.PlatformFile
 
+/*
 @OptIn(ExperimentalComposeUiApi::class)
 fun createDragAndDropTarget(
     onDrop: (pdfFile: PlatformFile) -> Unit,
@@ -48,3 +49,29 @@ fun createDragAndDropTarget(
             return true
         }
     }
+ */
+
+
+
+
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun createDragAndDropTarget(
+    onDrop: (file: PlatformFile) -> Unit,
+): DragAndDropTarget =
+    object : DragAndDropTarget {
+        override fun onDrop(event: DragAndDropEvent): Boolean {
+            val dragData = event.dragData()
+            if (dragData !is DragData.FilesList) return false
+
+            val supportedFileUri = dragData.readFiles().firstOrNull {
+                it.lowercase().endsWith(".pdf") || it.lowercase().endsWith(".xml")
+            } ?: return false
+
+            val platformFile = getPlatformFileFromURI(supportedFileUri)
+            onDrop(platformFile)
+            return true
+        }
+    }
+
+

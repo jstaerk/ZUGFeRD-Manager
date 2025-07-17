@@ -49,10 +49,7 @@ val LocalShutdownHandler = staticCompositionLocalOf<ShutdownHandler?> { null }
 @Preview
 fun App() = AppTheme {
 
-    val state = remember { VisualsSectionState() }
-    MaterialTheme {
-        VisualsSection(state)
-    }
+
 
     val shutdownHandler = getShutdownHandler()
     val language = LocalAppState.current.preferences.language
