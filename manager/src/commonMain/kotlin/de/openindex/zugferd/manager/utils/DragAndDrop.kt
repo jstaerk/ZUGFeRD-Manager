@@ -52,9 +52,6 @@ fun createDragAndDropTarget(
  */
 
 
-
-
-
 @OptIn(ExperimentalComposeUiApi::class)
 fun createDragAndDropTarget(
     onDrop: (file: PlatformFile) -> Unit,

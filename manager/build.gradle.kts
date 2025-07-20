@@ -123,6 +123,8 @@ kotlin {
             // Kotlinx-Serialization
             // https://github.com/Kotlin/kotlinx.serialization
             implementation(libs.kotlinx.serialization.json)
+
+            implementation("org.jsoup:jsoup:1.17.2")
         }
 
         desktopMain.dependencies {
@@ -166,6 +168,9 @@ kotlin {
             // https://www.slf4j.org/
             // https://www.slf4j.org/legacy.html#jul-to-slf4j
             implementation(libs.slf4j.jul)
+
+
+            implementation("org.jsoup:jsoup:1.17.2")
         }
     }
 }

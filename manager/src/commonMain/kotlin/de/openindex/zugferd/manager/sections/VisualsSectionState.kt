@@ -38,59 +38,6 @@ import de.openindex.zugferd.manager.utils.getXmlFromPdf
 import de.openindex.zugferd.manager.utils.trimToNull
 import io.github.vinceglb.filekit.core.PlatformFile
 
-/*
-class VisualsSectionState: SectionState() {
-    val documents = mutableStateListOf<DocumentTab>()
-    var selectedIndex by mutableStateOf(0)
-}
-*/
-
-/*
-// Diese Code nur für Dragdrop und pdfviewer
-class VisualsSectionState : SectionState() {
-    private var _selectedPdf = mutableStateOf<PlatformFile?>(null)
-    val selectedPdf: PlatformFile?
-        get() = _selectedPdf.value
-
-    var visualTags by mutableStateOf(listOf<String>())
-
-    suspend fun selectVisualPdf(appState: AppState) {
-        val pdf = FileKit.pickFile(
-            type = PickerType.File(extensions = listOf("pdf")),
-            mode = PickerMode.Single,
-            title = getString(Res.string.AppCreateSelectFile).title(),
-            initialDirectory = appState.preferences.previousPdfLocation,
-        ) ?: return
-
-        selectVisualPdf(pdf, appState)
-    }
-
-    suspend fun selectVisualPdf(pdf: PlatformFile, appState: AppState) {
-        _selectedPdf.value = pdf
-
-        pdf.directory?.let {
-            appState.preferences.setPreviousPdfLocation(it)
-        }
-
-        visualTags = listOf() // Reset tags when loading new file
-    }
-}
-
- */
-
-
-/*
-      fun loadPdfInTab(tab: DocumentTab, pdfFile: PlatformFile, appState: AppState) {
-         tab.name = pdfFile.name
-         tab.pdf = pdfFile
-         tab.tags = listOf()
-
-         pdfFile.directory?.let {
-             appState.preferences.setPreviousPdfLocation(it)
-         }
-     }
-
-  */
 
 class VisualsSectionState : SectionState() {
     val documents = mutableStateListOf<DocumentTab>()

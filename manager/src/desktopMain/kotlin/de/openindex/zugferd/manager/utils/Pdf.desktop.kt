@@ -56,7 +56,8 @@ import java.util.Collections
 import java.util.GregorianCalendar
 import kotlin.io.path.pathString
 import kotlin.io.path.writer
-
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 @Suppress("SpellCheckingInspection")
 private val CUSTOM_VISUALIZATION_CSS = """
     body > form {
@@ -78,6 +79,7 @@ private val CUSTOM_VISUALIZATION_CSS = """
         font-family: sans-serif !important;
         font-size: 14px !important;
     }
+    
 """.trimIndent()
 
 actual suspend fun getPdfArchiveVersion(pdfFile: PlatformFile): Int {
@@ -327,6 +329,8 @@ actual fun getXmlFromPdf(pdf: PlatformFile): String? {
         null
     }
 }
+
+/*
 actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
     return try {
         ZUGFeRDVisualizer()
@@ -346,6 +350,113 @@ actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
         null
     }
 }
+
+ */
+
+
+
+/*
+actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
+    return try {
+        val rawHtml = ZUGFeRDVisualizer()
+            .visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
+
+        val doc: Document = Jsoup.parse(rawHtml)
+
+        // Fügt benutzerdefiniertes CSS ein
+        val styleTag = doc.head().appendElement("style")
+        styleTag.appendText(CUSTOM_VISUALIZATION_CSS)
+
+        // Schleife über alle "boxzeile"-Container
+        val boxRows = doc.select("div.boxzeile")
+        for (row in boxRows) {
+            val legend = row.selectFirst("div.boxdaten.legende")
+            val value = row.selectFirst("div.boxdaten.wert[id]")
+
+            if (legend != null && value != null) {
+                val btId = value.id()
+                // Falls nicht schon vorhanden, anhängen
+                if (!legend.text().contains(btId)) {
+                    val labelText = legend.text().removeSuffix(":").trim()
+                    println(labelText)
+                    legend.text("$labelText $btId")
+                }
+            }
+        }
+
+
+        // Erzeugen HTML, Speichern und im Browser öffnen
+        val htmlContent = doc.outerHtml()
+
+        // Datei speichern
+        val htmlFile = Files.createTempFile("zugferd-", ".html")
+        Files.write(htmlFile, htmlContent.toByteArray(Charsets.UTF_8))
+        println("HTML gespeichert unter: ${htmlFile.toAbsolutePath()}")
+
+        // Optional im Browser öffnen
+        try {
+            java.awt.Desktop.getDesktop().browse(htmlFile.toUri())
+        } catch (e: Exception) {
+            println(" Browser konnte nicht geöffnet werden: ${e.message}")
+        }
+
+        htmlContent
+    } catch (e: Exception) {
+        APP_LOGGER.error("Can't create HTML visualization.", e)
+        null
+    }
+}
+
+ */
+
+actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
+    return try {
+        val rawHtml = ZUGFeRDVisualizer()
+            .visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
+
+        val doc: Document = Jsoup.parse(rawHtml)
+
+        // Benutzerdefiniertes CSS einfügen
+        doc.head().appendElement("style").appendText(CUSTOM_VISUALIZATION_CSS)
+
+        // 1. BT-IDs in boxzeile
+        val boxRows = doc.select("div.boxzeile")
+        for (row in boxRows) {
+            val legend = row.selectFirst("div.boxdaten.legende")
+            val value = row.selectFirst("div.boxdaten.wert[id]")
+
+            if (legend != null && value != null) {
+                val btId = value.id()
+                if (!legend.text().contains(btId)) {
+                    val labelText = legend.text().removeSuffix(":").trim()
+                    legend.text("$labelText [$btId]")
+                }
+            }
+        }
+
+        //  2. BT-IDs in rechnungsZeile → rechnungSp1 bekommt die ID von rechnungSp3
+        val invoiceRows = doc.select("div.rechnungsZeile")
+        for (row in invoiceRows) {
+            val label = row.selectFirst("div.rechnungSp1")
+            val idSource = row.selectFirst("div.rechnungSp3[id]")
+
+            if (label != null && idSource != null) {
+                val btId = idSource.id()
+                if (!label.text().contains(btId)) {
+                    val text = label.text().removeSuffix(":").trim()
+                    label.text("$text [$btId]")
+                }
+            }
+        }
+
+
+        doc.outerHtml()
+    } catch (e: Exception) {
+        APP_LOGGER.error("Can't create HTML visualization.", e)
+        null
+    }
+}
+
 
 actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
     val xmlData = getXmlFromPdf(pdf) ?: return null
