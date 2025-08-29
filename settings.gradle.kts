@@ -1,4 +1,4 @@
-rootProject.name = "OpenIndex-ZUGFeRD"
+rootProject.name = "Quba"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 

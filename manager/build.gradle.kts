@@ -82,7 +82,7 @@ buildInfo {
     gitlabCi = false
 
     customFields = mapOf(
-        "VENDOR" to "OpenIndex",
+        "VENDOR" to "Mustangproject",
     )
 }
 
@@ -228,11 +228,11 @@ compose.desktop {
         }
 
         nativeDistributions {
-            val copyrightYear = "2024-${Calendar.getInstance().get(Calendar.YEAR)}"
+            val copyrightYear = "2025-${Calendar.getInstance().get(Calendar.YEAR)}"
 
             packageName = applicationPackageName
             //packageVersion = project.version.toString()
-            vendor = "OpenIndex"
+            vendor = "Mustangproject"
             copyright = "© $copyrightYear OpenIndex. All rights reserved."
             description = "A desktop application for creating and validating e-invoices."
             licenseFile = rootProject.file("LICENSE.txt")
