@@ -1,4 +1,4 @@
-# OpenIndex Quba 1.3.2
+# OpenIndex Quba 2.0.0
 
 <img src="./share/icons/application.svg" align="right" height="125" alt="OpenIndex Quba">
 
