@@ -27,7 +27,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSidebarCreate">erzeugen</string>
     <string name="AppSidebarCheck">prüfen</string>
     <string name="AppSidebarSettings">Optionen</string>
-    <string name="AppSidebarNewVisualisation">Visualisation</string>
+    <string name="AppSidebarNewVisualisation">Visualisieren</string>
     <string name="AppSidebarQuit">beenden</string>
 
     <string name="AppMoreActions">weitere Aktionen</string>

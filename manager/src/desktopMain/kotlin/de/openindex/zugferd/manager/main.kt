@@ -45,7 +45,8 @@ val APP_LOGGER: Logger by lazy {
 val LocalApplicationScope = staticCompositionLocalOf<ApplicationScope?> { null }
 
 fun main() {
-    //
+
+     //
     // Setup logging.
     //
 

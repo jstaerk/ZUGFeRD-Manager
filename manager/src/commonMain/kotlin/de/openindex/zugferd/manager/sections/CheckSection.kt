@@ -192,8 +192,7 @@ fun CheckSectionActions(state: CheckSectionState) {
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .padding(end = 8.dp),
+        modifier = Modifier.padding(end = 8.dp),
     ) {
         // Add button to select a PDF file for validation.
         ActionButtonWithTooltip(

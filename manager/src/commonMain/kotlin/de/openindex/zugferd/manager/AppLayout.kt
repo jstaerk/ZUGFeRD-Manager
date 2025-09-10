@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.gui.Label
+import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.quba.generated.resources.AppSidebarQuit
 import de.openindex.zugferd.quba.generated.resources.Res
@@ -138,6 +139,8 @@ private fun AppContent() {
     ) {
         LocalAppState.current.section.content()
     }
+
+
 }
 
 @Composable
@@ -228,6 +231,7 @@ private fun AppNavigationItem(
         modifier = Modifier,
     )
 }
+
 
 @Composable
 private fun AppSectionNavigationItem(section: AppSection) {

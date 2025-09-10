@@ -29,7 +29,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateSelect">PDF wählen</string>
     <string name="AppCreateSelectInfo">Eine PDF-Rechnung zur Bearbeitung auswählen.</string>
     <string name="AppCreateSelectMessage">
-        Bitte wählen Sie eine PDF-Rechnung aus[br]
+        Bitte wählen Sie eine E-Rechnung aus[br]
         oder ziehen Sie eine PDF-Datei per Drag &amp; Drop in dieses Fenster.
     </string>
     <string name="AppCreateSelectFile">eine PDF-Rechnung wählen</string>

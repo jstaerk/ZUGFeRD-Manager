@@ -22,6 +22,7 @@
 package de.openindex.zugferd.manager
 
 import VisualsSection
+import VisualsSectionActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Search
@@ -153,7 +154,7 @@ enum class AppSection(
             CREATE -> CreateSectionActions(state = state as CreateSectionState)
             CHECK -> CheckSectionActions(state = state as CheckSectionState)
             SETTINGS -> {}
-            VISUALISATION -> {}
+            VISUALISATION -> {VisualsSectionActions(state = state as VisualsSectionState)}
         }
     }
 }

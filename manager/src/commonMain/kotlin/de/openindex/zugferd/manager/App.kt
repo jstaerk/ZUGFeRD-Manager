@@ -21,13 +21,9 @@
 
 package de.openindex.zugferd.manager
 
-import VisualsSection
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.theme.AppTheme
 import de.openindex.zugferd.manager.utils.DEFAULT_LANGUAGE
 import de.openindex.zugferd.manager.utils.ShutdownHandler
