@@ -416,6 +416,10 @@ actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
 
         val doc: Document = Jsoup.parse(rawHtml)
 
+        //File("zugferd_test.html").writeText(doc.outerHtml())
+
+
+
         // Benutzerdefiniertes CSS einfügen
         doc.head().appendElement("style").appendText(CUSTOM_VISUALIZATION_CSS)
 

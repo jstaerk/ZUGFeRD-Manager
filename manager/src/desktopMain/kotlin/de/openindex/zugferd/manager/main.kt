@@ -32,10 +32,12 @@ import de.openindex.zugferd.manager.utils.APP_LAUNCHER
 import de.openindex.zugferd.manager.utils.LOGS_DIR
 import de.openindex.zugferd.manager.utils.SHUTDOWN_HANDLER
 import de.openindex.zugferd.manager.utils.getPlatform
+import de.openindex.zugferd.manager.utils.installWebView
 import org.apache.commons.lang3.SystemUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
+import kotlinx.coroutines.runBlocking
 import kotlin.io.path.absolutePathString
 
 val APP_LOGGER: Logger by lazy {
@@ -98,6 +100,12 @@ fun main() {
 
     val appState = _APP_STATE
 
+    /*sorgen dafür, dass CEF beim Programmstart vorbereitet wird, 
+     *damit der allererste Klick auf „Select e‑Invoice“ keinen CEF‑Initialisierungsfehler mehr auslöst.
+    */
+    runBlocking {
+        installWebView()
+    }
 
     //
     // Dump System Properties
