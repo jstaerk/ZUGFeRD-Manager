@@ -23,6 +23,7 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.openindex.zugferd.manager.sections.SearchState
 
 @Composable
-expect fun WebViewer(html: String, modifier: Modifier = Modifier)
+expect fun WebViewer(html: String, modifier: Modifier = Modifier, search: SearchState? = null)

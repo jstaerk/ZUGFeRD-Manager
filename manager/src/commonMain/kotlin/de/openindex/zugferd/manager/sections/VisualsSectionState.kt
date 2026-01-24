@@ -141,6 +141,11 @@ class VisualsSectionState : SectionState() {
     val documents = mutableStateListOf<DocumentTab>()
     var selectedIndex by mutableStateOf(0)
 
+    // Search State
+    var isSearchOpen by mutableStateOf(false)
+    var searchQuery by mutableStateOf("")
+    var searchSequence by mutableStateOf(0)
+
     fun addNewTab() {
         documents.add(DocumentTab(name = "Neuer Tab", pdf = null, isLoading = false))
         selectedIndex = documents.lastIndex

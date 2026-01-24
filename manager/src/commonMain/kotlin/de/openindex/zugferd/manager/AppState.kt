@@ -21,8 +21,8 @@
 
 package de.openindex.zugferd.manager
 
-import VisualsSection
-import VisualsSectionActions
+import de.openindex.zugferd.manager.sections.VisualsSection
+import de.openindex.zugferd.manager.sections.VisualsSectionActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Search

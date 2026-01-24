@@ -192,7 +192,11 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
     //}
 
     CEF_APP = withContext(Dispatchers.IO) {
-        CEF_LOG_FILE.deleteIfExists()
+        try {
+            CEF_LOG_FILE.deleteIfExists()
+        } catch (e: Exception) {
+            APP_LOGGER.warn("Could not delete CEF log file: ${e.message}")
+        }
 
         if (CEF_DEBUG) {
             enableVerboseLogging()

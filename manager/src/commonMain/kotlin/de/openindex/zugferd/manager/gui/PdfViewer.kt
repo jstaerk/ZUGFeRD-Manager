@@ -23,7 +23,8 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.openindex.zugferd.manager.sections.SearchState
 import io.github.vinceglb.filekit.core.PlatformFile
 
 @Composable
-expect fun PdfViewer(pdf: PlatformFile, modifier: Modifier = Modifier)
+expect fun PdfViewer(pdf: PlatformFile, modifier: Modifier = Modifier, search: SearchState? = null)

@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import de.openindex.zugferd.manager.LocalAppState
+import de.openindex.zugferd.manager.sections.SearchState
 import de.openindex.zugferd.manager.utils.getCefBrowser
 import de.openindex.zugferd.manager.utils.installWebView
 import kotlinx.coroutines.launch
@@ -45,7 +46,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 @Composable
 @OptIn(ExperimentalEncodingApi::class)
 @Suppress("DuplicatedCode")
-actual fun WebViewer(html: String, modifier: Modifier) {
+actual fun WebViewer(html: String, modifier: Modifier, search: SearchState?) {
     val scope = rememberCoroutineScope()
     var isInstalled by remember { mutableStateOf(false) }
     val chromeGpuEnabled = LocalAppState.current.preferences.chromeGpuEnabled
@@ -61,6 +62,16 @@ actual fun WebViewer(html: String, modifier: Modifier) {
     }
 
     var browserState by remember { mutableStateOf<CefBrowser?>(null) }
+
+    LaunchedEffect(browserState, search) {
+        val browser = browserState ?: return@LaunchedEffect
+        if (search != null && search.query.isNotBlank()) {
+            browser.find(search.query, true, false, search.sequence > 0)
+        } else {
+            browser.stopFinding(true)
+        }
+    }
+
     val dataUrl = remember(html) {
         "data:text/html;charset=utf-8;base64,".plus(
             Base64.Default.encode(html.encodeToByteArray())

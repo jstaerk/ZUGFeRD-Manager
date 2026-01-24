@@ -19,11 +19,15 @@
  * under the License.
  */
 
+package de.openindex.zugferd.manager.sections
+
 import androidx.compose.foundation.*
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -39,6 +43,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
@@ -60,6 +65,16 @@ import kotlinx.coroutines.launch
 import java.awt.Cursor
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationSelectFile
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationSelectInfo
+
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Popup
+
+data class SearchState(
+    val query: String,
+    val sequence: Int = 0,
+)
 
 
 /* Orginal Lösung
@@ -784,7 +799,24 @@ fun VisualsSection(state: VisualsSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    val activeSearch = remember(state.isSearchOpen, state.searchQuery, state.searchSequence) {
+        if (state.isSearchOpen && state.searchQuery.isNotBlank()) {
+            SearchState(query = state.searchQuery, sequence = state.searchSequence)
+        } else {
+            null
+        }
+    }
+
+    LaunchedEffect(state.isSearchOpen) {
+        if (!state.isSearchOpen) {
+            state.searchQuery = ""
+            state.searchSequence = 0
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         if (state.documents.isNotEmpty()) {
             TabRowWithControls(state)
         }
@@ -799,14 +831,12 @@ fun VisualsSection(state: VisualsSectionState) {
                         createDragAndDropTarget { file ->
                             scope.launch {
                                 try {
-                                    // Sicherstellen, dass die Datei nicht bereits geöffnet ist
                                     if (state.documents.isEmpty()) {
                                         state.addTabWithFile(file, appState)
                                     } else {
                                         state.loadFileInCurrentTab(file, appState)
                                     }
                                 } catch (e: Exception) {
-                                    // Fehlerbehandlung
                                     e.printStackTrace()
                                 }
                             }
@@ -818,11 +848,12 @@ fun VisualsSection(state: VisualsSectionState) {
             if (state.documents.isEmpty()) {
                 EmptyVisualsView(state)
             } else {
-                CurrentTabContent(state)
+                CurrentTabContent(state, activeSearch)
             }
         }
     }
 }
+
 @Composable
 fun VisualsSectionActions(state: VisualsSectionState) {
     val scope = rememberCoroutineScope()
@@ -831,7 +862,31 @@ fun VisualsSectionActions(state: VisualsSectionState) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        if (state.documents.isNotEmpty()) {
+            if (state.isSearchOpen) {
+                CompactSearchBar(
+                    value = state.searchQuery,
+                    onValueChange = {
+                        state.searchQuery = it
+                        state.searchSequence = 0
+                    },
+                    onSubmit = {
+                        if (state.searchQuery.isNotBlank()) {
+                            state.searchSequence++
+                        }
+                    },
+                    onClose = { state.isSearchOpen = false },
+                    modifier = Modifier.width(220.dp)
+                )
+            } else {
+                IconButton(onClick = { state.isSearchOpen = true }) {
+                    Icon(Icons.Default.Search, "Suchen")
+                }
+            }
+        }
+
         // Add button to select a PDF file for validation.
         ActionButtonWithTooltip(
             label = Res.string.AppVisualisationSelectFile,
@@ -842,6 +897,90 @@ fun VisualsSectionActions(state: VisualsSectionState) {
                                    }
             },
         )
+    }
+}
+
+@Composable
+private fun CompactSearchBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val textStyle = MaterialTheme.typography.bodySmall
+
+    Box(
+        modifier = modifier
+            .height(36.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(18.dp))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = true,
+                    textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onPreviewKeyEvent { event ->
+                            if ((event.key == Key.Enter || event.key == Key.NumPadEnter) && event.type == KeyEventType.KeyUp) {
+                                if (value.isNotBlank()) {
+                                    onSubmit()
+                                }
+                                true
+                            } else {
+                                false
+                            }
+                        },
+                )
+            }
+
+            IconButton(
+                onClick = { if (value.isNotBlank()) onSubmit() },
+                modifier = Modifier.size(28.dp)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Nächster Treffer",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier.size(28.dp)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Suche schließen",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 
@@ -999,7 +1138,7 @@ private fun DocumentTabItem(
 }
 
 @Composable
-private fun CurrentTabContent(state: VisualsSectionState) {
+private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) {
     val currentTab = state.documents.getOrNull(state.selectedIndex) ?: return
     var tabState by remember { mutableStateOf(0) }
     var viewMode by remember { mutableStateOf(ViewMode.SPLIT) }
@@ -1041,11 +1180,11 @@ private fun CurrentTabContent(state: VisualsSectionState) {
         }
 
         when (viewMode) {
-            ViewMode.PDF_ONLY -> currentTab.pdf?.let { PdfViewer(pdf = it, modifier = Modifier.fillMaxSize()) }
-            ViewMode.CODE_ONLY -> CodeOnlyView(currentTab, tabState) { tabState = it }
+            ViewMode.PDF_ONLY -> currentTab.pdf?.let { PdfViewer(pdf = it, modifier = Modifier.fillMaxSize(), search = search) }
+            ViewMode.CODE_ONLY -> CodeOnlyView(currentTab, tabState, { tabState = it }, search)
             ViewMode.SPLIT -> ResizableSplitPane(
-                leftContent = { CodeOnlyView(currentTab, tabState) { tabState = it } },
-                rightContent = { currentTab.pdf?.let { PdfViewer(pdf = it, modifier = Modifier.fillMaxSize()) } }
+                leftContent = { CodeOnlyView(currentTab, tabState, { tabState = it }, search) },
+                rightContent = { currentTab.pdf?.let { PdfViewer(pdf = it, modifier = Modifier.fillMaxSize(), search = search) } }
             )
         }
     }
@@ -1079,7 +1218,7 @@ private fun EmptyVisualsView(state: VisualsSectionState) {
 }
 
 @Composable
-private fun CodeOnlyView(tab: DocumentTab, selectedTab: Int, onTabChange: (Int) -> Unit) {
+private fun CodeOnlyView(tab: DocumentTab, selectedTab: Int, onTabChange: (Int) -> Unit, search: SearchState?) {
     val hasHtml = tab.html != null
     val hasXml = tab.xml != null
 
@@ -1109,11 +1248,11 @@ private fun CodeOnlyView(tab: DocumentTab, selectedTab: Int, onTabChange: (Int) 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
                 hasHtml && selectedTab == 0 -> {
-                    WebViewer(html = tab.html!!, modifier = Modifier.fillMaxSize())
+                    WebViewer(html = tab.html!!, modifier = Modifier.fillMaxSize(), search = search)
                 }
 
                 hasXml && (selectedTab == 1 || !hasHtml) -> {
-                    XmlViewer(xml = tab.xml!!, modifier = Modifier.fillMaxSize())
+                    XmlViewer(xml = tab.xml!!, modifier = Modifier.fillMaxSize(), search = search)
                 }
 
                 else -> {
