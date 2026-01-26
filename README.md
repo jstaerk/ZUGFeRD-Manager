@@ -1,4 +1,5 @@
-# OpenIndex Quba 2.0.0
+# Mustang Quba 2.0.0
+Based on OpenIndex ZUGFeRD-Manager.
 
 <img src="./share/icons/application.svg" align="right" height="125" alt="OpenIndex Quba">
 
