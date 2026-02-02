@@ -107,7 +107,7 @@ class AppState(
 }
 
 enum class AppSection(
-    private val state: SectionState
+    val state: SectionState
 ) {
     CREATE(CreateSectionState()),
     CHECK(CheckSectionState()),

@@ -24,6 +24,8 @@ package de.openindex.zugferd.manager.utils
 import com.jetbrains.cef.JCefAppConfig
 import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.AppInfo
+import de.openindex.zugferd.manager.AppSection
+import de.openindex.zugferd.manager._APP_STATE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cef.CefApp
@@ -95,6 +97,34 @@ fun getCefBrowser(url: String): CefBrowser {
                 .also {
                     it.removeDragHandler()
                     it.addDragHandler { _, _, _ -> true }
+                }
+                .also { client ->
+                    client.addKeyboardHandler(object : org.cef.handler.CefKeyboardHandlerAdapter() {
+                        override fun onKeyEvent(
+                            browser: org.cef.browser.CefBrowser?,
+                            event: org.cef.handler.CefKeyboardHandler.CefKeyEvent?
+                        ): Boolean {
+                            if (event == null) return false
+                            if (event.type == org.cef.handler.CefKeyboardHandler.CefKeyEvent.EventType.KEYEVENT_RAWKEYDOWN ||
+                                event.type == org.cef.handler.CefKeyboardHandler.CefKeyEvent.EventType.KEYEVENT_KEYDOWN) {
+                                
+                                // Flags from CefKeyboardHandler
+                                // EVENTFLAG_CONTROL_DOWN = 1 << 2
+                                // EVENTFLAG_COMMAND_DOWN = 1 << 7 (Meta/Cmd)
+                                val controlPressed = (event.modifiers and 4 != 0)
+                                val metaPressed = (event.modifiers and 128 != 0)
+                                
+                                if (event.windows_key_code == 70 && (controlPressed || metaPressed)) { // 70 is 'F'
+                                    val visualsState = AppSection.VISUALISATION.state as? de.openindex.zugferd.manager.sections.VisualsSectionState
+                                    if (visualsState != null && visualsState.documents.isNotEmpty()) {
+                                        visualsState.isSearchOpen = true
+                                        return true // Consume event
+                                    }
+                                }
+                            }
+                            return false
+                        }
+                    })
                 }
         } catch (e: Exception) {
             APP_LOGGER.error("Browser is not properly initialized!", e)

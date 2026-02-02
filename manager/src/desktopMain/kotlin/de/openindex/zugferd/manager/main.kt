@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory
 import org.slf4j.bridge.SLF4JBridgeHandler
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.absolutePathString
+import java.awt.KeyboardFocusManager
+import java.awt.event.KeyEvent
 
 val APP_LOGGER: Logger by lazy {
     LoggerFactory.getLogger("de.openindex.zugferd.manager")
@@ -118,6 +120,28 @@ fun main() {
     //    .forEach {
     //        APP_LOGGER.info("${it}: ${System.getProperty(it)}")
     //    }
+
+
+    //
+    // Global Keyboard Interaction (handles Swing/PDF viewer focus too)
+    //
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher { e ->
+        if (e.id == KeyEvent.KEY_PRESSED &&
+            e.keyCode == KeyEvent.VK_F &&
+            (e.isControlDown || e.isMetaDown)
+        ) {
+            // Check if Visualisation Section is active
+            if (appState.section == AppSection.VISUALISATION) {
+                val visualsState = AppSection.VISUALISATION.state as? de.openindex.zugferd.manager.sections.VisualsSectionState
+                if (visualsState != null && visualsState.documents.isNotEmpty()) {
+                    // Open search (UI update)
+                    visualsState.isSearchOpen = true
+                    return@addKeyEventDispatcher true // Consume event
+                }
+            }
+        }
+        false
+    }
 
 
     //

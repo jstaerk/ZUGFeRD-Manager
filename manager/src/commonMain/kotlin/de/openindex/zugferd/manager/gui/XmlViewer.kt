@@ -36,6 +36,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 import de.openindex.zugferd.manager.LocalAppState
+import androidx.compose.ui.input.key.*
+import de.openindex.zugferd.manager._APP_STATE
+import de.openindex.zugferd.manager.AppSection
+import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.sections.SearchState
 import de.openindex.zugferd.manager.utils.XmlVisualTransformation
 
@@ -76,6 +80,8 @@ fun XmlViewer(
         }
     }
 
+    val appState = de.openindex.zugferd.manager.LocalAppState.current
+
     TextField(
         value = internalTextFieldValue,
         onValueChange = { internalTextFieldValue = it },
@@ -84,6 +90,20 @@ fun XmlViewer(
         shape = RectangleShape,
         textStyle = xmlTextStyle,
         visualTransformation = xmlVisualTransformation,
-        modifier = modifier,
+        modifier = modifier.onPreviewKeyEvent { event ->
+            if (event.type == KeyEventType.KeyDown &&
+                event.key == Key.F &&
+                (event.isCtrlPressed || event.isMetaPressed)
+            ) {
+                if (appState.section == AppSection.VISUALISATION) {
+                    val visualsState = AppSection.VISUALISATION.state as? VisualsSectionState
+                    if (visualsState != null && visualsState.documents.isNotEmpty()) {
+                        visualsState.isSearchOpen = true
+                        return@onPreviewKeyEvent true
+                    }
+                }
+            }
+            false
+        },
     )
 }
