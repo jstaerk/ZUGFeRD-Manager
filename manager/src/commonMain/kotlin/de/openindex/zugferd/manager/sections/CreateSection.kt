@@ -210,51 +210,13 @@ fun CreateSection(state: CreateSectionState) {
                     )
                 }
 
-                // Show error message, if selected PDF was not convertable to PDF/A-3.
-                AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveError != null) {
-                    NotificationBar(
-                        text = stringResource(Res.string.AppCreateErrorConversion)
-                            .plus("\n").plus(selectedPdfArchiveError),
-                    )
-                }
+
 
                 // Show warning message, if selected PDF has an unsupported PDF/A version but maybe convertable to PDF/A-3.
                 AnimatedVisibility(visible = !isSelectedPdfArchiveUsable && selectedPdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION && selectedPdfArchiveError == null) {
                     NotificationBar(
                         text = Res.string.AppCreateConvertWarning,
-                    ) {
-                        // Information about possible conversion problems as tooltip.
-                        Tooltip(
-                            text = Res.string.AppCreateConvertInfo,
-                            tooltipPlacement = TooltipPlacement.CursorPoint(
-                                alignment = Alignment.TopCenter,
-                                offset = DpOffset(8.dp, (-16).dp)
-                            ),
-                        ) {
-                            // Button to start manual conversion to PDF/A-3.
-                            Button(
-                                onClick = {
-                                    scope.launch {
-                                        state.convertToPdfArchive()
-                                    }
-                                },
-                                modifier = Modifier
-                                    .padding(all = 8.dp),
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Label(
-                                        text = stringResource(Res.string.AppCreateConvert).title(),
-                                    )
-                                    Text(
-                                        text = "(${stringResource(Res.string.AppCreateConvertExperimental)})",
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    )
                 }
             }
 
