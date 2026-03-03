@@ -23,8 +23,14 @@ package de.openindex.zugferd.manager
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.ic_app_logo
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import ch.qos.logback.classic.ClassicConstants
@@ -165,6 +171,7 @@ fun main() {
         Window(
             title = "$APP_TITLE_FULL $APP_VERSION",
             state = windowState,
+            icon = painterResource(Res.drawable.ic_app_logo),
             onCloseRequest = {
                 APP_LOGGER.info("Closing window...")
                 exitApplication()

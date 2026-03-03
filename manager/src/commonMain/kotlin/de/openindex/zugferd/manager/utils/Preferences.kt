@@ -214,15 +214,6 @@ class Preferences(data: PreferencesData) {
         _previousProductKey = productKey
     }
 
-    //
-    // Convert to PDF/A automatically on invoice import.
-    //
-
-    private var _autoConvertToPdfA = mutableStateOf(data.autoConvertToPdfA)
-    val autoConvertToPdfA get() = _autoConvertToPdfA.value
-    fun setAutoConvertToPdfA(enabled: Boolean) {
-        _autoConvertToPdfA.value = enabled
-    }
 
     //
     // Remove attachments on invoice creation.
@@ -260,7 +251,7 @@ class Preferences(data: PreferencesData) {
             previousExportLocation = _previousExportLocation,
             previousSenderKey = _previousSenderKey,
             previousProductKey = _previousProductKey,
-            autoConvertToPdfA = _autoConvertToPdfA.value,
+
             autoRemoveAttachments = _autoRemoveAttachments.value,
             chromeGpuEnabled = _chromeGpuEnabled.value,
         )
@@ -288,7 +279,7 @@ data class PreferencesData(
     val previousExportLocation: String? = null,
     val previousSenderKey: UInt? = null,
     val previousProductKey: UInt? = null,
-    val autoConvertToPdfA: Boolean = false,
+
     val autoRemoveAttachments: Boolean = false,
     val chromeGpuEnabled: Boolean = true,
 )

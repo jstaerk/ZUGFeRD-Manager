@@ -34,7 +34,7 @@ import de.openindex.zugferd.manager.utils.FALLBACK_CURRENCY
 import de.openindex.zugferd.manager.utils.MAX_PDF_ARCHIVE_VERSION
 import de.openindex.zugferd.manager.utils.Preferences
 import de.openindex.zugferd.manager.utils.SectionState
-import de.openindex.zugferd.manager.utils.convertToPdfArchive
+
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getPdfArchiveVersion
 import de.openindex.zugferd.manager.utils.getString
@@ -117,18 +117,7 @@ class CreateSectionState : SectionState() {
         _selectedPdfArchiveError.value = null
 
         val pdfArchiveVersion = getPdfArchiveVersion(pdf)
-        if (appState.preferences.autoConvertToPdfA && !isSupportedPdfArchiveVersion(pdfArchiveVersion) && pdfArchiveVersion < MAX_PDF_ARCHIVE_VERSION) {
-            try {
-                val convertedPdf = convertToPdfArchive(pdf)
-                _selectedPdf.value = convertedPdf
-                _selectedPdfArchiveVersion.value = getPdfArchiveVersion(convertedPdf)
-            } catch (e: Exception) {
-                _selectedPdfArchiveVersion.value = -1
-                _selectedPdfArchiveError.value = e.localizedMessage ?: e.message
-            }
-        } else {
-            _selectedPdfArchiveVersion.value = pdfArchiveVersion
-        }
+        _selectedPdfArchiveVersion.value = pdfArchiveVersion
 
         // Create empty invoice instance.
         _invoice.value = Invoice(
@@ -143,21 +132,7 @@ class CreateSectionState : SectionState() {
         )
     }
 
-    suspend fun convertToPdfArchive() {
-        if (isSupportedPdfArchiveVersion(selectedPdfArchiveVersion)) {
-            return
-        }
-        val originalPdf = originalSelectedPdf ?: return
 
-        try {
-            val convertedPdf = convertToPdfArchive(originalPdf)
-            _selectedPdf.value = convertedPdf
-            _selectedPdfArchiveVersion.value = getPdfArchiveVersion(convertedPdf)
-        } catch (e: Exception) {
-            _selectedPdfArchiveVersion.value = -1
-            _selectedPdfArchiveError.value = e.localizedMessage ?: e.message
-        }
-    }
 
     suspend fun exportPdf(preferences: Preferences) {
         val sourceFile = selectedPdf ?: return

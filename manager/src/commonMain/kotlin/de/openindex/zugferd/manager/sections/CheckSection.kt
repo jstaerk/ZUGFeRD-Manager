@@ -126,10 +126,10 @@ fun CheckSection(state: CheckSectionState) {
 
     val dragAndDropCallback = remember {
         createDragAndDropTarget(
-            onDrop = { pdfFile ->
+            onDrop = { file ->
                 scope.launch {
-                    state.selectPdf(
-                        pdf = pdfFile,
+                    state.selectFile(
+                        file = file,
                         appState = appState,
                     )
                 }
@@ -200,7 +200,7 @@ fun CheckSectionActions(state: CheckSectionState) {
             tooltip = Res.string.AppCheckSelectInfo,
             onClick = {
                 scope.launch(Dispatchers.IO) {
-                    state.selectPdf(
+                    state.selectFile(
                         appState = appState,
                     )
                 }

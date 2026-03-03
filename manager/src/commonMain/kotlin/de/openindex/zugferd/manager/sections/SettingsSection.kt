@@ -793,38 +793,7 @@ private fun CreateSettings(state: SettingsSectionState) =
         val scope = rememberCoroutineScope()
         val preferences = LocalAppState.current.preferences
 
-        // Toggle for automatic PDF/A conversion.
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier,
-        ) {
-            Switch(
-                checked = preferences.autoConvertToPdfA,
-                onCheckedChange = {
-                    preferences.setAutoConvertToPdfA(it)
-                    scope.launch {
-                        preferences.save()
-                    }
-                }
-            )
 
-            Column {
-                Label(
-                    text = Res.string.AppSettingsCreatePdfAutoConvert,
-                )
-                Text(
-                    text = "(${stringResource(Res.string.AppSettingsCreatePdfAutoConvertExperimental)})",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-
-        AnimatedVisibility(visible = preferences.autoConvertToPdfA) {
-            SectionInfo(
-                text = Res.string.AppSettingsCreatePdfAutoConvertWarning,
-            )
-        }
 
         // Toggle for automatic removal of attachments.
         Row(
