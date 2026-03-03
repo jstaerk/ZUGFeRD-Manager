@@ -275,6 +275,10 @@ actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
     }
 }
 
+actual suspend fun getHtmlVisualizationFromXML(xml: PlatformFile): String? {
+    return getHtmlVisualizationFromXML(xml.file.toPath())
+}
+
 
 actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
     val xmlData = getXmlFromPdf(pdf) ?: return null

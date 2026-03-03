@@ -28,6 +28,7 @@ import de.openindex.zugferd.manager.model.ValidationType
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Validation
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
+import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
@@ -62,38 +63,52 @@ class CheckSectionState : SectionState() {
     val selectedPdfValidation: Validation?
         get() = _selectedPdfValidation.value
 
-    suspend fun selectPdf(appState: AppState) {
-        val pdf = FileKit.pickFile(
-            type = PickerType.File(extensions = listOf("pdf")),
+    suspend fun selectFile(appState: AppState) {
+        val file = FileKit.pickFile(
+            type = PickerType.File(extensions = listOf("pdf", "xml")),
             mode = PickerMode.Single,
             title = getString(Res.string.AppCheckSelectFile).title(),
             initialDirectory = appState.preferences.previousPdfLocation,
         ) ?: return
 
-        selectPdf(
-            pdf = pdf,
+        selectFile(
+            file = file,
             appState = appState,
         )
     }
 
     @Suppress("UNUSED_PARAMETER")
-    suspend fun selectPdf(pdf: PlatformFile, appState: AppState) {
+    suspend fun selectFile(file: PlatformFile, appState: AppState) {
         _selectedPdfHtml.value = null
         _selectedPdfValidation.value = null
-        _selectedPdf.value = pdf
-        _selectedPdfXml.value = getXmlFromPdf(pdf)?.let { getPrettyPrintedXml(it) }?.trimToNull()
+        _selectedPdf.value = file
 
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                //delay(2000)
-                _selectedPdfHtml.value = getHtmlVisualizationFromPdf(pdf)
+        val isXml = file.name.endsWith(".xml", ignoreCase = true)
+
+        if (isXml) {
+            val xmlContent = file.readBytes().decodeToString()
+            _selectedPdfXml.value = getPrettyPrintedXml(xmlContent)?.trimToNull() ?: xmlContent.trimToNull()
+
+            coroutineScope {
+                launch(Dispatchers.IO) {
+                    _selectedPdfHtml.value = getHtmlVisualizationFromXML(file)
+                }
+            }
+        } else {
+            _selectedPdfXml.value = getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
+
+            coroutineScope {
+                launch(Dispatchers.IO) {
+                    //delay(2000)
+                    _selectedPdfHtml.value = getHtmlVisualizationFromPdf(file)
+                }
             }
         }
 
         coroutineScope {
             launch(Dispatchers.IO) {
                 //delay(2000)
-                _selectedPdfValidation.value = validatePdf(pdf)
+                _selectedPdfValidation.value = validatePdf(file)
                 _filterType.value = ValidationType.entries.toList()
                 _filterSeverity.value = ValidationSeverity.entries.toList()
             }

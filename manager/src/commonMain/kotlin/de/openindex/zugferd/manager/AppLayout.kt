@@ -58,8 +58,11 @@ import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.quba.generated.resources.AppSidebarQuit
 import de.openindex.zugferd.quba.generated.resources.Res
 import de.openindex.zugferd.quba.generated.resources.application
+import de.openindex.zugferd.quba.generated.resources.ic_app_logo
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+
+import androidx.compose.material.icons.filled.Description
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +87,7 @@ fun AppLayout() {
                         modifier = Modifier,
                     ) {
                         Image(
-                            painter = painterResource(Res.drawable.application),
+                            painter = painterResource(Res.drawable.ic_app_logo),
                             contentDescription = APP_TITLE,
                             modifier = Modifier
                                 .padding(start = 4.dp, end = 38.dp)

@@ -45,3 +45,5 @@ expect fun getXmlFromPdf(pdf: PlatformFile): String?
 expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
 
 expect suspend fun getHtmlVisualizationFromXML(xml: Path): String?
+
+expect suspend fun getHtmlVisualizationFromXML(xml: PlatformFile): String?
