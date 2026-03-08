@@ -42,6 +42,8 @@ expect suspend fun getPdfArchiveVersion(pdfFile: PlatformFile): Int
 
 expect fun getXmlFromPdf(pdf: PlatformFile): String?
 
+expect fun getAttachmentsFromPdf(pdf: PlatformFile): List<Pair<String, ByteArray>>
+
 expect suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String?
 
 expect suspend fun getHtmlVisualizationFromXML(xml: Path): String?

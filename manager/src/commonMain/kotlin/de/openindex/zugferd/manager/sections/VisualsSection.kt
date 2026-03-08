@@ -56,6 +56,7 @@ import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.stringResource
+import io.github.vinceglb.filekit.core.FileKit
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
 import de.openindex.zugferd.quba.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
@@ -466,6 +467,10 @@ private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) 
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        if (currentTab.attachments.isNotEmpty()) {
+            AttachmentsBar(currentTab.attachments)
+        }
+
         if (hasPdf && hasCode) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -482,6 +487,43 @@ private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) 
                 leftContent = { CodeOnlyView(currentTab, tabState, { tabState = it }, search) },
                 rightContent = { currentTab.pdf?.let { PdfViewer(pdf = it, modifier = Modifier.fillMaxSize(), search = search) } }
             )
+        }
+    }
+}
+
+@Composable
+private fun AttachmentsBar(attachments: List<Pair<String, ByteArray>>) {
+    val scope = rememberCoroutineScope()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Anhänge:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        attachments.forEach { (name, bytes) ->
+            OutlinedButton(
+                onClick = {
+                    scope.launch {
+                        val extension = name.substringAfterLast(".", "")
+                        val baseName = if (extension.isNotEmpty()) name.substringBeforeLast(".") else name
+                        FileKit.saveFile(
+                            bytes = bytes,
+                            baseName = baseName,
+                            extension = extension,
+                        )
+                    }
+                },
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+            ) {
+                Text(name, style = MaterialTheme.typography.labelSmall)
+            }
         }
     }
 }

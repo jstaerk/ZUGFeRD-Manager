@@ -34,6 +34,7 @@ class DocumentTab(
     var html by mutableStateOf<String?>(null)
     var xml by mutableStateOf<String?>(null)
     var isLoading by mutableStateOf(isLoading)
+    var attachments by mutableStateOf<List<Pair<String, ByteArray>>>(emptyList())
 
     // Fixed copy method
     fun copy(

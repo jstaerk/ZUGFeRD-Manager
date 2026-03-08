@@ -34,7 +34,12 @@ import org.cef.CefSettings
 import org.cef.browser.CefBrowser
 import org.cef.browser.CefRendering
 import org.cef.handler.CefAppHandlerAdapter
+import java.io.File
 import java.nio.file.Path
+import org.cef.browser.CefFrame
+import org.cef.browser.CefMessageRouter
+import org.cef.callback.CefQueryCallback
+import org.cef.handler.CefMessageRouterHandlerAdapter
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
@@ -99,6 +104,53 @@ fun getCefBrowser(url: String): CefBrowser {
                     it.addDragHandler { _, _, _ -> true }
                 }
                 .also { client ->
+                    // Handle OPEN:<path> messages sent via window.cefQuery() from the HTML viewer.
+                    val router = CefMessageRouter.create()
+                    router.addHandler(object : CefMessageRouterHandlerAdapter() {
+                        override fun onQuery(
+                            browser: CefBrowser?,
+                            frame: CefFrame?,
+                            queryId: Long,
+                            request: String?,
+                            persistent: Boolean,
+                            callback: CefQueryCallback?,
+                        ): Boolean {
+                            if (request == null || !request.startsWith("OPEN:")) return false
+                            val tempPath = request.removePrefix("OPEN:")
+                            val file = File(tempPath)
+                            if (!file.isFile) {
+                                APP_LOGGER.error("Attachment temp file not found: $tempPath")
+                                callback?.failure(1, "Datei nicht gefunden: $tempPath")
+                                return true
+                            }
+                            val originalName = file.name
+                                .removePrefix("zugferd-att-")
+                                .substringAfter('-')
+                                .ifEmpty { file.name }
+                            javax.swing.SwingUtilities.invokeLater {
+                                val chooser = javax.swing.JFileChooser()
+                                chooser.selectedFile = File(
+                                    javax.swing.filechooser.FileSystemView.getFileSystemView()
+                                        .defaultDirectory,
+                                    originalName,
+                                )
+                                chooser.dialogTitle = "Anhang speichern"
+                                val result = chooser.showSaveDialog(null)
+                                if (result == javax.swing.JFileChooser.APPROVE_OPTION) {
+                                    try {
+                                        file.copyTo(chooser.selectedFile, overwrite = true)
+                                    } catch (e: Exception) {
+                                        APP_LOGGER.error("Anhang konnte nicht gespeichert werden: ${e.message}", e)
+                                    }
+                                }
+                            }
+                            callback?.success("ok")
+                            return true
+                        }
+                    }, true)
+                    client.addMessageRouter(router)
+                }
+                .also { client ->
                     client.addKeyboardHandler(object : org.cef.handler.CefKeyboardHandlerAdapter() {
                         override fun onKeyEvent(
                             browser: org.cef.browser.CefBrowser?,
@@ -154,6 +206,10 @@ fun uninstallWebView() {
     CEF_CLIENT?.dispose()
     CEF_APP?.dispose()
 }
+
+/** Creates an independent browser for the attachment viewer window. */
+fun createDedicatedBrowser(url: String): CefBrowser =
+    CEF_CLIENT!!.createBrowser(url, CefRendering.DEFAULT, CEF_TRANSPARENCY_ENABLED)
 
 @OptIn(ExperimentalPathApi::class)
 suspend fun installWebView(gpuEnabled: Boolean = true) {

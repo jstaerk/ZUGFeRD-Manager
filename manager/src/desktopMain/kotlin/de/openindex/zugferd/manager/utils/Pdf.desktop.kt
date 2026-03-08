@@ -130,6 +130,29 @@ fun PDDocument.removeEmbeddedFiles(): PDDocument {
     return this
 }
 
+actual fun getAttachmentsFromPdf(pdf: PlatformFile): List<Pair<String, ByteArray>> {
+    return try {
+        val doc = Loader.loadPDF(pdf.file)
+        val result = mutableListOf<Pair<String, ByteArray>>()
+        try {
+            val names = PDDocumentNameDictionary(doc.documentCatalog)
+            val embeddedFiles = names.embeddedFiles ?: return emptyList()
+            val nameMap = embeddedFiles.names ?: return emptyList()
+            for ((name, spec) in nameMap) {
+                val fileSpec = spec as? PDComplexFileSpecification ?: continue
+                val ef = fileSpec.embeddedFile ?: fileSpec.embeddedFileUnicode ?: continue
+                result.add(name to ef.createInputStream().readBytes())
+            }
+        } finally {
+            doc.close()
+        }
+        result
+    } catch (e: Exception) {
+        APP_LOGGER.error("Can't extract attachments from PDF.", e)
+        emptyList()
+    }
+}
+
 actual fun getXmlFromPdf(pdf: PlatformFile): String? {
     return try {
         pdf.file

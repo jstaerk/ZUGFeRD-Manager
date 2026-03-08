@@ -37,6 +37,7 @@ import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
+import de.openindex.zugferd.manager.utils.getAttachmentsFromPdf
 import de.openindex.zugferd.manager.utils.trimToNull
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectFile
 import de.openindex.zugferd.quba.generated.resources.Res
@@ -250,6 +251,7 @@ suspend fun loadFileInCurrentTab(file: PlatformFile, appState: AppState) {
             else getHtmlVisualizationFromPdf(file)?.trimToNull()
             tab.xml = if (isXml) fileText.trimToNull()
             else getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
+            tab.attachments = if (!isXml) getAttachmentsFromPdf(file) else emptyList()
 
             file.directory?.let { appState.preferences.setPreviousPdfLocation(it) }
 
