@@ -83,6 +83,9 @@ private var CEF_CLIENT: CefClient? = null
 
 private var CEF_BROWSER: CefBrowser? = null
 
+/** Maps attachment filename → temp file on disk. Populated by postProcessHtmlForAttachments(). */
+val globalAttachmentTempFiles = mutableMapOf<String, java.io.File>()
+
 /**
  * As we never show multiple browser instances at once,
  * we keep one browser instance permanently in memory and only
@@ -121,15 +124,9 @@ fun getCefBrowser(url: String): CefBrowser {
                         ): Boolean {
                             val url = request?.url
                             
-                            // Allow initial load of HTML visualization (data:text/html without user gesture)
-                            if (url != null && url.startsWith("data:text/html") && !user_gesture) {
-                                return false
-                            }
-
+                            // data: URLs are handled by onBeforeDownload (via download attribute) — don't intercept here.
                             if (url != null && url.startsWith("data:")) {
-                                APP_LOGGER.info("Intercepted data URL navigation. Gesture: $user_gesture")
-                                handleDataUrl(url)
-                                return true // Cancel navigation
+                                return false
                             }
 
                             // Intercept file:// links to our attachment temp files → show save dialog.
@@ -174,18 +171,19 @@ fun getCefBrowser(url: String): CefBrowser {
                             suggestedName: String?,
                             callback: org.cef.callback.CefBeforeDownloadCallback?,
                         ) {
-                            javax.swing.SwingUtilities.invokeLater {
-                                val chooser = javax.swing.JFileChooser()
-                                chooser.selectedFile = java.io.File(
-                                    javax.swing.filechooser.FileSystemView
-                                        .getFileSystemView().defaultDirectory,
-                                    suggestedName ?: "anhang",
-                                )
-                                chooser.dialogTitle = "Anhang speichern"
-                                if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                                    callback?.Continue(chooser.selectedFile.absolutePath, false)
-                                }
+                            val filename = suggestedName ?: "anhang"
+                            // Prefer file:// URL so CEF's PDF/image viewer works correctly.
+                            // data: URLs for PDFs render blank in CEF.
+                            val tempFile = globalAttachmentTempFiles[filename]
+                            val windowUrl = if (tempFile != null && tempFile.exists()) {
+                                tempFile.toURI().toString()
+                            } else {
+                                downloadItem?.url
                             }
+                            if (windowUrl != null) {
+                                openAttachmentInWindow(windowUrl, filename)
+                            }
+                            // Do not call callback.Continue() → cancels the file download
                         }
                     })
                 }
@@ -411,49 +409,55 @@ private fun enableVerboseLogging() {
     System.setProperty("jcef.log.trace_thread", "true")
 }
 
-private fun handleDataUrl(url: String) {
+private fun handleDataUrl(url: String, filename: String? = null) {
     try {
         val commaIndex = url.indexOf(',')
         if (commaIndex == -1) return
-
-        val metadata = url.substring(5, commaIndex)
-        val base64Data = url.substring(commaIndex + 1)
-        
-        // Extract mime type (e.g. "application/pdf;base64")
-        val mimeType = metadata.substringBefore(';')
-        
-        // Determine extension
+        val mimeType = url.substring(5, commaIndex).substringBefore(';')
         val extension = when {
-            mimeType.contains("pdf") -> ".pdf"
-            mimeType.contains("png") -> ".png"
+            mimeType.contains("pdf")  -> ".pdf"
+            mimeType.contains("png")  -> ".png"
             mimeType.contains("jpeg") -> ".jpg"
-            mimeType.contains("jpg") -> ".jpg"
-            mimeType.contains("gif") -> ".gif"
-            mimeType.contains("xml") -> ".xml"
+            mimeType.contains("jpg")  -> ".jpg"
+            mimeType.contains("gif")  -> ".gif"
+            mimeType.contains("xml")  -> ".xml"
             mimeType.contains("html") -> ".html"
             else -> ".bin"
         }
-
-        val bytes = java.util.Base64.getDecoder().decode(base64Data)
-        
-        javax.swing.SwingUtilities.invokeLater {
-            val chooser = javax.swing.JFileChooser()
-            chooser.selectedFile = java.io.File(
-                javax.swing.filechooser.FileSystemView.getFileSystemView().defaultDirectory,
-                "anhang$extension"
-            )
-            chooser.dialogTitle = "Anhang speichern"
-            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                try {
-                    java.nio.file.Files.write(chooser.selectedFile.toPath(), bytes)
-                    APP_LOGGER.info("Saved attachment to: ${chooser.selectedFile}")
-                } catch (e: Exception) {
-                    APP_LOGGER.error("Failed to save attachment", e)
-                    javax.swing.JOptionPane.showMessageDialog(null, "Fehler beim Speichern: ${e.message}")
-                }
-            }
-        }
+        val title = filename ?: "anhang$extension"
+        openAttachmentInWindow(url, title)
     } catch (e: Exception) {
         APP_LOGGER.error("Failed to handle data URL", e)
+    }
+}
+
+private fun openAttachmentInWindow(url: String, title: String) {
+    javax.swing.SwingUtilities.invokeLater {
+        try {
+            // Use a dedicated CefClient per popup — sharing CEF_CLIENT with the main browser
+            // causes the second browser to render blank.
+            val popupClient = CEF_APP!!.createClient()
+            val popupBrowser = popupClient.createBrowser(url, org.cef.browser.CefRendering.DEFAULT, false)
+
+            val frame = javax.swing.JFrame(title)
+            frame.defaultCloseOperation = javax.swing.JFrame.DISPOSE_ON_CLOSE
+            frame.setSize(900, 700)
+            frame.setLocationRelativeTo(null)
+            frame.contentPane.add(popupBrowser.uiComponent, java.awt.BorderLayout.CENTER)
+
+            // Show the frame first so the native window exists before CEF tries to render into it.
+            frame.isVisible = true
+            frame.contentPane.validate()
+
+            // Clean up the popup client when the window is closed.
+            frame.addWindowListener(object : java.awt.event.WindowAdapter() {
+                override fun windowClosed(e: java.awt.event.WindowEvent?) {
+                    popupBrowser.close(true)
+                    popupClient.dispose()
+                }
+            })
+        } catch (e: Exception) {
+            APP_LOGGER.error("Anhang-Fenster konnte nicht geöffnet werden.", e)
+        }
     }
 }

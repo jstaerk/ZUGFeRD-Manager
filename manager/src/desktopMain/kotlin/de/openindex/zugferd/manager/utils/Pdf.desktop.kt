@@ -262,8 +262,8 @@ actual fun postProcessHtmlForAttachments(html: String, attachments: List<Pair<St
         }
 
         if (attachmentFile != null) {
-            // Use data: URL so CEF's onBeforeDownload fires with the correct suggestedName.
-            // file:// URLs are rejected by Chrome's download manager before any handler is called.
+            // Register temp file so onBeforeDownload can open it via file:// URL (data: URLs render blank for PDFs).
+            globalAttachmentTempFiles[filename] = attachmentFile
             val bytes = attachmentFile.readBytes()
             val b64 = java.util.Base64.getEncoder().encodeToString(bytes)
             val resolvedMime = div.attr("mimetype").ifEmpty { div.attr("type") }.ifEmpty { "application/octet-stream" }
