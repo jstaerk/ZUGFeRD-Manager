@@ -99,6 +99,97 @@ fun getCefBrowser(url: String): CefBrowser {
                     it.addDragHandler { _, _, _ -> true }
                 }
                 .also { client ->
+                    // Block popups (prevents blank windows from original downloadData/window.open calls).
+                    client.addLifeSpanHandler(object : org.cef.handler.CefLifeSpanHandlerAdapter() {
+                        override fun onBeforePopup(
+                            browser: org.cef.browser.CefBrowser?,
+                            frame: org.cef.browser.CefFrame?,
+                            targetUrl: String?,
+                            targetFrameName: String?,
+                        ): Boolean = true
+                    })
+                }
+                .also { client ->
+                    // Handle data: URLs (attachments) manually if the browser tries to navigate to them
+                    client.addRequestHandler(object : org.cef.handler.CefRequestHandlerAdapter() {
+                        override fun onBeforeBrowse(
+                            browser: org.cef.browser.CefBrowser?,
+                            frame: org.cef.browser.CefFrame?,
+                            request: org.cef.network.CefRequest?,
+                            user_gesture: Boolean,
+                            is_redirect: Boolean
+                        ): Boolean {
+                            val url = request?.url
+                            
+                            // Allow initial load of HTML visualization (data:text/html without user gesture)
+                            if (url != null && url.startsWith("data:text/html") && !user_gesture) {
+                                return false
+                            }
+
+                            if (url != null && url.startsWith("data:")) {
+                                APP_LOGGER.info("Intercepted data URL navigation. Gesture: $user_gesture")
+                                handleDataUrl(url)
+                                return true // Cancel navigation
+                            }
+
+                            // Intercept file:// links to our attachment temp files → show save dialog.
+                            if (url != null && url.startsWith("file:") && url.contains("zugferd_attachments_")) {
+                                try {
+                                    val file = java.io.File(java.net.URI(url))
+                                    if (file.exists()) {
+                                        javax.swing.SwingUtilities.invokeLater {
+                                            val chooser = javax.swing.JFileChooser()
+                                            chooser.selectedFile = java.io.File(
+                                                javax.swing.filechooser.FileSystemView
+                                                    .getFileSystemView().defaultDirectory,
+                                                file.name,
+                                            )
+                                            chooser.dialogTitle = "Anhang speichern"
+                                            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                                                try {
+                                                    file.copyTo(chooser.selectedFile, overwrite = true)
+                                                } catch (e: Exception) {
+                                                    APP_LOGGER.error("Anhang konnte nicht gespeichert werden.", e)
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    APP_LOGGER.error("Fehler beim Öffnen des Anhangs.", e)
+                                }
+                                return true // Cancel navigation
+                            }
+
+                            return super.onBeforeBrowse(browser, frame, request, user_gesture, is_redirect)
+                        }
+                    })
+                }
+                .also { client ->
+                    // Handle downloads from <a href="data:...;base64,..." download="filename"> links
+                    // that postProcessHtmlForAttachments() injects in place of "Öffnen" links.
+                    client.addDownloadHandler(object : org.cef.handler.CefDownloadHandlerAdapter() {
+                        override fun onBeforeDownload(
+                            browser: org.cef.browser.CefBrowser?,
+                            downloadItem: org.cef.callback.CefDownloadItem?,
+                            suggestedName: String?,
+                            callback: org.cef.callback.CefBeforeDownloadCallback?,
+                        ) {
+                            javax.swing.SwingUtilities.invokeLater {
+                                val chooser = javax.swing.JFileChooser()
+                                chooser.selectedFile = java.io.File(
+                                    javax.swing.filechooser.FileSystemView
+                                        .getFileSystemView().defaultDirectory,
+                                    suggestedName ?: "anhang",
+                                )
+                                chooser.dialogTitle = "Anhang speichern"
+                                if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                                    callback?.Continue(chooser.selectedFile.absolutePath, false)
+                                }
+                            }
+                        }
+                    })
+                }
+                .also { client ->
                     client.addKeyboardHandler(object : org.cef.handler.CefKeyboardHandlerAdapter() {
                         override fun onKeyEvent(
                             browser: org.cef.browser.CefBrowser?,
@@ -260,6 +351,10 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
         // Disable DRM / Widevine
         // https://magpcss.org/ceforum/viewtopic.php?f=6&t=19093
         appArgs.add("--disable-component-update")
+        
+        // Allow local file access and disable web security to support data URLs and local resources
+        appArgs.add("--allow-file-access-from-files")
+        appArgs.add("--disable-web-security")
 
         // Disable Hardware Acceleration
         if (!gpuEnabled) {
@@ -314,4 +409,51 @@ private fun enableVerboseLogging() {
     System.setProperty("jcef.trace.cefapp.lifespan", "true")
     System.setProperty("jcef.trace.cefbrowserwr.addnotify", "true")
     System.setProperty("jcef.log.trace_thread", "true")
+}
+
+private fun handleDataUrl(url: String) {
+    try {
+        val commaIndex = url.indexOf(',')
+        if (commaIndex == -1) return
+
+        val metadata = url.substring(5, commaIndex)
+        val base64Data = url.substring(commaIndex + 1)
+        
+        // Extract mime type (e.g. "application/pdf;base64")
+        val mimeType = metadata.substringBefore(';')
+        
+        // Determine extension
+        val extension = when {
+            mimeType.contains("pdf") -> ".pdf"
+            mimeType.contains("png") -> ".png"
+            mimeType.contains("jpeg") -> ".jpg"
+            mimeType.contains("jpg") -> ".jpg"
+            mimeType.contains("gif") -> ".gif"
+            mimeType.contains("xml") -> ".xml"
+            mimeType.contains("html") -> ".html"
+            else -> ".bin"
+        }
+
+        val bytes = java.util.Base64.getDecoder().decode(base64Data)
+        
+        javax.swing.SwingUtilities.invokeLater {
+            val chooser = javax.swing.JFileChooser()
+            chooser.selectedFile = java.io.File(
+                javax.swing.filechooser.FileSystemView.getFileSystemView().defaultDirectory,
+                "anhang$extension"
+            )
+            chooser.dialogTitle = "Anhang speichern"
+            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                try {
+                    java.nio.file.Files.write(chooser.selectedFile.toPath(), bytes)
+                    APP_LOGGER.info("Saved attachment to: ${chooser.selectedFile}")
+                } catch (e: Exception) {
+                    APP_LOGGER.error("Failed to save attachment", e)
+                    javax.swing.JOptionPane.showMessageDialog(null, "Fehler beim Speichern: ${e.message}")
+                }
+            }
+        }
+    } catch (e: Exception) {
+        APP_LOGGER.error("Failed to handle data URL", e)
+    }
 }
