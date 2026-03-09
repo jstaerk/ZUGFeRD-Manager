@@ -83,8 +83,9 @@ private var CEF_CLIENT: CefClient? = null
 
 private var CEF_BROWSER: CefBrowser? = null
 
-/** Maps attachment filename → temp file on disk. Populated by postProcessHtmlForAttachments(). */
-val globalAttachmentTempFiles = mutableMapOf<String, java.io.File>()
+/** Maps attachment filename → (bytes, mimeType) in memory. Populated by postProcessHtmlForAttachments(). */
+val globalAttachmentData = mutableMapOf<String, Pair<ByteArray, String>>()
+
 
 /**
  * As we never show multiple browser instances at once,
@@ -122,68 +123,33 @@ fun getCefBrowser(url: String): CefBrowser {
                             user_gesture: Boolean,
                             is_redirect: Boolean
                         ): Boolean {
-                            val url = request?.url
-                            
-                            // data: URLs are handled by onBeforeDownload (via download attribute) — don't intercept here.
-                            if (url != null && url.startsWith("data:")) {
-                                return false
-                            }
+                            val url = request?.url ?: return false
 
-                            // Intercept file:// links to our attachment temp files → show save dialog.
-                            if (url != null && url.startsWith("file:") && url.contains("zugferd_attachments_")) {
+                            // Intercept attachment links → write temp file on-demand, open via file:// URL.
+                            if (url.startsWith("zugferd-attachment://")) {
                                 try {
-                                    val file = java.io.File(java.net.URI(url))
-                                    if (file.exists()) {
-                                        javax.swing.SwingUtilities.invokeLater {
-                                            val chooser = javax.swing.JFileChooser()
-                                            chooser.selectedFile = java.io.File(
-                                                javax.swing.filechooser.FileSystemView
-                                                    .getFileSystemView().defaultDirectory,
-                                                file.name,
-                                            )
-                                            chooser.dialogTitle = "Anhang speichern"
-                                            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                                                try {
-                                                    file.copyTo(chooser.selectedFile, overwrite = true)
-                                                } catch (e: Exception) {
-                                                    APP_LOGGER.error("Anhang konnte nicht gespeichert werden.", e)
-                                                }
-                                            }
-                                        }
+                                    val filename = java.net.URLDecoder.decode(
+                                        url.removePrefix("zugferd-attachment://"), "UTF-8"
+                                    )
+                                    val entry = globalAttachmentData[filename]
+                                    if (entry != null) {
+                                        val (bytes, _) = entry
+                                        // Create temp file only when user actually clicks — not upfront.
+                                        val safePrefix = filename.replace("[^a-zA-Z0-9._-]".toRegex(), "_")
+                                        val tempFile = java.io.File.createTempFile("zugferd_att_", "_$safePrefix")
+                                        tempFile.deleteOnExit()
+                                        tempFile.writeBytes(bytes)
+                                        openAttachmentInWindow(tempFile.toURI().toString(), filename)
+                                    } else {
+                                        APP_LOGGER.warn("No attachment data found for: $filename")
                                     }
                                 } catch (e: Exception) {
                                     APP_LOGGER.error("Fehler beim Öffnen des Anhangs.", e)
                                 }
-                                return true // Cancel navigation
+                                return true // Cancel navigation in main browser
                             }
 
                             return super.onBeforeBrowse(browser, frame, request, user_gesture, is_redirect)
-                        }
-                    })
-                }
-                .also { client ->
-                    // Handle downloads from <a href="data:...;base64,..." download="filename"> links
-                    // that postProcessHtmlForAttachments() injects in place of "Öffnen" links.
-                    client.addDownloadHandler(object : org.cef.handler.CefDownloadHandlerAdapter() {
-                        override fun onBeforeDownload(
-                            browser: org.cef.browser.CefBrowser?,
-                            downloadItem: org.cef.callback.CefDownloadItem?,
-                            suggestedName: String?,
-                            callback: org.cef.callback.CefBeforeDownloadCallback?,
-                        ) {
-                            val filename = suggestedName ?: "anhang"
-                            // Prefer file:// URL so CEF's PDF/image viewer works correctly.
-                            // data: URLs for PDFs render blank in CEF.
-                            val tempFile = globalAttachmentTempFiles[filename]
-                            val windowUrl = if (tempFile != null && tempFile.exists()) {
-                                tempFile.toURI().toString()
-                            } else {
-                                downloadItem?.url
-                            }
-                            if (windowUrl != null) {
-                                openAttachmentInWindow(windowUrl, filename)
-                            }
-                            // Do not call callback.Continue() → cancels the file download
                         }
                     })
                 }
