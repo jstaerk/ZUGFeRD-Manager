@@ -27,11 +27,13 @@ import de.openindex.zugferd.manager.model.ValidationSeverity
 import de.openindex.zugferd.manager.model.ValidationType
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Validation
+import de.openindex.zugferd.manager.utils.getAttachmentsFromPdf
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
+import de.openindex.zugferd.manager.utils.postProcessHtmlForAttachments
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.trimToNull
 import de.openindex.zugferd.manager.utils.validatePdf
@@ -99,8 +101,9 @@ class CheckSectionState : SectionState() {
 
             coroutineScope {
                 launch(Dispatchers.IO) {
-                    //delay(2000)
-                    _selectedPdfHtml.value = getHtmlVisualizationFromPdf(file)
+                    val attachments = getAttachmentsFromPdf(file)
+                    val rawHtml = getHtmlVisualizationFromPdf(file)
+                    _selectedPdfHtml.value = rawHtml?.let { postProcessHtmlForAttachments(it, attachments) }
                 }
             }
         }

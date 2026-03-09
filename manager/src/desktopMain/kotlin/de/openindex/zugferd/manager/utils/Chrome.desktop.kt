@@ -375,28 +375,6 @@ private fun enableVerboseLogging() {
     System.setProperty("jcef.log.trace_thread", "true")
 }
 
-private fun handleDataUrl(url: String, filename: String? = null) {
-    try {
-        val commaIndex = url.indexOf(',')
-        if (commaIndex == -1) return
-        val mimeType = url.substring(5, commaIndex).substringBefore(';')
-        val extension = when {
-            mimeType.contains("pdf")  -> ".pdf"
-            mimeType.contains("png")  -> ".png"
-            mimeType.contains("jpeg") -> ".jpg"
-            mimeType.contains("jpg")  -> ".jpg"
-            mimeType.contains("gif")  -> ".gif"
-            mimeType.contains("xml")  -> ".xml"
-            mimeType.contains("html") -> ".html"
-            else -> ".bin"
-        }
-        val title = filename ?: "anhang$extension"
-        openAttachmentInWindow(url, title)
-    } catch (e: Exception) {
-        APP_LOGGER.error("Failed to handle data URL", e)
-    }
-}
-
 private fun openAttachmentInWindow(url: String, title: String) {
     javax.swing.SwingUtilities.invokeLater {
         try {

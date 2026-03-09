@@ -228,7 +228,7 @@ actual fun postProcessHtmlForAttachments(html: String, attachments: List<Pair<St
             val bytes = attachmentData[resolvedName]!!
             val mimeType = div.attr("mimetype").ifEmpty { div.attr("type") }.ifEmpty { "application/octet-stream" }
 
-            // Register bytes in global map — served on demand by the in-memory HTTP server.
+            // Register bytes in global map — temp file written on demand when user clicks.
             globalAttachmentData[filename] = Pair(bytes, mimeType)
 
             val encodedFilename = java.net.URLEncoder.encode(filename, "UTF-8")
@@ -258,85 +258,6 @@ actual fun getXmlFromPdf(pdf: PlatformFile): String? {
         null
     }
 }
-
-/*
-actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
-    return try {
-        ZUGFeRDVisualizer()
-            .visualize(
-                xml.pathString,
-                ZUGFeRDVisualizer.Language.DE,
-            )
-            // HACK: Apply custom css.
-            .replace(
-                "</head>",
-                "\n<style>\n${CUSTOM_VISUALIZATION_CSS}</style>\n</head>"
-            )
-
-        //APP_LOGGER.debug("generated HTML\n${html}")
-    } catch (e: Exception) {
-        APP_LOGGER.error("Can't create HTML visualization.", e)
-        null
-    }
-}
-
- */
-
-
-
-/*
-actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
-    return try {
-        val rawHtml = ZUGFeRDVisualizer()
-            .visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
-
-        val doc: Document = Jsoup.parse(rawHtml)
-
-        // Fügt benutzerdefiniertes CSS ein
-        val styleTag = doc.head().appendElement("style")
-        styleTag.appendText(CUSTOM_VISUALIZATION_CSS)
-
-        // Schleife über alle "boxzeile"-Container
-        val boxRows = doc.select("div.boxzeile")
-        for (row in boxRows) {
-            val legend = row.selectFirst("div.boxdaten.legende")
-            val value = row.selectFirst("div.boxdaten.wert[id]")
-
-            if (legend != null && value != null) {
-                val btId = value.id()
-                // Falls nicht schon vorhanden, anhängen
-                if (!legend.text().contains(btId)) {
-                    val labelText = legend.text().removeSuffix(":").trim()
-                    println(labelText)
-                    legend.text("$labelText $btId")
-                }
-            }
-        }
-
-
-        // Erzeugen HTML, Speichern und im Browser öffnen
-        val htmlContent = doc.outerHtml()
-
-        // Datei speichern
-        val htmlFile = Files.createTempFile("zugferd-", ".html")
-        Files.write(htmlFile, htmlContent.toByteArray(Charsets.UTF_8))
-        println("HTML gespeichert unter: ${htmlFile.toAbsolutePath()}")
-
-        // Optional im Browser öffnen
-        try {
-            java.awt.Desktop.getDesktop().browse(htmlFile.toUri())
-        } catch (e: Exception) {
-            println(" Browser konnte nicht geöffnet werden: ${e.message}")
-        }
-
-        htmlContent
-    } catch (e: Exception) {
-        APP_LOGGER.error("Can't create HTML visualization.", e)
-        null
-    }
-}
-
- */
 
 actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
     return try {
@@ -404,8 +325,5 @@ actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
         }
         tempXmlFile
     }
-
-    val html = getHtmlVisualizationFromXML(tempXmlFile) ?: return null
-    val attachments = getAttachmentsFromPdf(pdf)
-    return postProcessHtmlForAttachments(html, attachments)
+    return getHtmlVisualizationFromXML(tempXmlFile)
 }
