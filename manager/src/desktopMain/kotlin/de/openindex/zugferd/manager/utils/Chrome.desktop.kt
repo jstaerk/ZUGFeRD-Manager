@@ -114,7 +114,7 @@ fun getCefBrowser(url: String): CefBrowser {
                     })
                 }
                 .also { client ->
-                    // Handle data: URLs (attachments) manually if the browser tries to navigate to them
+                    // Intercept zugferd-attachment:// links to open attachments in a popup window.
                     client.addRequestHandler(object : org.cef.handler.CefRequestHandlerAdapter() {
                         override fun onBeforeBrowse(
                             browser: org.cef.browser.CefBrowser?,

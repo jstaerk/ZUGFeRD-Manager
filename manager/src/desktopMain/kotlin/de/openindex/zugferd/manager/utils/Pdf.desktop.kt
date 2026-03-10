@@ -22,42 +22,28 @@
 package de.openindex.zugferd.manager.utils
 
 import de.openindex.zugferd.manager.APP_LOGGER
-import de.openindex.zugferd.manager.APP_TITLE_FULL
-import de.openindex.zugferd.manager.APP_VERSION
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.pdfbox.Loader
-import org.apache.pdfbox.cos.COSArray
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog
-import org.apache.pdfbox.pdmodel.PDDocumentInformation
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode
-import org.apache.pdfbox.pdmodel.common.PDMetadata
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification
-import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile
-import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
 import org.apache.xmpbox.xml.DomXmpParser
 import org.apache.xmpbox.xml.XmpParsingException
 import org.mustangproject.ZUGFeRD.ZUGFeRDExporterFromPDFA
 import org.mustangproject.ZUGFeRD.ZUGFeRDImporter
 import org.mustangproject.ZUGFeRD.ZUGFeRDVisualizer
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
-import java.nio.file.Path
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.Collections
-import java.util.GregorianCalendar
-import kotlin.io.path.pathString
-import kotlin.io.path.writer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.io.path.pathString
+import kotlin.io.path.writer
 @Suppress("SpellCheckingInspection")
 private val CUSTOM_VISUALIZATION_CSS = """
     body > form {
@@ -179,7 +165,7 @@ actual fun postProcessHtmlForAttachments(html: String, attachments: List<Pair<St
 
         val link = doc.select("a[onclick*='$id']").first() ?: run {
             APP_LOGGER.info("No link found for data div ID: $id")
-            return@run null
+            null
         } ?: continue
 
         // Resolve filename from BT-124 #ef= reference (grandparent = boxtabelle container).
@@ -265,10 +251,6 @@ actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
             .visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
 
         val doc: Document = Jsoup.parse(rawHtml)
-
-        //File("zugferd_test.html").writeText(doc.outerHtml())
-
-
 
         // Benutzerdefiniertes CSS einfügen
         doc.head().appendElement("style").appendText(CUSTOM_VISUALIZATION_CSS)

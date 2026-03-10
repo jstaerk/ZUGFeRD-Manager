@@ -32,16 +32,11 @@ import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.directory
-import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
+import de.openindex.zugferd.manager.utils.getHtmlWithAttachments
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
-import de.openindex.zugferd.manager.utils.getString
-import de.openindex.zugferd.manager.utils.getAttachmentsFromPdf
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
-import de.openindex.zugferd.manager.utils.postProcessHtmlForAttachments
 import de.openindex.zugferd.manager.utils.trimToNull
-import de.openindex.zugferd.quba.generated.resources.AppCheckSelectFile
-import de.openindex.zugferd.quba.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -137,10 +132,8 @@ class VisualsSectionState : SectionState() {
 
             tab.name = file.name
             tab.pdf = if (!isXml) file else null
-            val attachments = if (!isXml) getAttachmentsFromPdf(file) else emptyList()
-            val rawHtml = if (isXml) getHtmlVisualizationFromXML(filePath)?.trimToNull()
-            else getHtmlVisualizationFromPdf(file)?.trimToNull()
-            tab.html = rawHtml?.let { postProcessHtmlForAttachments(it, attachments) }
+            tab.html = if (isXml) getHtmlVisualizationFromXML(filePath)?.trimToNull()
+                       else getHtmlWithAttachments(file)?.trimToNull()
             tab.xml = if (isXml) fileText.trimToNull()
             else getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
 
