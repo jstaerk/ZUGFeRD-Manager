@@ -111,8 +111,8 @@ enum class AppSection(
 ) {
     CREATE(CreateSectionState()),
     CHECK(CheckSectionState()),
-    SETTINGS(SettingsSectionState()),
-    VISUALISATION( VisualsSectionState());
+    VISUALISATION( VisualsSectionState()),
+    SETTINGS(SettingsSectionState());
 
     val label: StringResource
         get() = when (this) {
