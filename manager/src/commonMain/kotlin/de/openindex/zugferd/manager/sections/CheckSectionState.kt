@@ -27,8 +27,8 @@ import de.openindex.zugferd.manager.model.ValidationSeverity
 import de.openindex.zugferd.manager.model.ValidationType
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Validation
-import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
+import de.openindex.zugferd.manager.utils.getHtmlWithAttachments
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
@@ -99,15 +99,13 @@ class CheckSectionState : SectionState() {
 
             coroutineScope {
                 launch(Dispatchers.IO) {
-                    //delay(2000)
-                    _selectedPdfHtml.value = getHtmlVisualizationFromPdf(file)
+                    _selectedPdfHtml.value = getHtmlWithAttachments(file)
                 }
             }
         }
 
         coroutineScope {
             launch(Dispatchers.IO) {
-                //delay(2000)
                 _selectedPdfValidation.value = validatePdf(file)
                 _filterType.value = ValidationType.entries.toList()
                 _filterSeverity.value = ValidationSeverity.entries.toList()

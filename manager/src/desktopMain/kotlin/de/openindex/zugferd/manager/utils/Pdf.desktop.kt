@@ -22,42 +22,28 @@
 package de.openindex.zugferd.manager.utils
 
 import de.openindex.zugferd.manager.APP_LOGGER
-import de.openindex.zugferd.manager.APP_TITLE_FULL
-import de.openindex.zugferd.manager.APP_VERSION
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.pdfbox.Loader
-import org.apache.pdfbox.cos.COSArray
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog
-import org.apache.pdfbox.pdmodel.PDDocumentInformation
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode
-import org.apache.pdfbox.pdmodel.common.PDMetadata
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification
-import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile
-import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
 import org.apache.xmpbox.xml.DomXmpParser
 import org.apache.xmpbox.xml.XmpParsingException
 import org.mustangproject.ZUGFeRD.ZUGFeRDExporterFromPDFA
 import org.mustangproject.ZUGFeRD.ZUGFeRDImporter
 import org.mustangproject.ZUGFeRD.ZUGFeRDVisualizer
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
-import java.nio.file.Path
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.Collections
-import java.util.GregorianCalendar
-import kotlin.io.path.pathString
-import kotlin.io.path.writer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.io.path.pathString
+import kotlin.io.path.writer
 @Suppress("SpellCheckingInspection")
 private val CUSTOM_VISUALIZATION_CSS = """
     body > form {
@@ -130,6 +116,121 @@ fun PDDocument.removeEmbeddedFiles(): PDDocument {
     return this
 }
 
+actual fun getAttachmentsFromPdf(pdf: PlatformFile): List<Pair<String, ByteArray>> {
+    return try {
+        val doc = Loader.loadPDF(pdf.file)
+        val result = mutableListOf<Pair<String, ByteArray>>()
+        try {
+            val nameTree = PDDocumentNameDictionary(doc.documentCatalog).embeddedFiles ?: return emptyList()
+            for ((name, spec) in (nameTree.names ?: return emptyList())) {
+                val ef = (spec as? PDComplexFileSpecification)?.let {
+                    it.embeddedFile ?: it.embeddedFileUnicode
+                } ?: continue
+                result += name to ef.createInputStream().readBytes()
+            }
+        } finally {
+            doc.close()
+        }
+        result
+    } catch (e: Exception) {
+        APP_LOGGER.error("Anhänge konnten nicht aus PDF gelesen werden.", e)
+        emptyList()
+    }
+}
+
+actual fun postProcessHtmlForAttachments(html: String, attachments: List<Pair<String, ByteArray>>): String {
+    if (html.isBlank()) return html
+    APP_LOGGER.info("Post-processing HTML for attachments. Found ${attachments.size} attachments in PDF.")
+
+    // Keep bytes in memory — no temp files needed.
+    val attachmentData = mutableMapOf<String, ByteArray>()        // original name → bytes
+    val attachmentContentMap = mutableMapOf<String, String>()     // base64 content → original name
+
+    for ((name, bytes) in attachments) {
+        attachmentData[name] = bytes
+        attachmentContentMap[java.util.Base64.getEncoder().encodeToString(bytes)] = name
+        APP_LOGGER.info("Registered attachment '$name' (${bytes.size} bytes)")
+    }
+
+    val doc = Jsoup.parse(html)
+    val dataDivs = doc.select("div[filename], div[data-filename], div[mimetype]")
+    APP_LOGGER.info("Found ${dataDivs.size} data divs.")
+
+    for ((index, div) in dataDivs.withIndex()) {
+        val id = div.id()
+        if (id.isEmpty()) continue
+
+        var filename = div.attr("filename").ifEmpty { div.attr("data-filename") }
+        APP_LOGGER.info("Processing data div with ID: $id, Filename: '$filename'")
+
+        val link = doc.select("a[onclick*='$id']").first() ?: run {
+            APP_LOGGER.info("No link found for data div ID: $id")
+            null
+        } ?: continue
+
+        // Resolve filename from BT-124 #ef= reference (grandparent = boxtabelle container).
+        if (filename.isEmpty()) {
+            val efHref = div.parent()?.parent()?.selectFirst("a[href^='#ef=']")?.attr("href") ?: ""
+            if (efHref.startsWith("#ef=")) {
+                val efFilename = efHref.removePrefix("#ef=")
+                filename = attachmentData.keys.find { it.endsWith(efFilename, ignoreCase = true) } ?: efFilename
+                APP_LOGGER.info("Resolved filename via #ef= reference: '$efFilename' → '$filename'")
+            }
+        }
+
+        // Strategy 1: exact match
+        var resolvedName: String? = attachmentData.keys.find { it == filename }
+        // Strategy 1b: case-insensitive
+        if (resolvedName == null && filename.isNotEmpty())
+            resolvedName = attachmentData.keys.find { it.equals(filename, ignoreCase = true) }
+        // Strategy 1c: endsWith (e.g. "Aufmass.png" matches "EN16931_Elektron_Aufmass.png")
+        if (resolvedName == null && filename.isNotEmpty())
+            resolvedName = attachmentData.keys.find { it.endsWith(filename, ignoreCase = true) }
+        // Strategy 2: index-based
+        if (resolvedName == null && index < attachments.size) {
+            resolvedName = attachments[index].first
+            APP_LOGGER.info("Matched attachment by index ($index): $resolvedName")
+            if (filename.isEmpty()) filename = resolvedName
+        }
+        // Strategy 3: base64 content match
+        if (resolvedName == null) {
+            val divContent = div.text().replace("\\s".toRegex(), "")
+            if (divContent.isNotEmpty()) {
+                resolvedName = attachmentContentMap[divContent]
+                if (resolvedName != null) {
+                    APP_LOGGER.info("Matched attachment by content for div ID: $id")
+                    if (filename.isEmpty()) filename = resolvedName
+                }
+            }
+        }
+        // Strategy 4: single attachment fallback
+        if (resolvedName == null && attachmentData.size == 1) {
+            resolvedName = attachmentData.keys.first()
+            APP_LOGGER.info("Fallback: single attachment used for '$filename'")
+            if (filename.isEmpty()) filename = resolvedName
+        }
+
+        if (resolvedName != null) {
+            val bytes = attachmentData[resolvedName]!!
+            val mimeType = div.attr("mimetype").ifEmpty { div.attr("type") }.ifEmpty { "application/octet-stream" }
+
+            // Register bytes in global map — temp file written on demand when user clicks.
+            globalAttachmentData[filename] = Pair(bytes, mimeType)
+
+            val encodedFilename = java.net.URLEncoder.encode(filename, "UTF-8")
+            link.attr("href", "zugferd-attachment://$encodedFilename")
+            link.removeAttr("onclick")
+            link.removeAttr("download")
+            link.text("Anhang öffnen")
+            APP_LOGGER.info("Replaced link for '$filename' with in-memory attachment reference (${bytes.size} bytes)")
+        } else {
+            APP_LOGGER.warn("No matching attachment found for filename '$filename'")
+        }
+    }
+
+    return doc.outerHtml()
+}
+
 actual fun getXmlFromPdf(pdf: PlatformFile): String? {
     return try {
         pdf.file
@@ -144,95 +245,12 @@ actual fun getXmlFromPdf(pdf: PlatformFile): String? {
     }
 }
 
-/*
-actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
-    return try {
-        ZUGFeRDVisualizer()
-            .visualize(
-                xml.pathString,
-                ZUGFeRDVisualizer.Language.DE,
-            )
-            // HACK: Apply custom css.
-            .replace(
-                "</head>",
-                "\n<style>\n${CUSTOM_VISUALIZATION_CSS}</style>\n</head>"
-            )
-
-        //APP_LOGGER.debug("generated HTML\n${html}")
-    } catch (e: Exception) {
-        APP_LOGGER.error("Can't create HTML visualization.", e)
-        null
-    }
-}
-
- */
-
-
-
-/*
 actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
     return try {
         val rawHtml = ZUGFeRDVisualizer()
             .visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
 
         val doc: Document = Jsoup.parse(rawHtml)
-
-        // Fügt benutzerdefiniertes CSS ein
-        val styleTag = doc.head().appendElement("style")
-        styleTag.appendText(CUSTOM_VISUALIZATION_CSS)
-
-        // Schleife über alle "boxzeile"-Container
-        val boxRows = doc.select("div.boxzeile")
-        for (row in boxRows) {
-            val legend = row.selectFirst("div.boxdaten.legende")
-            val value = row.selectFirst("div.boxdaten.wert[id]")
-
-            if (legend != null && value != null) {
-                val btId = value.id()
-                // Falls nicht schon vorhanden, anhängen
-                if (!legend.text().contains(btId)) {
-                    val labelText = legend.text().removeSuffix(":").trim()
-                    println(labelText)
-                    legend.text("$labelText $btId")
-                }
-            }
-        }
-
-
-        // Erzeugen HTML, Speichern und im Browser öffnen
-        val htmlContent = doc.outerHtml()
-
-        // Datei speichern
-        val htmlFile = Files.createTempFile("zugferd-", ".html")
-        Files.write(htmlFile, htmlContent.toByteArray(Charsets.UTF_8))
-        println("HTML gespeichert unter: ${htmlFile.toAbsolutePath()}")
-
-        // Optional im Browser öffnen
-        try {
-            java.awt.Desktop.getDesktop().browse(htmlFile.toUri())
-        } catch (e: Exception) {
-            println(" Browser konnte nicht geöffnet werden: ${e.message}")
-        }
-
-        htmlContent
-    } catch (e: Exception) {
-        APP_LOGGER.error("Can't create HTML visualization.", e)
-        null
-    }
-}
-
- */
-
-actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
-    return try {
-        val rawHtml = ZUGFeRDVisualizer()
-            .visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
-
-        val doc: Document = Jsoup.parse(rawHtml)
-
-        //File("zugferd_test.html").writeText(doc.outerHtml())
-
-
 
         // Benutzerdefiniertes CSS einfügen
         doc.head().appendElement("style").appendText(CUSTOM_VISUALIZATION_CSS)
@@ -289,16 +307,5 @@ actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
         }
         tempXmlFile
     }
-
     return getHtmlVisualizationFromXML(tempXmlFile)
-    /*
-    try {
-        ExportResource("/xrechnung-viewer.css")
-        ExportResource("/xrechnung-viewer.js")
-
-        println("xrechnung-viewer.css and xrechnung-viewer.js written as well (to local working dir)")
-    } catch (e: java.lang.Exception) {
-        LOGGER.error(e.message, e)
-    }
-    */
 }

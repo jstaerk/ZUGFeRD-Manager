@@ -32,14 +32,11 @@ import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.directory
-import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromPdf
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
+import de.openindex.zugferd.manager.utils.getHtmlWithAttachments
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
-import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
 import de.openindex.zugferd.manager.utils.trimToNull
-import de.openindex.zugferd.quba.generated.resources.AppCheckSelectFile
-import de.openindex.zugferd.quba.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -47,95 +44,6 @@ import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.IOException
-
-//Orginal
-/*
-class VisualsSectionState : SectionState() {
-    val documents = mutableStateListOf<DocumentTab>()
-    var selectedIndex by mutableStateOf(0)
-
-
-    fun addNewTab() {
-        documents.add(DocumentTab(name = "", pdf = null))
-        selectedIndex = documents.lastIndex
-    }
-
-    fun removeTab(index: Int) {
-        documents.removeAt(index)
-        if (selectedIndex >= documents.size) {
-            selectedIndex = (documents.size - 1).coerceAtLeast(0)
-        }
-    }
-
-
-    suspend fun loadFileInTab(tab: DocumentTab, file: PlatformFile, appState: AppState) {
-        val tabIndex = documents.indexOf(tab)
-        if (tabIndex == -1) return
-
-        // Tab-Loading aktivieren
-        updateTabLoadingState(tabIndex, true)
-
-        try {
-            // Arbeitskopie erstellen
-            var updatedTab = tab.copy(isLoading = true)
-
-            updatedTab.name = file.name
-            updatedTab.pdf = null
-            updatedTab.html = null
-            updatedTab.xml = null
-            updatedTab.tags = listOf()
-
-            val fileText = file.file.readText()
-            val filePath = file.file.toPath()
-
-            val isXml = file.name.lowercase().endsWith(".xml") || fileText.trimStart().startsWith("<")
-
-            if (isXml) {
-                updatedTab.xml = fileText.trimToNull()
-                updatedTab.html = getHtmlVisualizationFromXML(filePath)?.trimToNull()
-            } else {
-                val isPdf = fileText.trimStart().startsWith("%PDF")
-                if (isPdf) {
-                    updatedTab.pdf = file
-                    updatedTab.html = getHtmlVisualizationFromPdf(file)
-                    updatedTab.xml = getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
-
-                    file.directory?.let {
-                        appState.preferences.setPreviousPdfLocation(it)
-                    }
-                }
-            }
-
-            // Aktualisierte Tab-Daten in die Liste schreiben
-            documents[tabIndex] = updatedTab
-        } finally {
-            // Tab-Loading beenden
-            updateTabLoadingState(tabIndex, false)
-        }
-    }
-
-    fun updateTabLoadingState(index: Int, loading: Boolean) {
-        if (index in documents.indices) {
-            val tab = documents[index]
-            documents[index] = tab.copy(isLoading = loading)
-        }
-    }
-
-
-
-    private var _selectedPdfXml = mutableStateOf<String?>(null)
-    val selectedPdfXml: String?
-        get() = _selectedPdfXml.value
-
-
-    private var _selectedPdfHtml = mutableStateOf<String?>(null)
-    val selectedPdfHtml: String?
-        get() = _selectedPdfHtml.value
-
-
-}
-
- */
 
 class VisualsSectionState : SectionState() {
     val documents = mutableStateListOf<DocumentTab>()
@@ -151,15 +59,6 @@ class VisualsSectionState : SectionState() {
         selectedIndex = documents.lastIndex
     }
 
-    /*
-    fun removeTab(index: Int) {
-        if (documents.size > 1) {
-            documents.removeAt(index)
-            selectedIndex = (documents.size - 1).coerceAtLeast(0)
-        }
-    }
-
-     */
     fun removeTab(index: Int) {
         if (index !in documents.indices) return
         documents.removeAt(index)
@@ -186,14 +85,14 @@ class VisualsSectionState : SectionState() {
 
 
 
-suspend fun loadFileInCurrentTab(file: PlatformFile, appState: AppState) {
-    if (documents.isEmpty()) {
-        addTabWithFile(file, appState)
-    } else {
-        val currentTab = documents[selectedIndex]
-        loadFileInTab(currentTab, file, appState)
+    suspend fun loadFileInCurrentTab(file: PlatformFile, appState: AppState) {
+        if (documents.isEmpty()) {
+            addTabWithFile(file, appState)
+        } else {
+            val currentTab = documents[selectedIndex]
+            loadFileInTab(currentTab, file, appState)
+        }
     }
-}
 
 
     suspend fun addTabWithFile(file: PlatformFile, appState: AppState) {
@@ -216,19 +115,6 @@ suspend fun loadFileInCurrentTab(file: PlatformFile, appState: AppState) {
 
 
 
-    suspend fun readFileSafely(file: File): String {
-        repeat(5) { attempt ->
-            try {
-                return file.inputStream().bufferedReader().use { it.readText() }
-            } catch (e: IOException) {
-                if (attempt == 4) throw e
-                delay(100L) // 100ms warten und nochmal versuchen
-            }
-        }
-        return "" // wird nie erreicht
-    }
-
-
     suspend fun loadFileInTab(tab: DocumentTab, file: PlatformFile, appState: AppState) {
         tab.isLoading = true
 
@@ -247,7 +133,7 @@ suspend fun loadFileInCurrentTab(file: PlatformFile, appState: AppState) {
             tab.name = file.name
             tab.pdf = if (!isXml) file else null
             tab.html = if (isXml) getHtmlVisualizationFromXML(filePath)?.trimToNull()
-            else getHtmlVisualizationFromPdf(file)?.trimToNull()
+                       else getHtmlWithAttachments(file)?.trimToNull()
             tab.xml = if (isXml) fileText.trimToNull()
             else getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
 
@@ -278,12 +164,6 @@ suspend fun loadFileInCurrentTab(file: PlatformFile, appState: AppState) {
 
 
 
-    private fun updateTabLoadingState(index: Int, loading: Boolean) {
-        if (index in documents.indices) {
-            val tab = documents[index]
-            documents[index] = tab.copy(isLoading = loading)
-        }
-    }
 }
 
 

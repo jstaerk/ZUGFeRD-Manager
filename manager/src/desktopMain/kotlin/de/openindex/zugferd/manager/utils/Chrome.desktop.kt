@@ -83,6 +83,10 @@ private var CEF_CLIENT: CefClient? = null
 
 private var CEF_BROWSER: CefBrowser? = null
 
+/** Maps attachment filename → (bytes, mimeType) in memory. Populated by postProcessHtmlForAttachments(). */
+val globalAttachmentData = mutableMapOf<String, Pair<ByteArray, String>>()
+
+
 /**
  * As we never show multiple browser instances at once,
  * we keep one browser instance permanently in memory and only
@@ -97,6 +101,57 @@ fun getCefBrowser(url: String): CefBrowser {
                 .also {
                     it.removeDragHandler()
                     it.addDragHandler { _, _, _ -> true }
+                }
+                .also { client ->
+                    // Block popups (prevents blank windows from original downloadData/window.open calls).
+                    client.addLifeSpanHandler(object : org.cef.handler.CefLifeSpanHandlerAdapter() {
+                        override fun onBeforePopup(
+                            browser: org.cef.browser.CefBrowser?,
+                            frame: org.cef.browser.CefFrame?,
+                            targetUrl: String?,
+                            targetFrameName: String?,
+                        ): Boolean = true
+                    })
+                }
+                .also { client ->
+                    // Intercept zugferd-attachment:// links to open attachments in a popup window.
+                    client.addRequestHandler(object : org.cef.handler.CefRequestHandlerAdapter() {
+                        override fun onBeforeBrowse(
+                            browser: org.cef.browser.CefBrowser?,
+                            frame: org.cef.browser.CefFrame?,
+                            request: org.cef.network.CefRequest?,
+                            user_gesture: Boolean,
+                            is_redirect: Boolean
+                        ): Boolean {
+                            val url = request?.url ?: return false
+
+                            // Intercept attachment links → write temp file on-demand, open via file:// URL.
+                            if (url.startsWith("zugferd-attachment://")) {
+                                try {
+                                    val filename = java.net.URLDecoder.decode(
+                                        url.removePrefix("zugferd-attachment://"), "UTF-8"
+                                    )
+                                    val entry = globalAttachmentData[filename]
+                                    if (entry != null) {
+                                        val (bytes, _) = entry
+                                        // Create temp file only when user actually clicks — not upfront.
+                                        val safePrefix = filename.replace("[^a-zA-Z0-9._-]".toRegex(), "_")
+                                        val tempFile = java.io.File.createTempFile("zugferd_att_", "_$safePrefix")
+                                        tempFile.deleteOnExit()
+                                        tempFile.writeBytes(bytes)
+                                        openAttachmentInWindow(tempFile.toURI().toString(), filename)
+                                    } else {
+                                        APP_LOGGER.warn("No attachment data found for: $filename")
+                                    }
+                                } catch (e: Exception) {
+                                    APP_LOGGER.error("Fehler beim Öffnen des Anhangs.", e)
+                                }
+                                return true // Cancel navigation in main browser
+                            }
+
+                            return super.onBeforeBrowse(browser, frame, request, user_gesture, is_redirect)
+                        }
+                    })
                 }
                 .also { client ->
                     client.addKeyboardHandler(object : org.cef.handler.CefKeyboardHandlerAdapter() {
@@ -260,6 +315,10 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
         // Disable DRM / Widevine
         // https://magpcss.org/ceforum/viewtopic.php?f=6&t=19093
         appArgs.add("--disable-component-update")
+        
+        // Allow local file access and disable web security to support data URLs and local resources
+        appArgs.add("--allow-file-access-from-files")
+        appArgs.add("--disable-web-security")
 
         // Disable Hardware Acceleration
         if (!gpuEnabled) {
@@ -314,4 +373,35 @@ private fun enableVerboseLogging() {
     System.setProperty("jcef.trace.cefapp.lifespan", "true")
     System.setProperty("jcef.trace.cefbrowserwr.addnotify", "true")
     System.setProperty("jcef.log.trace_thread", "true")
+}
+
+private fun openAttachmentInWindow(url: String, title: String) {
+    javax.swing.SwingUtilities.invokeLater {
+        try {
+            // Use a dedicated CefClient per popup — sharing CEF_CLIENT with the main browser
+            // causes the second browser to render blank.
+            val popupClient = CEF_APP!!.createClient()
+            val popupBrowser = popupClient.createBrowser(url, org.cef.browser.CefRendering.DEFAULT, false)
+
+            val frame = javax.swing.JFrame(title)
+            frame.defaultCloseOperation = javax.swing.JFrame.DISPOSE_ON_CLOSE
+            frame.setSize(900, 700)
+            frame.setLocationRelativeTo(null)
+            frame.contentPane.add(popupBrowser.uiComponent, java.awt.BorderLayout.CENTER)
+
+            // Show the frame first so the native window exists before CEF tries to render into it.
+            frame.isVisible = true
+            frame.contentPane.validate()
+
+            // Clean up the popup client when the window is closed.
+            frame.addWindowListener(object : java.awt.event.WindowAdapter() {
+                override fun windowClosed(e: java.awt.event.WindowEvent?) {
+                    popupBrowser.close(true)
+                    popupClient.dispose()
+                }
+            })
+        } catch (e: Exception) {
+            APP_LOGGER.error("Anhang-Fenster konnte nicht geöffnet werden.", e)
+        }
+    }
 }
