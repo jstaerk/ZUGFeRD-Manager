@@ -2,10 +2,22 @@
 :toc:
 :toc-title: Inhaltsverzeichnis
 :toclevels: 3
+:revnumber: 1.0
+:revdate: 2026-03-15
+:author: Mohammed Bakroon
+:reviewer: Geprüft von eintragen
 
 Version: Mustang Quba v1.9.9 +
 Basierend auf: OpenIndex ZUGFeRD-Manager +
 Lizenz: Kostenlos, Open Source (Apache License 2.0)
+
+[cols="1,3",frame=none,grid=none]
+|===
+| Autor | {author}
+| Geprüft von | {reviewer}
+| Dokumentversion | {revnumber}
+| Stand | {revdate}
+|===
 
 Dieses Handbuch ist im AsciiDoc-Format verfasst, damit es standardisiert als HTML und (optional) als PDF exportiert werden kann.
 
