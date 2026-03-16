@@ -41,7 +41,9 @@ import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
 import io.github.vinceglb.filekit.core.PlatformFile
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 
@@ -117,33 +119,51 @@ class VisualsSectionState : SectionState() {
 
     suspend fun loadFileInTab(tab: DocumentTab, file: PlatformFile, appState: AppState) {
         tab.isLoading = true
+        tab.isHtmlLoading = false
 
+        // Phase 1: XML sofort lesen und anzeigen (schnell)
+        val filePath: java.nio.file.Path
+        val isXml: Boolean
         try {
-            // Wenn es der erste Tab ist, kurz warten
-            if (tab.name.isEmpty()) {
-                delay(150L)
-            }
+            if (tab.name.isEmpty()) delay(150L)
 
-            // Datei mehrfach versuchen zu lesen
-            val fileText = readFileWithRetry(file.file)
+            // Datei auf IO-Dispatcher lesen (blockierende Operation)
+            val fileText = withContext(Dispatchers.IO) { readFileWithRetry(file.file) }
 
-            val filePath = file.file.toPath()
-            val isXml = file.name.lowercase().endsWith(".xml") || fileText.trimStart().startsWith("<")
+            filePath = file.file.toPath()
+            isXml = file.name.lowercase().endsWith(".xml") || fileText.trimStart().startsWith("<")
 
             tab.name = file.name
             tab.pdf = if (!isXml) file else null
-            tab.html = if (isXml) getHtmlVisualizationFromXML(filePath)?.trimToNull()
-                       else getHtmlWithAttachments(file)?.trimToNull()
-            tab.xml = if (isXml) fileText.trimToNull()
-            else getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
+
+            // XML-Inhalt: bei XML-Datei bereits im Speicher, bei PDF auf IO-Dispatcher
+            tab.xml = if (isXml) {
+                fileText.trimToNull()
+            } else {
+                withContext(Dispatchers.IO) {
+                    getXmlFromPdf(file)?.let { getPrettyPrintedXml(it) }?.trimToNull()
+                }
+            }
 
             file.directory?.let { appState.preferences.setPreviousPdfLocation(it) }
 
         } catch (e: IOException) {
-            println("Fehler beim Lesen der Datei, erneut versuchen: ${e.message}")
+            println("Fehler beim Lesen der Datei: ${e.message}")
             throw e
         } finally {
-            tab.isLoading = false
+            tab.isLoading = false  // XML ist bereit → Spinner ausblenden
+        }
+
+        // Phase 2: HTML im Hintergrund generieren (kann länger dauern)
+        // XML-View ist bereits sichtbar, HTML-Tab erscheint sobald fertig
+        try {
+            tab.isHtmlLoading = true
+            tab.html = withContext(Dispatchers.IO) {
+                if (isXml) getHtmlVisualizationFromXML(filePath)?.trimToNull()
+                else getHtmlWithAttachments(file)?.trimToNull()
+            }
+        } finally {
+            tab.isHtmlLoading = false
         }
     }
 

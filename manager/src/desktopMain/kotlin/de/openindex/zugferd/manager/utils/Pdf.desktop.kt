@@ -25,6 +25,7 @@ import de.openindex.zugferd.manager.APP_LOGGER
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog
@@ -247,8 +248,18 @@ actual fun getXmlFromPdf(pdf: PlatformFile): String? {
 
 actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
     return try {
-        val rawHtml = ZUGFeRDVisualizer()
-            .visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
+        // ZUGFeRDVisualizer auf IO-Dispatcher ausführen (blockierende XSLT-Transformation)
+        // Timeout verhindert endloses Hängen bei beschädigten oder sehr großen Dateien
+        val rawHtml = withContext(Dispatchers.IO) {
+            withTimeoutOrNull(30_000L) {
+                ZUGFeRDVisualizer().visualize(xml.pathString, ZUGFeRDVisualizer.Language.DE)
+            }
+        }
+
+        if (rawHtml.isNullOrBlank() || rawHtml.length < 200) {
+            APP_LOGGER.warn("ZUGFeRDVisualizer lieferte leeres HTML – Fallback wird verwendet.")
+            return generateFallbackHtml(xml)
+        }
 
         val doc: Document = Jsoup.parse(rawHtml)
 
@@ -285,12 +296,32 @@ actual suspend fun getHtmlVisualizationFromXML(xml: Path): String? {
             }
         }
 
-
         doc.outerHtml()
     } catch (e: Exception) {
-        APP_LOGGER.error("Can't create HTML visualization.", e)
-        null
+        APP_LOGGER.error("HTML-Visualisierung fehlgeschlagen.", e)
+        generateFallbackHtml(xml)
     }
+}
+
+private fun generateFallbackHtml(xml: Path): String {
+    val xmlContent = try {
+        xml.toFile().readText(Charsets.UTF_8)
+    } catch (e: Exception) {
+        "<!-- Fehler beim Lesen der XML-Datei: ${e.message} -->"
+    }
+    val escaped = xmlContent
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    return """<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><style>
+body{font-family:monospace;padding:20px;background:#1e1e1e;color:#d4d4d4}
+pre{white-space:pre-wrap;word-break:break-all;font-size:12px;line-height:1.5}
+.warn{background:#b45309;color:#fff;padding:10px 16px;border-radius:6px;margin-bottom:16px;font-family:sans-serif;font-size:13px}
+</style></head><body>
+<div class="warn">&#9888; HTML-Visualisierung nicht verfügbar – XML-Quellcode wird angezeigt.</div>
+<pre>$escaped</pre>
+</body></html>"""
 }
 
 actual suspend fun getHtmlVisualizationFromXML(xml: PlatformFile): String? {

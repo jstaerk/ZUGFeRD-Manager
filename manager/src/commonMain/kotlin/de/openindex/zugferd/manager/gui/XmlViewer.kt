@@ -41,7 +41,11 @@ import de.openindex.zugferd.manager._APP_STATE
 import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.sections.SearchState
+import androidx.compose.ui.text.input.VisualTransformation
 import de.openindex.zugferd.manager.utils.XmlVisualTransformation
+
+// Ab dieser Größe wird Syntax-Highlighting deaktiviert (verhindert UI-Freeze bei großen Dateien)
+private const val LARGE_XML_HIGHLIGHT_CHARS = 500_000
 
 @Composable
 fun XmlViewer(
@@ -51,8 +55,10 @@ fun XmlViewer(
 ) {
     val preferences = LocalAppState.current.preferences
     val systemIsDark = isSystemInDarkTheme()
-    val xmlVisualTransformation = remember(preferences.isThemeDark, systemIsDark) {
-        XmlVisualTransformation(darkMode = preferences.darkMode ?: systemIsDark)
+    val isLargeXml = xml.length > LARGE_XML_HIGHLIGHT_CHARS
+    val xmlVisualTransformation = remember(preferences.isThemeDark, systemIsDark, isLargeXml) {
+        if (isLargeXml) VisualTransformation.None
+        else XmlVisualTransformation(darkMode = preferences.darkMode ?: systemIsDark)
     }
     val xmlTextStyle = MaterialTheme.typography.bodyMedium.copy(
         fontFamily = FontFamily.Monospace,

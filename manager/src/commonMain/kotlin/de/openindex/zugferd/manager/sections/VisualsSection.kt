@@ -442,7 +442,7 @@ private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) 
     val hasPdf = currentTab.pdf != null
     val hasHtml = currentTab.html != null
     val hasXml = currentTab.xml != null
-    val hasCode = hasHtml || hasXml
+    val hasCode = hasHtml || hasXml || currentTab.isHtmlLoading
 
     LaunchedEffect(hasPdf, hasCode) {
         viewMode = when {
@@ -517,42 +517,71 @@ private fun EmptyVisualsView(state: VisualsSectionState) {
 private fun CodeOnlyView(tab: DocumentTab, selectedTab: Int, onTabChange: (Int) -> Unit, search: SearchState?) {
     val hasHtml = tab.html != null
     val hasXml = tab.xml != null
+    // HTML-Tab anzeigen sobald HTML bereit ODER noch geladen wird
+    val showHtmlTab = hasHtml || tab.isHtmlLoading
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Tab row for HTML/XML
-        if (hasHtml && hasXml) {
+        // Tab row: HTML-Tab (ggf. mit Lade-Indikator) + XML-Tab
+        if (showHtmlTab && hasXml) {
             TabRow(selectedTabIndex = selectedTab) {
-                if (hasHtml) {
-                    Tab(
-                        selected = selectedTab == 0,
-                        onClick = { onTabChange(0) },
-                        text = { Text("HTML Vorschau") }
-                    )
-                }
-
-                if (hasXml) {
-                    Tab(
-                        selected = selectedTab == if (hasHtml) 1 else 0,
-                        onClick = { onTabChange(if (hasHtml) 1 else 0) },
-                        text = { Text("XML") }
-                    )
-                }
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { onTabChange(0) },
+                    text = {
+                        if (tab.isHtmlLoading && !hasHtml) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text("HTML Vorschau")
+                                Spacer(modifier = Modifier.width(6.dp))
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(12.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            }
+                        } else {
+                            Text("HTML Vorschau")
+                        }
+                    }
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { onTabChange(1) },
+                    text = { Text("XML") }
+                )
             }
         }
 
         // Content
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                hasHtml && selectedTab == 0 -> {
+                selectedTab == 0 && hasHtml -> {
                     WebViewer(html = tab.html!!, modifier = Modifier.fillMaxSize(), search = search)
                 }
 
-                hasXml && (selectedTab == 1 || !hasHtml) -> {
+                selectedTab == 0 && tab.isHtmlLoading -> {
+                    // HTML wird noch generiert – Spinner anzeigen
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "HTML wird generiert…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                hasXml && (selectedTab == 1 || !showHtmlTab) -> {
                     XmlViewer(xml = tab.xml!!, modifier = Modifier.fillMaxSize(), search = search)
                 }
 
                 else -> {
-                    // Show empty state if no content
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,

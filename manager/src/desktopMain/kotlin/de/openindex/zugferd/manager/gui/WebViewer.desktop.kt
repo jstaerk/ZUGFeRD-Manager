@@ -36,15 +36,15 @@ import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.sections.SearchState
 import de.openindex.zugferd.manager.utils.getCefBrowser
 import de.openindex.zugferd.manager.utils.installWebView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.cef.browser.CefBrowser
 import java.awt.BorderLayout
+import java.io.File
 import javax.swing.JPanel
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
-@OptIn(ExperimentalEncodingApi::class)
 @Suppress("DuplicatedCode")
 actual fun WebViewer(html: String, modifier: Modifier, search: SearchState?) {
     val scope = rememberCoroutineScope()
@@ -72,30 +72,39 @@ actual fun WebViewer(html: String, modifier: Modifier, search: SearchState?) {
         }
     }
 
-    val dataUrl = remember(html) {
-        "data:text/html;charset=utf-8;base64,".plus(
-            Base64.Default.encode(html.encodeToByteArray())
-        )
+    // HTML in Temp-Datei schreiben statt Base64 Data-URL (vermeidet CEF-URL-Längengrenze bei großen Dateien)
+    var fileUrl by remember { mutableStateOf("") }
+    var currentTempFile by remember { mutableStateOf<File?>(null) }
+
+    LaunchedEffect(html) {
+        val f = withContext(Dispatchers.IO) {
+            File.createTempFile("quba_html_", ".html").also { file ->
+                file.writeText(html, Charsets.UTF_8)
+            }
+        }
+        currentTempFile?.delete()
+        currentTempFile = f
+        fileUrl = "file:///${f.absolutePath.replace('\\', '/')}"
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            //APP_LOGGER.debug("CLOSE WEB-BROWSER")
             browserState?.close(true)
+            currentTempFile?.delete()
         }
     }
 
-    if (isInstalled) {
+    if (isInstalled && fileUrl.isNotBlank()) {
         SwingPanel(
             background = MaterialTheme.colorScheme.surface,
             factory = {
-                val browser = getCefBrowser(dataUrl)
+                val browser = getCefBrowser(fileUrl)
                 browserState = browser
                 WebPanel(browser)
             },
             update = { panel: WebPanel ->
                 panel.browser.stopLoad()
-                panel.browser.loadURL(dataUrl)
+                panel.browser.loadURL(fileUrl)
             },
             modifier = modifier,
         )

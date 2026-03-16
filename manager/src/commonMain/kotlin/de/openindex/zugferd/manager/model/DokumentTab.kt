@@ -34,6 +34,8 @@ class DocumentTab(
     var html by mutableStateOf<String?>(null)
     var xml by mutableStateOf<String?>(null)
     var isLoading by mutableStateOf(isLoading)
+    // true während HTML im Hintergrund generiert wird (nach XML-Sofortanzeige)
+    var isHtmlLoading by mutableStateOf(false)
 
     // Fixed copy method
     fun copy(
@@ -42,11 +44,13 @@ class DocumentTab(
         tags: List<String> = this.tags,
         html: String? = this.html,
         xml: String? = this.xml,
-        isLoading: Boolean = this.isLoading
+        isLoading: Boolean = this.isLoading,
+        isHtmlLoading: Boolean = this.isHtmlLoading
     ): DocumentTab {
         return DocumentTab(name, pdf, tags, isLoading).apply {
             this.html = html
             this.xml = xml
+            this.isHtmlLoading = isHtmlLoading
         }
     }
 }
