@@ -35,7 +35,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppVisualisationSelect">E-Rechnung auswählen</string>
 
-    <string name="AppVisualisationSelectInfo">Wähle eine E-Rechnung zur Überprüfung aus.</string>
+    <string name="AppVisualisationSelectInfo">Wähle eine XML- oder PDF-Rechnung zur Darstellung aus.</string>
 
     <string name="AppVisualisationSelectMessage">
         Bitte wähle eine E-Rechnung aus[br]

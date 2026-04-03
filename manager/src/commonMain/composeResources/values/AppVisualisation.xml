@@ -29,7 +29,7 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppVisualisationFailed">E-invoice „%1$s“ is invalid.</string>
 
     <string name="AppVisualisationSelect">select e-invoice</string>
-    <string name="AppVisualisationSelectInfo">select e-invoice for validation.</string>
+    <string name="AppVisualisationSelectInfo">Select an XML or PDF invoice for display.</string>
     <string name="AppVisualisationSelectMessage">
         Please select an e-invoice[br]
         or move an e-invoice via drag &amp; drop into this window.
