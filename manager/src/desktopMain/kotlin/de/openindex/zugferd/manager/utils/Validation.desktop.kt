@@ -91,3 +91,14 @@ actual suspend fun validatePdf(pdf: PlatformFile): Validation {
                 .getValidation(input, pdf.name)
         }
 }
+
+actual suspend fun getValidationXmlReport(pdf: PlatformFile): String? {
+    return try {
+        pdf.file.inputStream().use { input ->
+            ZUGFeRDValidator().validate(input, pdf.name)
+        }
+    } catch (e: Exception) {
+        APP_LOGGER.error("Fehler beim Erstellen des Validierungsberichts.", e)
+        null
+    }
+}

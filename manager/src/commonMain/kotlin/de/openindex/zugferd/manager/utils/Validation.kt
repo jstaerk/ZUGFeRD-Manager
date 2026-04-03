@@ -52,3 +52,5 @@ data class ValidationMessage(
 )
 
 expect suspend fun validatePdf(pdf: PlatformFile): Validation
+
+expect suspend fun getValidationXmlReport(pdf: PlatformFile): String?

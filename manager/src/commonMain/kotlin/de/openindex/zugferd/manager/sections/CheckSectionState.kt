@@ -34,8 +34,8 @@ import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.trimToNull
+import de.openindex.zugferd.manager.utils.getValidationXmlReport
 import de.openindex.zugferd.manager.utils.validatePdf
-import de.openindex.zugferd.manager.utils.writeJson
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectFile
 import de.openindex.zugferd.quba.generated.resources.Res
 import io.github.vinceglb.filekit.core.FileKit
@@ -115,15 +115,13 @@ class CheckSectionState : SectionState() {
 
     suspend fun exportValidation(validation: Validation) {
         val sourceFile = selectedPdf ?: return
+        val xmlReport = getValidationXmlReport(sourceFile) ?: return
         val targetFile = FileKit.saveFile(
-            bytes = null,
-            baseName = sourceFile.name.substringBeforeLast(".")
-                .plus(".validation"),
-            extension = "json",
+            bytes = xmlReport.toByteArray(Charsets.UTF_8),
+            baseName = sourceFile.name.substringBeforeLast(".").plus("_validation"),
+            extension = "xml",
             initialDirectory = sourceFile.path,
         ) ?: return
-
-        targetFile.writeJson(validation)
     }
 
     private var _filterType = mutableStateOf(ValidationType.entries.toList())
