@@ -74,7 +74,7 @@ class AppState(
     // Section
     //
 
-    private var _section = mutableStateOf(AppSection.CREATE)
+    private var _section = mutableStateOf(AppSection.VISUALISATION)
     val section get() = _section.value
 
     fun isSection(section: AppSection): Boolean {
@@ -109,9 +109,9 @@ class AppState(
 enum class AppSection(
     val state: SectionState
 ) {
+    VISUALISATION(VisualsSectionState()),
     CREATE(CreateSectionState()),
     CHECK(CheckSectionState()),
-    VISUALISATION( VisualsSectionState()),
     SETTINGS(SettingsSectionState());
 
     val label: StringResource
