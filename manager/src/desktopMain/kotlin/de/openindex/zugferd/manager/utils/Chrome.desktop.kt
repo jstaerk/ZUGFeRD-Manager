@@ -381,12 +381,71 @@ private fun openAttachmentInWindow(url: String, title: String) {
             // Use a dedicated CefClient per popup — sharing CEF_CLIENT with the main browser
             // causes the second browser to render blank.
             val popupClient = CEF_APP!!.createClient()
+
+            // Handle download triggered by Chrome's built-in PDF viewer download button.
+            popupClient.addDownloadHandler(object : org.cef.handler.CefDownloadHandlerAdapter() {
+                override fun onBeforeDownload(
+                    browser: org.cef.browser.CefBrowser?,
+                    downloadItem: org.cef.callback.CefDownloadItem?,
+                    suggestedName: String?,
+                    callback: org.cef.callback.CefBeforeDownloadCallback?,
+                ) {
+                    val entry = globalAttachmentData[title]
+                    if (entry != null) {
+                        val (bytes, _) = entry
+                        javax.swing.SwingUtilities.invokeLater {
+                            val chooser = javax.swing.JFileChooser()
+                            chooser.selectedFile = java.io.File(suggestedName ?: title)
+                            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                                try {
+                                    chooser.selectedFile.writeBytes(bytes)
+                                } catch (e: Exception) {
+                                    APP_LOGGER.error("Anhang konnte nicht gespeichert werden.", e)
+                                }
+                            }
+                        }
+                    } else {
+                        callback?.Continue(suggestedName ?: title, true)
+                    }
+                }
+            })
+
             val popupBrowser = popupClient.createBrowser(url, org.cef.browser.CefRendering.DEFAULT, false)
 
             val frame = javax.swing.JFrame(title)
             frame.defaultCloseOperation = javax.swing.JFrame.DISPOSE_ON_CLOSE
             frame.setSize(900, 700)
             frame.setLocationRelativeTo(null)
+
+            // For non-PDF attachments (e.g. images), Chrome shows no download button.
+            // Add a minimal toolbar with a save button only in that case.
+            // Check both MIME type and file extension, as the MIME type from the HTML may be unreliable.
+            val mimeType = globalAttachmentData[title]?.second ?: ""
+            val isPdf = mimeType.equals("application/pdf", ignoreCase = true)
+                || title.endsWith(".pdf", ignoreCase = true)
+            if (!isPdf) {
+                val toolbar = javax.swing.JToolBar()
+                toolbar.isFloatable = false
+                val saveButton = javax.swing.JButton("Speichern unter…")
+                saveButton.addActionListener {
+                    val entry = globalAttachmentData[title]
+                    if (entry != null) {
+                        val (bytes, _) = entry
+                        val chooser = javax.swing.JFileChooser()
+                        chooser.selectedFile = java.io.File(title)
+                        if (chooser.showSaveDialog(frame) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                            try {
+                                chooser.selectedFile.writeBytes(bytes)
+                            } catch (e: Exception) {
+                                APP_LOGGER.error("Anhang konnte nicht gespeichert werden.", e)
+                            }
+                        }
+                    }
+                }
+                toolbar.add(saveButton)
+                frame.contentPane.add(toolbar, java.awt.BorderLayout.NORTH)
+            }
+
             frame.contentPane.add(popupBrowser.uiComponent, java.awt.BorderLayout.CENTER)
 
             // Show the frame first so the native window exists before CEF tries to render into it.
