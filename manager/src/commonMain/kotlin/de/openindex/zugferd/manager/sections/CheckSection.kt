@@ -743,5 +743,15 @@ private fun ValidationMessage(message: ValidationMessage) =
                 modifier = Modifier
                     .padding(vertical = 8.dp, horizontal = 16.dp),
             )
+
+            if (!message.location.isNullOrBlank()) {
+                Text(
+                    text = message.location,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier
+                        .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+                )
+            }
         }
     }

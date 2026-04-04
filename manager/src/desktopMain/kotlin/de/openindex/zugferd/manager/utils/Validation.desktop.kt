@@ -31,6 +31,7 @@ import org.mustangproject.validator.ValidationContext
 import org.mustangproject.validator.ValidationResultItem
 import org.mustangproject.validator.ZUGFeRDValidator
 import java.io.InputStream
+import de.openindex.zugferd.manager.utils.trimToNull
 
 private class CustomValidator : ZUGFeRDValidator() {
     val cachedResultItems: MutableList<ValidationResultItem> = mutableListOf()
@@ -80,6 +81,7 @@ private class CustomValidator : ZUGFeRDValidator() {
                 EPart.fx, EPart.ox -> ValidationType.XML
                 else -> ValidationType.OTHER
             },
+            location = item.location?.trimToNull(),
         )
     }
 }

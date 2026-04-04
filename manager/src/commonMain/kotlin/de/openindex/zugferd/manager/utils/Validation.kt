@@ -49,6 +49,7 @@ data class ValidationMessage(
     val message: String,
     val type: ValidationType,
     val severity: ValidationSeverity,
+    val location: String? = null,
 )
 
 expect suspend fun validatePdf(pdf: PlatformFile): Validation
