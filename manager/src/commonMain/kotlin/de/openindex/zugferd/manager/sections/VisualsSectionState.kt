@@ -34,6 +34,7 @@ import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.directory
 import de.openindex.zugferd.manager.utils.getHtmlVisualizationFromXML
 import de.openindex.zugferd.manager.utils.getHtmlWithAttachments
+import de.openindex.zugferd.manager.utils.getHtmlWithAttachmentsFromXml
 import de.openindex.zugferd.manager.utils.getPrettyPrintedXml
 import de.openindex.zugferd.manager.utils.getXmlFromPdf
 import de.openindex.zugferd.manager.utils.trimToNull
@@ -124,11 +125,12 @@ class VisualsSectionState : SectionState() {
         // Phase 1: XML sofort lesen und anzeigen (schnell)
         val filePath: java.nio.file.Path
         val isXml: Boolean
+        var fileText = ""
         try {
             if (tab.name.isEmpty()) delay(150L)
 
             // Datei auf IO-Dispatcher lesen (blockierende Operation)
-            val fileText = withContext(Dispatchers.IO) { readFileWithRetry(file.file) }
+            fileText = withContext(Dispatchers.IO) { readFileWithRetry(file.file) }
 
             filePath = file.file.toPath()
             isXml = file.name.lowercase().endsWith(".xml") || fileText.trimStart().startsWith("<")
@@ -159,7 +161,7 @@ class VisualsSectionState : SectionState() {
         try {
             tab.isHtmlLoading = true
             tab.html = withContext(Dispatchers.IO) {
-                if (isXml) getHtmlVisualizationFromXML(filePath)?.trimToNull()
+                if (isXml) getHtmlWithAttachmentsFromXml(filePath, fileText)?.trimToNull()
                 else getHtmlWithAttachments(file)?.trimToNull()
             }
         } finally {

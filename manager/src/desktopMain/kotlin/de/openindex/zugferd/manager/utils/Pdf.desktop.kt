@@ -139,6 +139,35 @@ actual fun getAttachmentsFromPdf(pdf: PlatformFile): List<Pair<String, ByteArray
     }
 }
 
+actual fun getAttachmentsFromXml(xmlContent: String): List<Pair<String, ByteArray>> {
+    return try {
+        val document = org.dom4j.DocumentHelper.parseText(xmlContent)
+        val result = mutableListOf<Pair<String, ByteArray>>()
+        // XPath mit local-name() findet Elemente unabhaengig von Namespace-Praefix und Verschachtelungstiefe
+        val nodes = document.selectNodes(
+            "//*[local-name()='AttachmentBinaryObject' or local-name()='EmbeddedDocumentBinaryObject']"
+        )
+        for (node in nodes) {
+            if (node !is org.dom4j.Element) continue
+            val filename = node.attributeValue("filename") ?: continue
+            if (filename.isBlank()) continue
+            val base64Content = node.textTrim.replace("\\s".toRegex(), "")
+            if (base64Content.isBlank()) continue
+            try {
+                val bytes = java.util.Base64.getDecoder().decode(base64Content)
+                result += filename to bytes
+                APP_LOGGER.info("XML-Anhang gefunden: '$filename' (${bytes.size} Bytes)")
+            } catch (e: IllegalArgumentException) {
+                APP_LOGGER.warn("Base64-Dekodierung fehlgeschlagen fuer Anhang '$filename': ${e.message}")
+            }
+        }
+        result
+    } catch (e: Exception) {
+        APP_LOGGER.error("Anhaenge konnten nicht aus XML gelesen werden.", e)
+        emptyList()
+    }
+}
+
 actual fun postProcessHtmlForAttachments(html: String, attachments: List<Pair<String, ByteArray>>): String {
     if (html.isBlank()) return html
     APP_LOGGER.info("Post-processing HTML for attachments. Found ${attachments.size} attachments in PDF.")
