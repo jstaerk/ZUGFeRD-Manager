@@ -22,21 +22,33 @@
 package de.openindex.zugferd.manager.sections
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbDown
@@ -62,18 +74,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.isPressed
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.times
+import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
 import de.openindex.zugferd.manager.gui.Label
@@ -86,8 +107,11 @@ import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.ValidationSeverity
 import de.openindex.zugferd.manager.model.ValidationType
+import de.openindex.zugferd.manager.utils.Validation
 import de.openindex.zugferd.manager.utils.ValidationMessage
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
+import de.openindex.zugferd.manager.utils.showTabContextMenu
+import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -129,15 +153,6 @@ import kotlinx.coroutines.launch
 fun CheckSection(state: CheckSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
-    val selectedPdf = state.selectedPdf
-
-    // Auto-load the last opened file when navigating from Visualisieren.
-    LaunchedEffect(Unit) {
-        val file = appState.lastSelectedFile ?: return@LaunchedEffect
-        if (state.selectedPdf?.name != file.name) {
-            state.selectFile(file, appState)
-        }
-    }
 
     // Clear search state when search is closed.
     LaunchedEffect(state.isSearchOpen) {
@@ -154,7 +169,7 @@ fun CheckSection(state: CheckSectionState) {
                 awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
                         && awtEvent.keyCode == java.awt.event.KeyEvent.VK_F
                         && awtEvent.isControlDown
-                        && state.selectedPdf != null -> {
+                        && state.selectedTab != null -> {
                     state.isSearchOpen = true
                     false
                 }
@@ -177,46 +192,34 @@ fun CheckSection(state: CheckSectionState) {
         createDragAndDropTarget(
             onDrop = { file ->
                 scope.launch {
-                    state.selectFile(
-                        file = file,
-                        appState = appState,
-                    )
+                    state.selectFile(file = file, appState = appState)
                 }
             }
         )
     }
 
-    // Show an empty view, if no PDF file was selected.
-    if (selectedPdf == null) {
-        EmptyView(state)
-    }
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Tab strip — visible as soon as at least one document is open.
+        if (state.tabs.isNotEmpty()) {
+            CheckTabStrip(state)
+        }
 
-    // Show two column layout, if a PDF file was selected.
-    else {
-        Row(
-            modifier = Modifier
-                .fillMaxSize(),
-        ) {
-            // Left column with e-invoice validation.
-            Column(
-                modifier = Modifier
-                    .weight(0.6f, fill = true),
-            ) {
-                // Validation result.
-                VerticalScrollBox(
-                    modifier = Modifier
-                        .weight(1f, fill = true),
-                ) {
-                    CheckView(state)
+        val selectedTab = state.selectedTab
+
+        if (selectedTab == null) {
+            // No document open yet — show the empty/welcome view.
+            EmptyView(state)
+        } else {
+            // Two-column layout: validation results on the left, viewer on the right.
+            Row(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(0.6f, fill = true)) {
+                    VerticalScrollBox(modifier = Modifier.weight(1f, fill = true)) {
+                        CheckView(state, selectedTab)
+                    }
                 }
-            }
-
-            // Right column with further details about the selected PDF.
-            Column(
-                modifier = Modifier
-                    .weight(0.4f, fill = true),
-            ) {
-                DetailsView(state)
+                Column(modifier = Modifier.weight(0.4f, fill = true)) {
+                    DetailsView(state, selectedTab)
+                }
             }
         }
     }
@@ -243,8 +246,8 @@ fun CheckSectionActions(state: CheckSectionState) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(end = 8.dp),
     ) {
-        // Search bar — only shown when a file is loaded.
-        if (state.selectedPdf != null) {
+        // Search bar — only shown when a tab is open.
+        if (state.selectedTab != null) {
             if (state.isSearchOpen) {
                 CompactSearchBar(
                     value = state.searchQuery,
@@ -310,14 +313,181 @@ private fun EmptyView(state: CheckSectionState) {
 }
 
 /**
+ * Scrollable row of open document tabs with a button to open additional files.
+ */
+@Composable
+private fun CheckTabStrip(state: CheckSectionState) {
+    val scope = rememberCoroutineScope()
+    val appState = LocalAppState.current
+    val density = LocalDensity.current
+
+    // Layout constants.
+    val maxTabWidth = 200.dp
+    val minTabWidth = 80.dp
+    val tabSpacing = 4.dp
+    val plusButtonSize = 32.dp
+    val stripPadding = 8.dp
+
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val tabCount = state.tabs.size
+            val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing
+            val rawTabWidth = if (tabCount == 0) maxTabWidth
+                              else (availableForTabs - tabSpacing * (tabCount - 1)) / tabCount
+            val targetTabWidth = rawTabWidth.coerceIn(minTabWidth, maxTabWidth)
+
+            val tabWidth by animateDpAsState(targetValue = targetTabWidth, label = "tabWidth")
+
+            val needsScroll = tabCount > 0 && rawTabWidth < minTabWidth
+            val scrollState = rememberScrollState()
+
+            LaunchedEffect(state.selectedIndex) {
+                if (needsScroll && state.tabs.isNotEmpty()) {
+                    with(density) {
+                        val itemWidth = (tabWidth + tabSpacing).toPx()
+                        scrollState.animateScrollTo((itemWidth * state.selectedIndex).toInt())
+                    }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(tabSpacing),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = stripPadding)
+                        .then(if (needsScroll) Modifier.horizontalScroll(scrollState) else Modifier),
+                ) {
+                    state.tabs.forEachIndexed { index, tab ->
+                        CheckTabItem(
+                            tab = tab,
+                            width = tabWidth,
+                            isSelected = index == state.selectedIndex,
+                            onSelect = { state.selectedIndex = index },
+                            onClose = { state.removeTab(index) },
+                            onRightClick = { screenX, screenY ->
+                                val visualsState = AppSection.VISUALISATION.state as? VisualsSectionState
+                                showTabContextMenu(
+                                    screenX = screenX,
+                                    screenY = screenY,
+                                    onClose = { state.removeTab(index) },
+                                    onCloseOthers = { state.removeOtherTabs(index) },
+                                    onCloseToRight = if (index < state.tabs.lastIndex) ({ state.removeTabsToRight(index) }) else null,
+                                    openInOtherLabel = "In Visualisierung öffnen",
+                                    onOpenInOther = if (visualsState != null) ({
+                                        scope.launch(Dispatchers.IO) {
+                                            visualsState.addTabWithFile(tab.file, appState)
+                                        }
+                                        appState.setSection(AppSection.VISUALISATION)
+                                    }) else null,
+                                )
+                            },
+                        )
+                    }
+                }
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .padding(horizontal = stripPadding)
+                        .size(plusButtonSize)
+                        .clip(RoundedCornerShape(6.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
+                        .clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Weitere Datei öffnen",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+}
+
+/**
+ * A single tab item in the check tab strip.
+ */
+@Composable
+private fun CheckTabItem(
+    tab: CheckTab,
+    width: Dp,
+    isSelected: Boolean,
+    onSelect: () -> Unit,
+    onClose: () -> Unit,
+    onRightClick: (screenX: Int, screenY: Int) -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .width(width)
+            .clip(RoundedCornerShape(6.dp))
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                else MaterialTheme.colorScheme.surface,
+            )
+            .border(
+                width = if (isSelected) 2.dp else 1.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(6.dp),
+            )
+            .clickable(onClick = onSelect)
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        if (event.type == PointerEventType.Press && event.buttons.isPressed(1)) {
+                            val mouseEvent = event.nativeEvent as? java.awt.event.MouseEvent
+                            onRightClick(mouseEvent?.xOnScreen ?: 0, mouseEvent?.yOnScreen ?: 0)
+                        }
+                    }
+                }
+            }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    ) {
+        Text(
+            text = tab.name,
+            color = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+
+        Spacer(modifier = Modifier.width(6.dp))
+
+        if (tab.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(14.dp),
+                strokeWidth = 2.dp,
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Tab schließen",
+                modifier = Modifier
+                    .size(14.dp)
+                    .clickable(onClick = onClose),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            )
+        }
+    }
+}
+
+/**
  * Left side view of the check section.
  * This provides the validation view.
  */
 @Composable
-private fun CheckView(state: CheckSectionState) {
+private fun CheckView(state: CheckSectionState, tab: CheckTab) {
     val scope = rememberCoroutineScope()
-    val selectedPdf = state.selectedPdf!!
-    val validation = state.selectedPdfValidation
+    val validation = tab.validation
 
     Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -341,7 +511,7 @@ private fun CheckView(state: CheckSectionState) {
                         Res.string.AppCheckPassed
                             .takeIf { validation?.isValid == true }
                             ?: Res.string.AppCheckFailed,
-                        selectedPdf.name,
+                        tab.name,
                     ),
                     modifier = Modifier
                         .size(32.dp)
@@ -350,9 +520,9 @@ private fun CheckView(state: CheckSectionState) {
 
             SectionTitle(
                 text = when (validation?.isValid) {
-                    true -> stringResource(Res.string.AppCheckPassed, selectedPdf.name)
-                    false -> stringResource(Res.string.AppCheckFailed, selectedPdf.name)
-                    else -> stringResource(Res.string.AppCheck, selectedPdf.name)
+                    true -> stringResource(Res.string.AppCheckPassed, tab.name)
+                    false -> stringResource(Res.string.AppCheckFailed, tab.name)
+                    else -> stringResource(Res.string.AppCheck, tab.name)
                 },
                 modifier = Modifier
                     .weight(1f, fill = true),
@@ -375,7 +545,7 @@ private fun CheckView(state: CheckSectionState) {
                     Button(
                         onClick = {
                             scope.launch {
-                                state.exportValidation(validation)
+                                state.exportValidation(tab)
                             }
                         },
                     ) {
@@ -385,7 +555,7 @@ private fun CheckView(state: CheckSectionState) {
                     }
                 }
 
-                ValidationSummary(state)
+                ValidationSummary(validation)
             }
 
             // Subsection with validation messages.
@@ -431,7 +601,7 @@ private fun CheckView(state: CheckSectionState) {
                                         } != null
                                     }
                                     .forEach { type ->
-                                        val isSelected = state.filterType.contains(type)
+                                        val isSelected = tab.filterType.contains(type)
 
                                         DropdownMenuItem(
                                             text = {
@@ -449,12 +619,11 @@ private fun CheckView(state: CheckSectionState) {
                                                 )
                                             },
                                             onClick = {
-                                                state.setFilterType(
-                                                    if (state.filterType.contains(type))
-                                                        state.filterType.minus(type)
+                                                tab.filterType =
+                                                    if (tab.filterType.contains(type))
+                                                        tab.filterType.minus(type)
                                                     else
-                                                        state.filterType.plus(type)
-                                                )
+                                                        tab.filterType.plus(type)
                                             }
                                         )
                                     }
@@ -479,7 +648,7 @@ private fun CheckView(state: CheckSectionState) {
                                         } != null
                                     }
                                     .forEach { severity ->
-                                        val isSelected = state.filterSeverity.contains(severity)
+                                        val isSelected = tab.filterSeverity.contains(severity)
 
                                         DropdownMenuItem(
                                             text = {
@@ -497,12 +666,11 @@ private fun CheckView(state: CheckSectionState) {
                                                 )
                                             },
                                             onClick = {
-                                                state.setFilterSeverity(
-                                                    if (state.filterSeverity.contains(severity))
-                                                        state.filterSeverity.minus(severity)
+                                                tab.filterSeverity =
+                                                    if (tab.filterSeverity.contains(severity))
+                                                        tab.filterSeverity.minus(severity)
                                                     else
-                                                        state.filterSeverity.plus(severity)
-                                                )
+                                                        tab.filterSeverity.plus(severity)
                                             }
                                         )
                                     }
@@ -510,7 +678,7 @@ private fun CheckView(state: CheckSectionState) {
                         }
                     }
 
-                    ValidationMessages(state)
+                    ValidationMessages(tab)
                 }
             }
         }
@@ -530,12 +698,11 @@ private fun CheckView(state: CheckSectionState) {
  * This provides the PDF- / HTML- / XML-viewer.
  */
 @Composable
-private fun DetailsView(state: CheckSectionState) {
-    val selectedPdf = state.selectedPdf
-    var tabState by remember { mutableStateOf(0) }
+private fun DetailsView(state: CheckSectionState, tab: CheckTab) {
+    var tabState by remember(tab) { mutableStateOf(0) }
     val isPdfTabSelected by derivedStateOf { tabState == 0 }
-    val isHtmlTabSelected by derivedStateOf { tabState == 1 && state.selectedPdfHtml != null }
-    val isXmlTabSelected by derivedStateOf { tabState == 2 && state.selectedPdfXml != null }
+    val isHtmlTabSelected by derivedStateOf { tabState == 1 && tab.html != null }
+    val isXmlTabSelected by derivedStateOf { tabState == 2 && tab.xml != null }
 
     val activeSearch = remember(state.isSearchOpen, state.searchQuery, state.searchSequence) {
         if (state.isSearchOpen && state.searchQuery.isNotBlank()) {
@@ -560,7 +727,7 @@ private fun DetailsView(state: CheckSectionState) {
         )
 
         // Add tab for HTML viewer.
-        if (state.selectedPdfHtml != null) {
+        if (tab.html != null) {
             Tab(
                 selected = isHtmlTabSelected,
                 onClick = { tabState = 1 },
@@ -573,7 +740,7 @@ private fun DetailsView(state: CheckSectionState) {
         }
 
         // Add tab for XML viewer.
-        if (state.selectedPdfXml != null) {
+        if (tab.xml != null) {
             Tab(
                 selected = isXmlTabSelected,
                 onClick = { tabState = 2 },
@@ -589,7 +756,7 @@ private fun DetailsView(state: CheckSectionState) {
     // Show PDF viewer.
     if (isPdfTabSelected) {
         PdfViewer(
-            pdf = selectedPdf!!,
+            pdf = tab.file,
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -597,7 +764,7 @@ private fun DetailsView(state: CheckSectionState) {
     // Show HTML viewer.
     if (isHtmlTabSelected) {
         WebViewer(
-            html = state.selectedPdfHtml ?: "",
+            html = tab.html ?: "",
             modifier = Modifier.fillMaxSize(),
             search = activeSearch,
         )
@@ -606,7 +773,7 @@ private fun DetailsView(state: CheckSectionState) {
     // Show XML viewer.
     if (isXmlTabSelected) {
         XmlViewer(
-            xml = state.selectedPdfXml ?: "",
+            xml = tab.xml ?: "",
             modifier = Modifier.fillMaxSize(),
             search = activeSearch,
         )
@@ -617,8 +784,7 @@ private fun DetailsView(state: CheckSectionState) {
  * Summary about the validation.
  */
 @Composable
-private fun ValidationSummary(state: CheckSectionState) {
-    val validation = state.selectedPdfValidation!!
+private fun ValidationSummary(validation: Validation) {
 
     Card(
         modifier = Modifier
@@ -732,10 +898,10 @@ private fun ValidationSummary(state: CheckSectionState) {
  * List of validation messages.
  */
 @Composable
-private fun ValidationMessages(state: CheckSectionState) {
-    val validation = state.selectedPdfValidation!!
-    val filterType = state.filterType
-    val filterSeverity = state.filterSeverity
+private fun ValidationMessages(tab: CheckTab) {
+    val validation = tab.validation!!
+    val filterType = tab.filterType
+    val filterSeverity = tab.filterSeverity
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),

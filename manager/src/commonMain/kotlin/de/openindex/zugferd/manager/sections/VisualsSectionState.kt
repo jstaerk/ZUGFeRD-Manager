@@ -72,6 +72,21 @@ class VisualsSectionState : SectionState() {
         }
     }
 
+    /** Closes all tabs except the one at [index]. */
+    fun removeOtherTabs(index: Int) {
+        val keep = documents.getOrNull(index) ?: return
+        documents.retainAll { it === keep }
+        selectedIndex = 0
+    }
+
+    /** Closes all tabs to the right of [index]. */
+    fun removeTabsToRight(index: Int) {
+        while (documents.size > index + 1) {
+            documents.removeAt(documents.lastIndex)
+        }
+        selectedIndex = selectedIndex.coerceAtMost(documents.lastIndex.coerceAtLeast(0))
+    }
+
     fun moveTab(from: Int, to: Int) {
         if (from == to || from !in documents.indices || to !in documents.indices) return
         documents.add(to, documents.removeAt(from))
@@ -88,8 +103,14 @@ class VisualsSectionState : SectionState() {
             initialDirectory = appState.preferences.previousPdfLocation
         ) ?: return
 
-        if (documents.isEmpty()) addNewTab()
-        loadFileInCurrentTab(file, appState)
+        // Deduplicate: if already open, just switch to that tab.
+        val existingIndex = documents.indexOfFirst { it.name == file.name }
+        if (existingIndex >= 0) {
+            selectedIndex = existingIndex
+            return
+        }
+
+        addTabWithFile(file, appState)
     }
 
 

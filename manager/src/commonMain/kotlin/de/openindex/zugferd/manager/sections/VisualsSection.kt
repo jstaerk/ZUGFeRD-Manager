@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.sections
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.Orientation
@@ -29,9 +30,6 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -45,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -52,7 +51,10 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
 import de.openindex.zugferd.manager.gui.NotificationBar
@@ -62,6 +64,8 @@ import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
+import de.openindex.zugferd.manager.utils.showTabContextMenu
+import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationNoXml
@@ -78,6 +82,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.isPressed
 
 
 data class SearchState(
@@ -97,14 +102,6 @@ fun VisualsSection(state: VisualsSectionState) {
             SearchState(query = state.searchQuery, sequence = state.searchSequence)
         } else {
             null
-        }
-    }
-
-    // Auto-load the last opened file when navigating from Prüfen.
-    LaunchedEffect(Unit) {
-        val file = appState.lastSelectedFile ?: return@LaunchedEffect
-        if (state.documents.none { it.name == file.name }) {
-            state.addTabWithFile(file, appState)
         }
     }
 
@@ -331,121 +328,113 @@ internal fun CompactSearchBar(
     }
 }
 
-/*
 @Composable
 private fun TabRowWithControls(state: VisualsSectionState) {
-    val scrollState = rememberScrollState()
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .horizontalScroll(scrollState)
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        state.documents.forEachIndexed { index, doc ->
-            DocumentTabItem(
-                document = doc,
-                isSelected = index == state.selectedIndex,
-                onSelect = { state.selectedIndex = index },
-                onClose = { state.removeTab(index) }
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-        }
+    val scope = rememberCoroutineScope()
+    val appState = LocalAppState.current
+    val density = LocalDensity.current
 
-        IconButton(
-            onClick = { state.addNewTab() },
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Neuer Tab", modifier = Modifier.size(20.dp))
-        }
-    }
-}
+    val maxTabWidth = 200.dp
+    val minTabWidth = 80.dp
+    val tabSpacing = 4.dp
+    val plusButtonSize = 32.dp
+    val stripPadding = 8.dp
 
- */
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val tabCount = state.documents.size
+            val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing
+            val rawTabWidth = if (tabCount == 0) maxTabWidth
+                              else (availableForTabs - tabSpacing * (tabCount - 1)) / tabCount
+            val targetTabWidth = rawTabWidth.coerceIn(minTabWidth, maxTabWidth)
 
-@Composable
-private fun TabRowWithControls(state: VisualsSectionState) {
-    val coroutineScope = rememberCoroutineScope()
-    val lazyListState = rememberLazyListState()
+            val tabWidth by animateDpAsState(targetValue = targetTabWidth, label = "tabWidth")
 
-    // Zum ausgewählten Tab scrollen
-    LaunchedEffect(state.selectedIndex) {
-        lazyListState.animateScrollToItem(state.selectedIndex)
-    }
+            val needsScroll = tabCount > 0 && rawTabWidth < minTabWidth
+            val scrollState = rememberScrollState()
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        // Scroll-Indikator links
-        if (lazyListState.firstVisibleItemIndex > 0) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Nach links scrollen",
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable {
-                        coroutineScope.launch {
-                            lazyListState.animateScrollToItem(lazyListState.firstVisibleItemIndex - 1)
-                        }
-                    },
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
+            LaunchedEffect(state.selectedIndex) {
+                if (needsScroll && state.documents.isNotEmpty()) {
+                    with(density) {
+                        val itemWidth = (tabWidth + tabSpacing).toPx()
+                        scrollState.animateScrollTo((itemWidth * state.selectedIndex).toInt())
+                    }
+                }
+            }
 
-        // Tabs mit LazyRow für bessere Performance
-        LazyRow(
-            state = lazyListState,
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            contentPadding = PaddingValues(horizontal = 8.dp)
-        ) {
-            itemsIndexed(state.documents) { index, doc ->
-                DocumentTabItem(
-                    document = doc,
-                    isSelected = index == state.selectedIndex,
-                    index = index,
-                    tabCount = state.documents.size,
-                    onSelect = { state.selectedIndex = index },
-                    onClose = { state.removeTab(index) },
-                    onMove = { from, to -> state.moveTab(from, to) },
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(tabSpacing),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = stripPadding)
+                        .then(if (needsScroll) Modifier.horizontalScroll(scrollState) else Modifier),
+                ) {
+                    state.documents.forEachIndexed { index, doc ->
+                        DocumentTabItem(
+                            document = doc,
+                            width = tabWidth,
+                            isSelected = index == state.selectedIndex,
+                            index = index,
+                            tabCount = state.documents.size,
+                            onSelect = { state.selectedIndex = index },
+                            onClose = { state.removeTab(index) },
+                            onRightClick = { screenX, screenY ->
+                                val checkState = AppSection.CHECK.state as? CheckSectionState
+                                val docFile = doc.sourceFile
+                                showTabContextMenu(
+                                    screenX = screenX,
+                                    screenY = screenY,
+                                    onClose = { state.removeTab(index) },
+                                    onCloseOthers = { state.removeOtherTabs(index) },
+                                    onCloseToRight = if (index < state.documents.lastIndex) ({ state.removeTabsToRight(index) }) else null,
+                                    openInOtherLabel = "In Prüfen öffnen",
+                                    onOpenInOther = if (checkState != null && docFile != null) ({
+                                        scope.launch(Dispatchers.IO) {
+                                            checkState.selectFile(docFile, appState)
+                                        }
+                                        appState.setSection(AppSection.CHECK)
+                                    }) else null,
+                                )
+                            },
+                            onMove = { from, to -> state.moveTab(from, to) },
+                        )
+                    }
+                }
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .padding(horizontal = stripPadding)
+                        .size(plusButtonSize)
+                        .clip(RoundedCornerShape(6.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
+                        .clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Weitere Datei öffnen",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
         }
-
-        // Scroll-Indikator rechts
-        if (lazyListState.firstVisibleItemIndex + lazyListState.layoutInfo.visibleItemsInfo.size < state.documents.size) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Nach rechts scrollen",
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable {
-                        coroutineScope.launch {
-                            lazyListState.animateScrollToItem(lazyListState.firstVisibleItemIndex + 1)
-                        }
-                    },
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        // "Neuer Tab" Button
-        IconButton(
-            onClick = { state.addNewTab() },
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Neuer Tab", modifier = Modifier.size(20.dp))
-        }
-    }
 }
+
 @Composable
 private fun DocumentTabItem(
     document: DocumentTab,
+    width: Dp,
     isSelected: Boolean,
     index: Int,
     tabCount: Int,
     onSelect: () -> Unit,
     onClose: () -> Unit,
+    onRightClick: (screenX: Int, screenY: Int) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
 ) {
     var tabWidthPx by remember { mutableStateOf(1) }
@@ -455,6 +444,7 @@ private fun DocumentTabItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .width(width)
             .onSizeChanged { tabWidthPx = it.width.coerceAtLeast(1) }
             .scale(if (isDragging) 1.05f else 1f)
             .clip(RoundedCornerShape(6.dp))
@@ -465,7 +455,7 @@ private fun DocumentTabItem(
             .border(
                 width = if (isSelected || isDragging) 2.dp else 1.dp,
                 color = if (isDragging || isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.outline,
+                        else MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(6.dp)
             )
             .pointerInput(index, tabCount) {
@@ -485,28 +475,41 @@ private fun DocumentTabItem(
                 )
             }
             .clickable(onClick = onSelect)
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        if (event.type == PointerEventType.Press && event.buttons.isPressed(1)) {
+                            val mouseEvent = event.nativeEvent as? java.awt.event.MouseEvent
+                            onRightClick(mouseEvent?.xOnScreen ?: 0, mouseEvent?.yOnScreen ?: 0)
+                        }
+                    }
+                }
+            }
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = document.name.ifBlank { "Neuer Tab" },
             color = if (isSelected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurface,
+                    else MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
-            maxLines = 1
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(6.dp))
 
         if (document.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
         } else {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Tab schließen",
                 modifier = Modifier
-                    .size(16.dp)
+                    .size(14.dp)
                     .clickable(onClick = onClose),
-                tint = MaterialTheme.colorScheme.error
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             )
         }
     }
