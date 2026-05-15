@@ -116,6 +116,13 @@ class CheckSectionState : SectionState() {
         selectedIndex = selectedIndex.coerceAtMost(tabs.lastIndex.coerceAtLeast(0))
     }
 
+    /** Moves the tab at [from] to position [to], adjusting the selected index. */
+    fun moveTab(from: Int, to: Int) {
+        if (from == to || from !in tabs.indices || to !in tabs.indices) return
+        tabs.add(to, tabs.removeAt(from))
+        selectedIndex = to
+    }
+
     /**
      * Opens a file picker and loads the chosen file in a new tab.
      * If the file is already open in a tab, switches to that tab instead.

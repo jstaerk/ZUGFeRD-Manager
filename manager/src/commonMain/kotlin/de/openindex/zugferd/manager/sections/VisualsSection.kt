@@ -21,11 +21,14 @@
 
 package de.openindex.zugferd.manager.sections
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.*
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.text.BasicTextField
@@ -48,7 +51,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -340,89 +343,142 @@ private fun TabRowWithControls(state: VisualsSectionState) {
     val plusButtonSize = 32.dp
     val stripPadding = 8.dp
 
+    // Drag state — lifted here so all tabs can react in real-time.
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffsetX by remember { mutableStateOf(0f) }
+    // Mutable array so drag lambdas always read the current step without restarting.
+    val tabStepPxRef = remember { floatArrayOf(0f) }
+
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val tabCount = state.documents.size
-            val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing
-            val rawTabWidth = if (tabCount == 0) maxTabWidth
-                              else (availableForTabs - tabSpacing * (tabCount - 1)) / tabCount
-            val targetTabWidth = rawTabWidth.coerceIn(minTabWidth, maxTabWidth)
+        val tabCount = state.documents.size
+        val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing
+        val rawTabWidth = if (tabCount == 0) maxTabWidth
+                          else (availableForTabs - tabSpacing * (tabCount - 1)) / tabCount
+        val targetTabWidth = rawTabWidth.coerceIn(minTabWidth, maxTabWidth)
 
-            val tabWidth by animateDpAsState(targetValue = targetTabWidth, label = "tabWidth")
+        val tabWidth by animateDpAsState(targetValue = targetTabWidth, label = "tabWidth")
 
-            val needsScroll = tabCount > 0 && rawTabWidth < minTabWidth
-            val scrollState = rememberScrollState()
+        // Keep ref in sync each frame so drag lambdas always read the correct step.
+        tabStepPxRef[0] = with(density) { (tabWidth + tabSpacing).toPx() }
 
-            LaunchedEffect(state.selectedIndex) {
-                if (needsScroll && state.documents.isNotEmpty()) {
-                    with(density) {
-                        val itemWidth = (tabWidth + tabSpacing).toPx()
-                        scrollState.animateScrollTo((itemWidth * state.selectedIndex).toInt())
-                    }
-                }
-            }
+        // Visual insertion index derived from current drag position.
+        val insertIndex: Int? = draggedIndex?.let { from ->
+            val step = tabStepPxRef[0]
+            if (step > 0f) (from + dragOffsetX / step).roundToInt()
+                .coerceIn(0, state.documents.lastIndex)
+            else from
+        }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(tabSpacing),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = stripPadding)
-                        .then(if (needsScroll) Modifier.horizontalScroll(scrollState) else Modifier),
-                ) {
-                    state.documents.forEachIndexed { index, doc ->
-                        DocumentTabItem(
-                            document = doc,
-                            width = tabWidth,
-                            isSelected = index == state.selectedIndex,
-                            index = index,
-                            tabCount = state.documents.size,
-                            onSelect = { state.selectedIndex = index },
-                            onClose = { state.removeTab(index) },
-                            onRightClick = { screenX, screenY ->
-                                val checkState = AppSection.CHECK.state as? CheckSectionState
-                                val docFile = doc.sourceFile
-                                showTabContextMenu(
-                                    screenX = screenX,
-                                    screenY = screenY,
-                                    onClose = { state.removeTab(index) },
-                                    onCloseOthers = { state.removeOtherTabs(index) },
-                                    onCloseToRight = if (index < state.documents.lastIndex) ({ state.removeTabsToRight(index) }) else null,
-                                    openInOtherLabel = "In Prüfen öffnen",
-                                    onOpenInOther = if (checkState != null && docFile != null) ({
-                                        scope.launch(Dispatchers.IO) {
-                                            checkState.selectFile(docFile, appState)
-                                        }
-                                        appState.setSection(AppSection.CHECK)
-                                    }) else null,
-                                )
-                            },
-                            onMove = { from, to -> state.moveTab(from, to) },
-                        )
-                    }
-                }
+        val needsScroll = tabCount > 0 && rawTabWidth < minTabWidth
+        val scrollState = rememberScrollState()
 
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(horizontal = stripPadding)
-                        .size(plusButtonSize)
-                        .clip(RoundedCornerShape(6.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
-                        .clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Weitere Datei öffnen",
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
+        LaunchedEffect(state.selectedIndex) {
+            if (needsScroll && state.documents.isNotEmpty()) {
+                with(density) {
+                    val itemWidth = (tabWidth + tabSpacing).toPx()
+                    scrollState.animateScrollTo((itemWidth * state.selectedIndex).toInt())
                 }
             }
         }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(tabSpacing),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = stripPadding)
+                    .then(if (needsScroll) Modifier.horizontalScroll(scrollState) else Modifier),
+            ) {
+                state.documents.forEachIndexed { index, doc ->
+                    val from = draggedIndex
+                    val to = insertIndex
+                    val step = tabStepPxRef[0]
+
+                    // How far should this tab shift visually to make room for the dragged tab?
+                    val shiftTarget: Float = when {
+                        from == null || to == null -> 0f
+                        index == from -> 0f                          // dragged tab: offset applied directly
+                        from < to && index in (from + 1)..to -> -step  // dragging right: shift left
+                        from > to && index in to until from -> step    // dragging left: shift right
+                        else -> 0f
+                    }
+
+                    DocumentTabItem(
+                        document = doc,
+                        width = tabWidth,
+                        isSelected = index == state.selectedIndex,
+                        isDragged = index == draggedIndex,
+                        dragOffsetPx = if (index == draggedIndex) dragOffsetX else 0f,
+                        shiftTarget = shiftTarget,
+                        onSelect = { state.selectedIndex = index },
+                        onClose = { state.removeTab(index) },
+                        onRightClick = { screenX, screenY ->
+                            val checkState = AppSection.CHECK.state as? CheckSectionState
+                            val docFile = doc.sourceFile
+                            showTabContextMenu(
+                                screenX = screenX,
+                                screenY = screenY,
+                                onClose = { state.removeTab(index) },
+                                onCloseOthers = { state.removeOtherTabs(index) },
+                                onCloseToRight = if (index < state.documents.lastIndex) ({ state.removeTabsToRight(index) }) else null,
+                                openInOtherLabel = "In Prüfen öffnen",
+                                onOpenInOther = if (checkState != null && docFile != null) ({
+                                    scope.launch(Dispatchers.IO) {
+                                        checkState.selectFile(docFile, appState)
+                                    }
+                                    appState.setSection(AppSection.CHECK)
+                                }) else null,
+                            )
+                        },
+                        onDragStart = {
+                            draggedIndex = index
+                            dragOffsetX = 0f
+                        },
+                        onDragDelta = { delta ->
+                            dragOffsetX += delta
+                        },
+                        onDragEnd = {
+                            val fromIdx = draggedIndex
+                            if (fromIdx != null) {
+                                val s = tabStepPxRef[0]
+                                val toIdx = if (s > 0f)
+                                    (fromIdx + dragOffsetX / s).roundToInt()
+                                        .coerceIn(0, state.documents.lastIndex)
+                                else fromIdx
+                                draggedIndex = null
+                                dragOffsetX = 0f
+                                if (fromIdx != toIdx) state.moveTab(fromIdx, toIdx)
+                            } else {
+                                draggedIndex = null
+                                dragOffsetX = 0f
+                            }
+                        },
+                    )
+                }
+            }
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(horizontal = stripPadding)
+                    .size(plusButtonSize)
+                    .clip(RoundedCornerShape(6.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
+                    .clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Weitere Datei öffnen",
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -430,47 +486,57 @@ private fun DocumentTabItem(
     document: DocumentTab,
     width: Dp,
     isSelected: Boolean,
-    index: Int,
-    tabCount: Int,
+    isDragged: Boolean,
+    dragOffsetPx: Float,
+    shiftTarget: Float,
     onSelect: () -> Unit,
     onClose: () -> Unit,
     onRightClick: (screenX: Int, screenY: Int) -> Unit,
-    onMove: (from: Int, to: Int) -> Unit,
+    onDragStart: () -> Unit,
+    onDragDelta: (Float) -> Unit,
+    onDragEnd: () -> Unit,
 ) {
-    var tabWidthPx by remember { mutableStateOf(1) }
-    var isDragging by remember { mutableStateOf(false) }
-    var dragOffsetX by remember { mutableStateOf(0f) }
+    // Sibling tabs animate smoothly to their shifted positions.
+    // The dragged tab uses the raw dragOffsetPx for instant cursor-following.
+    val animatedShift by animateFloatAsState(
+        targetValue = if (isDragged) 0f else shiftTarget,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "tabShift",
+    )
+    val visualOffsetPx = if (isDragged) dragOffsetPx else animatedShift
+
+    // Keep callbacks fresh without restarting the pointerInput coroutine.
+    val updatedOnDragStart = rememberUpdatedState(onDragStart)
+    val updatedOnDragDelta = rememberUpdatedState(onDragDelta)
+    val updatedOnDragEnd = rememberUpdatedState(onDragEnd)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .width(width)
-            .onSizeChanged { tabWidthPx = it.width.coerceAtLeast(1) }
-            .scale(if (isDragging) 1.05f else 1f)
+            // Dragged tab floats above siblings; offset is layout-neutral (Row sees original size).
+            .zIndex(if (isDragged) 2f else 0f)
+            .offset { IntOffset(visualOffsetPx.roundToInt(), 0) }
+            .scale(if (isDragged) 1.05f else 1f)
             .clip(RoundedCornerShape(6.dp))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                 else MaterialTheme.colorScheme.surface
             )
             .border(
-                width = if (isSelected || isDragging) 2.dp else 1.dp,
-                color = if (isDragging || isSelected) MaterialTheme.colorScheme.primary
+                width = if (isSelected || isDragged) 2.dp else 1.dp,
+                color = if (isDragged || isSelected) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(6.dp)
             )
-            .pointerInput(index, tabCount) {
-                detectDragGesturesAfterLongPress(
-                    onDragStart = { isDragging = true; dragOffsetX = 0f },
-                    onDragEnd = {
-                        isDragging = false
-                        val delta = (dragOffsetX / tabWidthPx).roundToInt()
-                        if (delta != 0) onMove(index, (index + delta).coerceIn(0, tabCount - 1))
-                        dragOffsetX = 0f
-                    },
-                    onDragCancel = { isDragging = false; dragOffsetX = 0f },
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = { updatedOnDragStart.value() },
+                    onDragEnd = { updatedOnDragEnd.value() },
+                    onDragCancel = { updatedOnDragEnd.value() },
                     onDrag = { change, dragAmount ->
                         change.consume()
-                        dragOffsetX += dragAmount.x
+                        updatedOnDragDelta.value(dragAmount.x)
                     },
                 )
             }
