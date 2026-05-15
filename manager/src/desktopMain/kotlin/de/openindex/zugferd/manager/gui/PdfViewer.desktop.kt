@@ -40,6 +40,8 @@ import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.launch
 import org.cef.browser.CefBrowser
 import java.awt.BorderLayout
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 import javax.swing.JPanel
 
 @Composable
@@ -51,9 +53,7 @@ actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier, search: SearchState?
 
     LaunchedEffect(Unit) {
         scope.launch {
-            installWebView(
-                gpuEnabled = chromeGpuEnabled,
-            )
+            installWebView(gpuEnabled = chromeGpuEnabled)
         }.invokeOnCompletion {
             isInstalled = true
         }
@@ -75,7 +75,6 @@ actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier, search: SearchState?
 
     DisposableEffect(Unit) {
         onDispose {
-            //APP_LOGGER.debug("CLOSE PDF-BROWSER")
             browserState?.close(true)
         }
     }
@@ -97,10 +96,18 @@ actual fun PdfViewer(pdf: PlatformFile, modifier: Modifier, search: SearchState?
     }
 }
 
-private class PdfPanel(
-    val browser: CefBrowser
-) : JPanel(BorderLayout()) {
+private class PdfPanel(val browser: CefBrowser) : JPanel(BorderLayout()) {
     init {
         add(browser.uiComponent, BorderLayout.CENTER)
+        addComponentListener(object : ComponentAdapter() {
+            override fun componentResized(e: ComponentEvent?) {
+                val w = width
+                val h = height
+                if (w > 0 && h > 0) {
+                    browser.uiComponent.setBounds(0, 0, w, h)
+                    validate()
+                }
+            }
+        })
     }
 }

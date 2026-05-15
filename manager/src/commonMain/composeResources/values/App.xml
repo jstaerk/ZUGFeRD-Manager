@@ -32,5 +32,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppMoreActions">further actions</string>
 
+    <string name="AppTradePartyFieldHint">Use + to add a new entry.</string>
+    <string name="AppTradePartyDialogGeneralTaxHint">* At least one of the two is required.</string>
+
     <string name="AppPricePerUnit">%1$s per %2$s</string>
 </resources>

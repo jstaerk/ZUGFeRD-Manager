@@ -24,8 +24,8 @@ package de.openindex.zugferd.manager
 import de.openindex.zugferd.manager.sections.VisualsSection
 import de.openindex.zugferd.manager.sections.VisualsSectionActions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.Composable
@@ -47,6 +47,7 @@ import de.openindex.zugferd.manager.utils.Products
 import de.openindex.zugferd.manager.utils.Recipients
 import de.openindex.zugferd.manager.utils.SectionState
 import de.openindex.zugferd.manager.utils.Senders
+import io.github.vinceglb.filekit.core.PlatformFile
 import de.openindex.zugferd.manager.utils.getCountryDefaultCurrency
 import de.openindex.zugferd.manager.utils.getCountryDefaultTax
 import de.openindex.zugferd.manager.utils.getSystemCountryCode
@@ -84,6 +85,15 @@ class AppState(
     fun setSection(section: AppSection) {
         _section.value = section
     }
+
+    //
+    // Cross-section file sync
+    //
+
+    private val _lastSelectedFile = mutableStateOf<PlatformFile?>(null)
+    var lastSelectedFile: PlatformFile?
+        get() = _lastSelectedFile.value
+        set(value) { _lastSelectedFile.value = value }
 
 
     //
@@ -125,7 +135,7 @@ enum class AppSection(
     val activeIcon: ImageVector
         get() = when (this) {
             CREATE -> Icons.Default.EditNote
-            CHECK -> Icons.Default.Search
+            CHECK -> Icons.Default.CheckCircle
             SETTINGS -> Icons.Default.Settings
             VISUALISATION -> Icons.Default.Visibility
         }
@@ -133,7 +143,7 @@ enum class AppSection(
     val inactiveIcon: ImageVector
         get() = when (this) {
             CREATE -> Icons.Default.EditNote
-            CHECK -> Icons.Default.Search
+            CHECK -> Icons.Default.CheckCircle
             SETTINGS -> Icons.Default.Settings
             VISUALISATION -> Icons.Default.Visibility
         }

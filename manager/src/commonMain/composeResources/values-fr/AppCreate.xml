@@ -90,6 +90,11 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateDetailsPdf">PDF choisie</string>
     <string name="AppCreateDetailsXml">Données XML brutes</string>
 
+    <string name="AppCreateErrorInvalidFields">Manquant : %1$s</string>
+    <string name="AppCreateErrorSenderTaxMissing">N° TVA / N° fiscal (émetteur)</string>
+    <string name="AppCreateErrorCurrencyMissing">devise</string>
+    <string name="AppCreateErrorItemsMissing">postes de facture</string>
+
     <string name="AppCreateErrorInvalid">
         Les données relatives à la facture sont incomplètes. Une facture électronique ne peut être créée que si toutes les données requises sont fournies.
     </string>

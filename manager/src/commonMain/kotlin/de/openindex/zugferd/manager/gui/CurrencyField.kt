@@ -43,10 +43,10 @@ fun CurrencyField(
 ) {
     val language = LocalAppState.current.preferences.language
 
-    DropDown(
+    AutoCompleteField(
         label = label.translate(),
-        value = currency,
-        options = remember(language) {
+        entry = currency,
+        entries = remember(language) {
             (if (short) getCurrenciesBySymbol() else getCurrenciesByName())
                 .toList()
                 .sortedBy { (_, value) -> value }

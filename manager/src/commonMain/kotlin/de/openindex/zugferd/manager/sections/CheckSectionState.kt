@@ -21,7 +21,9 @@
 
 package de.openindex.zugferd.manager.sections
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import de.openindex.zugferd.manager.AppState
 import de.openindex.zugferd.manager.model.ValidationSeverity
 import de.openindex.zugferd.manager.model.ValidationType
@@ -47,6 +49,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class CheckSectionState : SectionState() {
+    var isSearchOpen by mutableStateOf(false)
+    var searchQuery by mutableStateOf("")
+    var searchSequence by mutableStateOf(0)
+
     private var _selectedPdf = mutableStateOf<PlatformFile?>(null)
     val selectedPdf: PlatformFile?
         get() = _selectedPdf.value
@@ -82,6 +88,7 @@ class CheckSectionState : SectionState() {
         _selectedPdfHtml.value = null
         _selectedPdfValidation.value = null
         _selectedPdf.value = file
+        appState.lastSelectedFile = file
 
         val isXml = file.name.endsWith(".xml", ignoreCase = true)
 

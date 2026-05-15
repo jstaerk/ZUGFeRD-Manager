@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager.sections
 import androidx.compose.foundation.*
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.text.BasicTextField
@@ -41,29 +42,40 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
+import de.openindex.zugferd.manager.gui.NotificationBar
 import de.openindex.zugferd.manager.gui.PdfViewer
+import de.openindex.zugferd.manager.gui.Tooltip
 import de.openindex.zugferd.manager.gui.WebViewer
 import de.openindex.zugferd.manager.gui.XmlViewer
 import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
+import de.openindex.zugferd.quba.generated.resources.AppVisualisationNoXml
 import de.openindex.zugferd.quba.generated.resources.Res
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.awt.Cursor
+import java.awt.KeyboardFocusManager
+import java.awt.KeyEventDispatcher
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationSelectFile
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationSelectInfo
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.focus.focusRequester
 
@@ -88,6 +100,14 @@ fun VisualsSection(state: VisualsSectionState) {
         }
     }
 
+    // Auto-load the last opened file when navigating from Prüfen.
+    LaunchedEffect(Unit) {
+        val file = appState.lastSelectedFile ?: return@LaunchedEffect
+        if (state.documents.none { it.name == file.name }) {
+            state.addTabWithFile(file, appState)
+        }
+    }
+
     LaunchedEffect(state.isSearchOpen) {
         if (!state.isSearchOpen) {
             state.searchQuery = ""
@@ -99,6 +119,32 @@ fun VisualsSection(state: VisualsSectionState) {
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+    }
+
+    // Global AWT key listener — works even when JCEF/PDF viewer has focus.
+    // Ctrl+F opens search; ESC closes search.
+    DisposableEffect(Unit) {
+        val dispatcher = KeyEventDispatcher { awtEvent ->
+            when {
+                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
+                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_F
+                        && awtEvent.isControlDown -> {
+                    state.isSearchOpen = true
+                    false
+                }
+                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
+                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_ESCAPE
+                        && state.isSearchOpen -> {
+                    state.isSearchOpen = false
+                    true
+                }
+                else -> false
+            }
+        }
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher)
+        onDispose {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(dispatcher)
+        }
     }
 
     Column(
@@ -145,6 +191,7 @@ fun VisualsSection(state: VisualsSectionState) {
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 fun VisualsSectionActions(state: VisualsSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
@@ -175,6 +222,7 @@ fun VisualsSectionActions(state: VisualsSectionState) {
                     Icon(Icons.Default.Search, "Suchen")
                 }
             }
+
         }
 
         // Add button to select a PDF file for validation.
@@ -191,7 +239,7 @@ fun VisualsSectionActions(state: VisualsSectionState) {
 }
 
 @Composable
-private fun CompactSearchBar(
+internal fun CompactSearchBar(
     value: String,
     onValueChange: (String) -> Unit,
     onSubmit: () -> Unit,
@@ -241,13 +289,16 @@ private fun CompactSearchBar(
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
                         .onPreviewKeyEvent { event ->
-                            if ((event.key == Key.Enter || event.key == Key.NumPadEnter) && event.type == KeyEventType.KeyUp) {
-                                if (value.isNotBlank()) {
-                                    onSubmit()
+                            when {
+                                (event.key == Key.Enter || event.key == Key.NumPadEnter) && event.type == KeyEventType.KeyUp -> {
+                                    if (value.isNotBlank()) onSubmit()
+                                    true
                                 }
-                                true
-                            } else {
-                                false
+                                event.key == Key.Escape && event.type == KeyEventType.KeyUp -> {
+                                    onClose()
+                                    true
+                                }
+                                else -> false
                             }
                         },
                 )
@@ -289,7 +340,7 @@ private fun TabRowWithControls(state: VisualsSectionState) {
         modifier = Modifier
             .horizontalScroll(scrollState)
             .fillMaxWidth()
-            .padding(vertical = 8.dp) //<--------------------------------------------------------------------------
+            .padding(vertical = 8.dp)
     ) {
         state.documents.forEachIndexed { index, doc ->
             DocumentTabItem(
@@ -353,8 +404,11 @@ private fun TabRowWithControls(state: VisualsSectionState) {
                 DocumentTabItem(
                     document = doc,
                     isSelected = index == state.selectedIndex,
+                    index = index,
+                    tabCount = state.documents.size,
                     onSelect = { state.selectedIndex = index },
-                    onClose = { state.removeTab(index) }
+                    onClose = { state.removeTab(index) },
+                    onMove = { from, to -> state.moveTab(from, to) },
                 )
             }
         }
@@ -388,23 +442,48 @@ private fun TabRowWithControls(state: VisualsSectionState) {
 private fun DocumentTabItem(
     document: DocumentTab,
     isSelected: Boolean,
+    index: Int,
+    tabCount: Int,
     onSelect: () -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onMove: (from: Int, to: Int) -> Unit,
 ) {
+    var tabWidthPx by remember { mutableStateOf(1) }
+    var isDragging by remember { mutableStateOf(false) }
+    var dragOffsetX by remember { mutableStateOf(0f) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .onSizeChanged { tabWidthPx = it.width.coerceAtLeast(1) }
+            .scale(if (isDragging) 1.05f else 1f)
             .clip(RoundedCornerShape(6.dp))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                 else MaterialTheme.colorScheme.surface
             )
             .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
+                width = if (isSelected || isDragging) 2.dp else 1.dp,
+                color = if (isDragging || isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.outline,
                 shape = RoundedCornerShape(6.dp)
             )
+            .pointerInput(index, tabCount) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { isDragging = true; dragOffsetX = 0f },
+                    onDragEnd = {
+                        isDragging = false
+                        val delta = (dragOffsetX / tabWidthPx).roundToInt()
+                        if (delta != 0) onMove(index, (index + delta).coerceIn(0, tabCount - 1))
+                        dragOffsetX = 0f
+                    },
+                    onDragCancel = { isDragging = false; dragOffsetX = 0f },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        dragOffsetX += dragAmount.x
+                    },
+                )
+            }
             .clickable(onClick = onSelect)
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
@@ -436,22 +515,6 @@ private fun DocumentTabItem(
 @Composable
 private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) {
     val currentTab = state.documents.getOrNull(state.selectedIndex) ?: return
-    var tabState by remember { mutableStateOf(0) }
-    var viewMode by remember { mutableStateOf(ViewMode.SPLIT) }
-
-    val hasPdf = currentTab.pdf != null
-    val hasHtml = currentTab.html != null
-    val hasXml = currentTab.xml != null
-    val hasCode = hasHtml || hasXml || currentTab.isHtmlLoading
-
-    LaunchedEffect(hasPdf, hasCode) {
-        viewMode = when {
-            !hasPdf && hasCode -> ViewMode.CODE_ONLY
-            hasPdf && !hasCode -> ViewMode.PDF_ONLY
-            hasPdf && hasCode -> ViewMode.SPLIT
-            else -> ViewMode.PDF_ONLY
-        }
-    }
 
     if (currentTab.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -460,12 +523,46 @@ private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) 
         return
     }
 
+    val hasPdf = currentTab.pdf != null
+    val hasXml = currentTab.xml != null
+    val hasHtml = currentTab.html != null
+    val hasCode = hasXml || hasHtml || currentTab.isHtmlLoading
+
     if (!hasPdf && !hasCode) {
         EmptyVisualsView(state)
         return
     }
 
+    // hasStableCode excludes isHtmlLoading intentionally:
+    // plain PDFs briefly have isHtmlLoading=true (HTML generation returns null),
+    // which would incorrectly trigger SPLIT mode for one frame.
+    val hasStableCode = hasXml || hasHtml
+
+    // Reset viewMode when the tab changes; initialize based on stable content.
+    var viewMode by remember(currentTab) {
+        mutableStateOf(when {
+            hasPdf && hasStableCode -> ViewMode.SPLIT
+            hasStableCode -> ViewMode.CODE_ONLY
+            else -> ViewMode.PDF_ONLY
+        })
+    }
+
+    // Correct viewMode when content availability changes asynchronously
+    // (e.g. XML/HTML arrives after the PDF was already shown).
+    LaunchedEffect(hasPdf, hasStableCode) {
+        when {
+            !hasPdf && viewMode != ViewMode.CODE_ONLY -> viewMode = ViewMode.CODE_ONLY
+            !hasStableCode && viewMode == ViewMode.CODE_ONLY -> viewMode = ViewMode.PDF_ONLY
+            !hasStableCode && viewMode == ViewMode.SPLIT -> viewMode = ViewMode.PDF_ONLY
+            hasStableCode && hasPdf && viewMode == ViewMode.PDF_ONLY -> viewMode = ViewMode.SPLIT
+        }
+    }
+
+    var tabState by remember(currentTab) { mutableStateOf(0) }
+    val splitRatioState = remember(currentTab) { mutableStateOf(0.5f) }
+
     Column(modifier = Modifier.fillMaxSize()) {
+        // Mode toggle — only shown when both PDF and code content are available
         if (hasPdf && hasCode) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -475,14 +572,27 @@ private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) 
             }
         }
 
-        when (viewMode) {
-            ViewMode.PDF_ONLY -> currentTab.pdf?.let { PdfViewer(pdf = it, modifier = Modifier.fillMaxSize(), search = search) }
-            ViewMode.CODE_ONLY -> CodeOnlyView(currentTab, tabState, { tabState = it }, search)
-            ViewMode.SPLIT -> ResizableSplitPane(
-                leftContent = { CodeOnlyView(currentTab, tabState, { tabState = it }, search) },
-                rightContent = { currentTab.pdf?.let { PdfViewer(pdf = it, modifier = Modifier.fillMaxSize(), search = search) } }
-            )
+        // Informational banner for plain PDFs without embedded e-invoice data
+        if (hasPdf && !hasCode) {
+            NotificationBar(text = stringResource(Res.string.AppVisualisationNoXml))
         }
+
+        // ContentArea keeps PdfViewer at a fixed slot in the composition tree.
+        // This prevents JCEF browser disposal when switching between SPLIT and PDF_ONLY,
+        // which would otherwise cause blank rendering (two browsers sharing one CEF client).
+        ContentArea(
+            viewMode = viewMode,
+            splitRatioState = splitRatioState,
+            codeContent = {
+                if (hasCode) CodeOnlyView(currentTab, tabState, { tabState = it }, search)
+            },
+            pdfContent = {
+                currentTab.pdf?.let { pdf ->
+                    PdfViewer(pdf = pdf, modifier = Modifier.fillMaxSize(), search = search)
+                }
+            },
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
@@ -644,58 +754,77 @@ private fun ViewModeToggle(
     }
 }
 
-// Resizable Split Pane (Links HTML/XML, Rechts PDF)
+// Three fixed composition slots: [0] code viewer | [1] divider | [2] PDF viewer.
+// Drag deltas are accumulated each mouse event and flushed once per display frame
+// via withFrameNanos — throttles JCEF resize calls to ~60/sec.
 @Composable
-fun ResizableSplitPane(
+private fun ContentArea(
+    viewMode: ViewMode,
+    splitRatioState: MutableState<Float>,
+    codeContent: @Composable () -> Unit,
+    pdfContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    initialRatio: Float = 0.5f,
-    minRatio: Float = 0.1f,
-    maxRatio: Float = 0.9f,
-    leftContent: @Composable () -> Unit,
-    rightContent: @Composable () -> Unit
 ) {
-    var dragOffset by remember { mutableStateOf(0f) }
-    val density = LocalDensity.current
-    var ratio by remember { mutableStateOf(initialRatio) }
+    val dividerPx = with(LocalDensity.current) { 6.dp.roundToPx() }
+    val containerWidth = remember { intArrayOf(0) }
+    val pendingDelta = remember { floatArrayOf(0f) }
 
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val totalWidthPx = with(density) { maxWidth.toPx() }
-        val leftWidthPx = (totalWidthPx * ratio + dragOffset).coerceIn(
-            totalWidthPx * minRatio,
-            totalWidthPx * maxRatio
-        )
+    fun applyDelta() {
+        val d = pendingDelta[0]
+        val w = containerWidth[0]
+        if (d != 0f && w > 0) {
+            pendingDelta[0] = 0f
+            splitRatioState.value = (splitRatioState.value + d / w).coerceIn(0.1f, 0.9f)
+        }
+    }
 
-        Row(modifier = Modifier.fillMaxSize()) {
+    LaunchedEffect(splitRatioState) {
+        while (true) { withFrameNanos { applyDelta() } }
+    }
+
+    val dividerColor = MaterialTheme.colorScheme.outline
+    Layout(
+        modifier = modifier.fillMaxSize(),
+        content = {
+            Box { if (viewMode != ViewMode.PDF_ONLY) codeContent() }
             Box(
-                modifier = Modifier
-                    .width(with(density) { leftWidthPx.toDp() })
-                    .fillMaxHeight()
-            ) {
-                leftContent()
-            }
-
-            Box(
-                modifier = Modifier
-                    .width(2.dp)
-                    .fillMaxHeight()
-                    .background(Color.Gray)
+                modifier = if (viewMode == ViewMode.SPLIT) Modifier
+                    .background(dividerColor)
                     .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                     .draggable(
                         orientation = Orientation.Horizontal,
-                        state = rememberDraggableState { delta ->
-                            ratio = (ratio * totalWidthPx + delta).coerceIn(100f, totalWidthPx - 100f) / totalWidthPx
-                        }
+                        state = rememberDraggableState { pendingDelta[0] += it },
+                        onDragStopped = { applyDelta() },
                     )
+                else Modifier
             )
+            Box { if (viewMode != ViewMode.CODE_ONLY) pdfContent() }
+        }
+    ) { measurables, constraints ->
+        containerWidth[0] = constraints.maxWidth
+        val ratio = splitRatioState.value
+        val h = if (constraints.hasBoundedHeight) constraints.maxHeight else 0
 
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                rightContent()
+        val (codeW, divW, pdfW) = when (viewMode) {
+            ViewMode.PDF_ONLY  -> Triple(0, 0, constraints.maxWidth)
+            ViewMode.CODE_ONLY -> Triple(constraints.maxWidth, 0, 0)
+            ViewMode.SPLIT -> {
+                val cw = ((constraints.maxWidth - dividerPx) * ratio).toInt()
+                    .coerceIn(0, constraints.maxWidth - dividerPx)
+                Triple(cw, dividerPx, constraints.maxWidth - cw - dividerPx)
             }
+        }
+
+        fun slot(w: Int) = constraints.copy(minWidth = w, maxWidth = w, minHeight = h, maxHeight = h)
+        val code    = measurables[0].measure(slot(codeW))
+        val divider = measurables[1].measure(slot(divW))
+        val pdf     = measurables[2].measure(slot(pdfW))
+
+        layout(constraints.maxWidth, h) {
+            code.placeRelative(0, 0)
+            divider.placeRelative(codeW, 0)
+            pdf.placeRelative(codeW + divW, 0)
         }
     }
 }
-
-
 

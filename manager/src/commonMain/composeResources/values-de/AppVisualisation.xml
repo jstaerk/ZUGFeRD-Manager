@@ -95,4 +95,6 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppVisualisationDetailsXml">XML-Daten</string>
 
+    <string name="AppVisualisationNoXml">Diese Datei enthält keine E-Rechnung-Daten (kein eingebettetes ZUGFeRD-XML).</string>
+
 </resources>

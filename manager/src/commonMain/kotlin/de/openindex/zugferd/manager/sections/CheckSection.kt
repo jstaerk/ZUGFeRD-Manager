@@ -33,10 +33,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
@@ -46,11 +48,14 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -111,6 +116,8 @@ import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryUnknown
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryVersion
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryWarnings
 import de.openindex.zugferd.quba.generated.resources.Res
+import java.awt.KeyboardFocusManager
+import java.awt.KeyEventDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -123,6 +130,48 @@ fun CheckSection(state: CheckSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
     val selectedPdf = state.selectedPdf
+
+    // Auto-load the last opened file when navigating from Visualisieren.
+    LaunchedEffect(Unit) {
+        val file = appState.lastSelectedFile ?: return@LaunchedEffect
+        if (state.selectedPdf?.name != file.name) {
+            state.selectFile(file, appState)
+        }
+    }
+
+    // Clear search state when search is closed.
+    LaunchedEffect(state.isSearchOpen) {
+        if (!state.isSearchOpen) {
+            state.searchQuery = ""
+            state.searchSequence = 0
+        }
+    }
+
+    // Global AWT key listener — works even when JCEF/PDF viewer has focus.
+    DisposableEffect(Unit) {
+        val dispatcher = KeyEventDispatcher { awtEvent ->
+            when {
+                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
+                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_F
+                        && awtEvent.isControlDown
+                        && state.selectedPdf != null -> {
+                    state.isSearchOpen = true
+                    false
+                }
+                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
+                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_ESCAPE
+                        && state.isSearchOpen -> {
+                    state.isSearchOpen = false
+                    true
+                }
+                else -> false
+            }
+        }
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher)
+        onDispose {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(dispatcher)
+        }
+    }
 
     val dragAndDropCallback = remember {
         createDragAndDropTarget(
@@ -194,6 +243,30 @@ fun CheckSectionActions(state: CheckSectionState) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(end = 8.dp),
     ) {
+        // Search bar — only shown when a file is loaded.
+        if (state.selectedPdf != null) {
+            if (state.isSearchOpen) {
+                CompactSearchBar(
+                    value = state.searchQuery,
+                    onValueChange = {
+                        state.searchQuery = it
+                        state.searchSequence = 0
+                    },
+                    onSubmit = {
+                        if (state.searchQuery.isNotBlank()) {
+                            state.searchSequence++
+                        }
+                    },
+                    onClose = { state.isSearchOpen = false },
+                    modifier = Modifier.width(220.dp),
+                )
+            } else {
+                IconButton(onClick = { state.isSearchOpen = true }) {
+                    Icon(Icons.Default.Search, "Suchen")
+                }
+            }
+        }
+
         // Add button to select a PDF file for validation.
         ActionButtonWithTooltip(
             label = Res.string.AppCheckSelect,
@@ -464,6 +537,14 @@ private fun DetailsView(state: CheckSectionState) {
     val isHtmlTabSelected by derivedStateOf { tabState == 1 && state.selectedPdfHtml != null }
     val isXmlTabSelected by derivedStateOf { tabState == 2 && state.selectedPdfXml != null }
 
+    val activeSearch = remember(state.isSearchOpen, state.searchQuery, state.searchSequence) {
+        if (state.isSearchOpen && state.searchQuery.isNotBlank()) {
+            SearchState(query = state.searchQuery, sequence = state.searchSequence)
+        } else {
+            null
+        }
+    }
+
     TabRow(
         selectedTabIndex = tabState,
     ) {
@@ -518,6 +599,7 @@ private fun DetailsView(state: CheckSectionState) {
         WebViewer(
             html = state.selectedPdfHtml ?: "",
             modifier = Modifier.fillMaxSize(),
+            search = activeSearch,
         )
     }
 
@@ -526,6 +608,7 @@ private fun DetailsView(state: CheckSectionState) {
         XmlViewer(
             xml = state.selectedPdfXml ?: "",
             modifier = Modifier.fillMaxSize(),
+            search = activeSearch,
         )
     }
 }

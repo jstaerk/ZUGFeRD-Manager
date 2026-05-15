@@ -72,6 +72,12 @@ class VisualsSectionState : SectionState() {
         }
     }
 
+    fun moveTab(from: Int, to: Int) {
+        if (from == to || from !in documents.indices || to !in documents.indices) return
+        documents.add(to, documents.removeAt(from))
+        selectedIndex = to
+    }
+
 
 
     suspend fun selectFile(appState: AppState) {
@@ -118,7 +124,20 @@ class VisualsSectionState : SectionState() {
 
 
 
+    suspend fun restoreSession(appState: AppState) {
+        val paths = appState.preferences.openTabPaths
+        if (paths.isEmpty()) return
+        for (path in paths) {
+            val javaFile = java.io.File(path)
+            if (javaFile.exists()) addTabWithFile(PlatformFile(javaFile), appState)
+        }
+        val idx = appState.preferences.openTabSelectedIndex
+        if (idx in documents.indices) selectedIndex = idx
+    }
+
     suspend fun loadFileInTab(tab: DocumentTab, file: PlatformFile, appState: AppState) {
+        appState.lastSelectedFile = file
+        tab.sourceFile = file
         tab.isLoading = true
         tab.isHtmlLoading = false
 

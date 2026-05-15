@@ -21,14 +21,17 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +62,13 @@ fun DateField(
 ) {
     //val dateState = rememberDatePickerState()
     var showDialog by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    // Open dialog when user clicks anywhere on the text field.
+    LaunchedEffect(isPressed) {
+        if (isPressed) showDialog = true
+    }
 
     // Text field for date value.
     TextField(
@@ -71,6 +81,7 @@ fun DateField(
         supportingText = supportingText,
         value = value?.formatAsMediumDate() ?: "",
         onValueChange = { },
+        interactionSource = interactionSource,
         trailingIcon = {
             Row(
                 //horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -83,7 +94,7 @@ fun DateField(
                         .pointerHoverIcon(PointerIcon.Default, true),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
+                        imageVector = Icons.Default.DateRange,
                         contentDescription = stringResource(Res.string.AppDateSelectionFieldSelect),
                     )
                 }

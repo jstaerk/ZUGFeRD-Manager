@@ -79,6 +79,7 @@ import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogContactS
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogContactZip
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogGeneral
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogGeneralAdditionalAddress
+import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogGeneralTaxHint
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogGeneralCountry
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogGeneralCustomerId
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogGeneralLocation
@@ -198,6 +199,14 @@ private fun TradePartyDialogContent(
     var tradeParty by remember { mutableStateOf(value.copy()) }
     var savePermanently by remember { mutableStateOf(false) }
 
+    // Übernehmen is only allowed when name is filled, and for senders also vatID or taxID.
+    val isTradePartyValid by remember(tradeParty, isCustomer) {
+        mutableStateOf(
+            tradeParty.name.isNotBlank() &&
+                (isCustomer || !tradeParty.vatID.isNullOrBlank() || !tradeParty.taxID.isNullOrBlank())
+        )
+    }
+
     Box(
         modifier = Modifier
             .border(border = BorderStroke(Dp.Hairline, MaterialTheme.colorScheme.primaryContainer))
@@ -247,7 +256,7 @@ private fun TradePartyDialogContent(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                 ) {
-                    // Submit button.
+                    // Submit button — disabled when required fields are missing.
                     Button(
                         onClick = {
                             onSubmitRequest(
@@ -255,6 +264,7 @@ private fun TradePartyDialogContent(
                                 savePermanently,
                             )
                         },
+                        enabled = isTradePartyValid,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -399,6 +409,7 @@ private fun TradePartyFormGeneral(
             TextField(
                 label = Res.string.AppTradePartyDialogGeneralName,
                 value = value.name,
+                requiredIndicator = true,
                 onValueChange = { newName ->
                     onUpdate(
                         value.copy(name = newName)
@@ -504,6 +515,7 @@ private fun TradePartyFormGeneral(
             TextField(
                 label = Res.string.AppTradePartyDialogGeneralVatId,
                 value = value.vatID ?: "",
+                requiredIndicator = !isCustomer,
                 onValueChange = { newVatID ->
                     onUpdate(
                         value.copy(vatID = newVatID)
@@ -517,6 +529,7 @@ private fun TradePartyFormGeneral(
             TextField(
                 label = Res.string.AppTradePartyDialogGeneralTaxId,
                 value = value.taxID ?: "",
+                requiredIndicator = !isCustomer,
                 onValueChange = { newTaxID ->
                     onUpdate(
                         value.copy(taxID = newTaxID)
@@ -537,6 +550,16 @@ private fun TradePartyFormGeneral(
                 },
                 modifier = Modifier
                     .weight(0.33f),
+            )
+        }
+
+        // Hint that at least one of VAT ID / Tax ID is required for the sender.
+        if (!isCustomer) {
+            Text(
+                text = stringResource(Res.string.AppTradePartyDialogGeneralTaxHint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp),
             )
         }
     }

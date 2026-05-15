@@ -102,6 +102,10 @@ import de.openindex.zugferd.quba.generated.resources.AppCreateDetailsXml
 import de.openindex.zugferd.quba.generated.resources.AppCreateErrorConversion
 import de.openindex.zugferd.quba.generated.resources.AppCreateErrorIncompatible
 import de.openindex.zugferd.quba.generated.resources.AppCreateErrorInvalid
+import de.openindex.zugferd.quba.generated.resources.AppCreateErrorCurrencyMissing
+import de.openindex.zugferd.quba.generated.resources.AppCreateErrorInvalidFields
+import de.openindex.zugferd.quba.generated.resources.AppCreateErrorItemsMissing
+import de.openindex.zugferd.quba.generated.resources.AppCreateErrorSenderTaxMissing
 import de.openindex.zugferd.quba.generated.resources.AppCreateGeneral
 import de.openindex.zugferd.quba.generated.resources.AppCreateGeneralDeliveryDate
 import de.openindex.zugferd.quba.generated.resources.AppCreateGeneralDeliveryDateEnd
@@ -194,9 +198,35 @@ fun CreateSection(state: CreateSectionState) {
                 }
 
                 // Show validation error for invalid e-invoice inputs.
-                AnimatedVisibility(visible = !isValid && isSelectedPdfArchiveUsable) {
+                AnimatedVisibility(visible = (!isValid || state.invoiceItems.isEmpty()) && isSelectedPdfArchiveUsable) {
+                    val senderLabel = stringResource(Res.string.AppCreateGeneralSender)
+                    val recipientLabel = stringResource(Res.string.AppCreateGeneralRecipient)
+                    val numberLabel = stringResource(Res.string.AppCreateGeneralInvoiceNumber)
+                    val deliveryLabel = stringResource(Res.string.AppCreateGeneralDeliveryDate)
+                    val senderTaxLabel = stringResource(Res.string.AppCreateErrorSenderTaxMissing)
+                    val currencyLabel = stringResource(Res.string.AppCreateErrorCurrencyMissing)
+                    val itemsLabel = stringResource(Res.string.AppCreateErrorItemsMissing)
+                    val missingFields = buildList {
+                        if (state.invoiceSender == null) add(senderLabel)
+                        if (state.invoiceRecipient == null) add(recipientLabel)
+                        if (state.invoiceNumber.isBlank()) add(numberLabel)
+                        if (state.invoiceCurrency == null) add(currencyLabel)
+                        if (state.invoiceItems.isEmpty()) add(itemsLabel)
+                        if (state.deliveryDate == null && (state.deliveryStartDate == null || state.deliveryEndDate == null)) {
+                            add(deliveryLabel)
+                        }
+                        if (state.invoiceSender != null &&
+                            state.invoiceSender?.vatID.isNullOrBlank() &&
+                            state.invoiceSender?.taxID.isNullOrBlank()
+                        ) {
+                            add(senderTaxLabel)
+                        }
+                    }
+                    val baseText = stringResource(Res.string.AppCreateErrorInvalid)
                     NotificationBar(
-                        text = Res.string.AppCreateErrorInvalid,
+                        text = if (missingFields.isNotEmpty())
+                            "$baseText " + stringResource(Res.string.AppCreateErrorInvalidFields, missingFields.joinToString(", "))
+                        else baseText,
                     )
                 }
 
@@ -512,6 +542,7 @@ private fun ColumnScope.GeneralForm(state: CreateSectionState) {
                 tradeParty = state.invoiceRecipient,
                 tradeParties = recipientsList.value,
                 requiredIndicator = true,
+                isCustomer = true,
                 onSelect = { recipient, savePermanently ->
                     state.invoiceRecipient = recipient
                     state.invoicePaymentMethod = recipient?._defaultPaymentMethod ?: state.invoicePaymentMethod

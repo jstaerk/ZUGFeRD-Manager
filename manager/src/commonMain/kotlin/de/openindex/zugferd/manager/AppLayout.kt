@@ -35,6 +35,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
@@ -130,6 +131,7 @@ fun AppLayout() {
                 .fillMaxSize(),
         ) {
             AppNavigation()
+            VerticalDivider()
             AppContent()
         }
     }

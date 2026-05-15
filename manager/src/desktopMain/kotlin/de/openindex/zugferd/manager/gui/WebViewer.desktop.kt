@@ -41,6 +41,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.cef.browser.CefBrowser
 import java.awt.BorderLayout
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 import java.io.File
 import javax.swing.JPanel
 
@@ -53,9 +55,7 @@ actual fun WebViewer(html: String, modifier: Modifier, search: SearchState?) {
 
     LaunchedEffect(Unit) {
         scope.launch {
-            installWebView(
-                gpuEnabled = chromeGpuEnabled,
-            )
+            installWebView(gpuEnabled = chromeGpuEnabled)
         }.invokeOnCompletion {
             isInstalled = true
         }
@@ -111,10 +111,18 @@ actual fun WebViewer(html: String, modifier: Modifier, search: SearchState?) {
     }
 }
 
-private class WebPanel(
-    val browser: CefBrowser
-) : JPanel(BorderLayout()) {
+private class WebPanel(val browser: CefBrowser) : JPanel(BorderLayout()) {
     init {
         add(browser.uiComponent, BorderLayout.CENTER)
+        addComponentListener(object : ComponentAdapter() {
+            override fun componentResized(e: ComponentEvent?) {
+                val w = width
+                val h = height
+                if (w > 0 && h > 0) {
+                    browser.uiComponent.setBounds(0, 0, w, h)
+                    validate()
+                }
+            }
+        })
     }
 }

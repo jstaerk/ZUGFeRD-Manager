@@ -108,11 +108,17 @@ fun main() {
 
     val appState = _APP_STATE
 
-    /*sorgen dafür, dass CEF beim Programmstart vorbereitet wird, 
-     *damit der allererste Klick auf „Select e‑Invoice“ keinen CEF‑Initialisierungsfehler mehr auslöst.
+    /*sorgen dafür, dass CEF beim Programmstart vorbereitet wird,
+     *damit der allererste Klick auf „Select e‑Invoice” keinen CEF‑Initialisierungsfehler mehr auslöst.
     */
     runBlocking {
         installWebView()
+    }
+
+    // Restore previously open tabs from last session.
+    runBlocking {
+        val visualsState = AppSection.VISUALISATION.state as de.openindex.zugferd.manager.sections.VisualsSectionState
+        visualsState.restoreSession(appState)
     }
 
     //
@@ -162,6 +168,9 @@ fun main() {
 
         Runtime.getRuntime().addShutdownHook(Thread {
             APP_LOGGER.info("Shutdown hook was triggered...")
+            val visualsState = AppSection.VISUALISATION.state as de.openindex.zugferd.manager.sections.VisualsSectionState
+            val paths = visualsState.documents.mapNotNull { it.sourceFile?.file?.absolutePath }
+            appState.preferences.setOpenTabs(paths, visualsState.selectedIndex)
             SHUTDOWN_HANDLER.saveSettingsOnShutdown(
                 preferences = appState.preferences,
                 windowState = windowState,

@@ -91,6 +91,11 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateDetailsPdf">gewählte PDF</string>
     <string name="AppCreateDetailsXml">XML-Rohdaten</string>
 
+    <string name="AppCreateErrorInvalidFields">Fehlend: %1$s</string>
+    <string name="AppCreateErrorSenderTaxMissing">USt-Id-Nr / Steuer-Nr (Ersteller)</string>
+    <string name="AppCreateErrorCurrencyMissing">Währung</string>
+    <string name="AppCreateErrorItemsMissing">Rechnungsposten</string>
+
     <string name="AppCreateErrorInvalid">
         Die Angaben zur Rechnung sind unvollständig. Eine E-Rechnung kann erst erzeugt werden, wenn alle nötigen Angaben
         vorhanden sind.

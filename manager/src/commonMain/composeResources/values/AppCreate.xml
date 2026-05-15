@@ -90,6 +90,11 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCreateDetailsPdf">selected PDF</string>
     <string name="AppCreateDetailsXml">XML data</string>
 
+    <string name="AppCreateErrorInvalidFields">Missing: %1$s</string>
+    <string name="AppCreateErrorSenderTaxMissing">VAT/Tax-ID (creator)</string>
+    <string name="AppCreateErrorCurrencyMissing">currency</string>
+    <string name="AppCreateErrorItemsMissing">items</string>
+
     <string name="AppCreateErrorInvalid">
         The invoice data is insufficient. An e-invoice can only be created after all required fields have been filled.
     </string>

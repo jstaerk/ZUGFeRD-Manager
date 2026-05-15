@@ -65,4 +65,6 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppVisualisationDetailsPdf">selected PDF</string>
     <string name="AppVisualisationDetailsHtml">XML visualization</string>
     <string name="AppVisualisationDetailsXml">XML data</string>
+
+    <string name="AppVisualisationNoXml">This file does not contain any e-invoice data (no embedded ZUGFeRD XML).</string>
 </resources>

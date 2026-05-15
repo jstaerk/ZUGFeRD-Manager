@@ -34,8 +34,9 @@ class DocumentTab(
     var html by mutableStateOf<String?>(null)
     var xml by mutableStateOf<String?>(null)
     var isLoading by mutableStateOf(isLoading)
-    // true während HTML im Hintergrund generiert wird (nach XML-Sofortanzeige)
     var isHtmlLoading by mutableStateOf(false)
+    // Original source file (PDF or XML) — persisted across app restarts.
+    var sourceFile: PlatformFile? = null
 
     // Fixed copy method
     fun copy(

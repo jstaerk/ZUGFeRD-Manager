@@ -235,6 +235,21 @@ class Preferences(data: PreferencesData) {
         _chromeGpuEnabled.value = enabled
     }
 
+
+    //
+    // Open visualisation tabs (session restore).
+    //
+
+    private var _openTabPaths = data.openTabPaths
+    private var _openTabSelectedIndex = data.openTabSelectedIndex
+    val openTabPaths: List<String> get() = _openTabPaths
+    val openTabSelectedIndex: Int get() = _openTabSelectedIndex
+    fun setOpenTabs(paths: List<String>, selectedIndex: Int) {
+        _openTabPaths = paths
+        _openTabSelectedIndex = selectedIndex
+    }
+
+
     @Suppress("MemberVisibilityCanBePrivate")
     fun toData(): PreferencesData =
         PreferencesData(
@@ -254,6 +269,8 @@ class Preferences(data: PreferencesData) {
 
             autoRemoveAttachments = _autoRemoveAttachments.value,
             chromeGpuEnabled = _chromeGpuEnabled.value,
+            openTabPaths = _openTabPaths,
+            openTabSelectedIndex = _openTabSelectedIndex,
         )
 
     suspend fun save() {
@@ -282,6 +299,8 @@ data class PreferencesData(
 
     val autoRemoveAttachments: Boolean = false,
     val chromeGpuEnabled: Boolean = true,
+    val openTabPaths: List<String> = emptyList(),
+    val openTabSelectedIndex: Int = 0,
 )
 
 suspend fun loadPreferences(): Preferences =
