@@ -380,11 +380,11 @@ private fun CheckTabStrip(state: CheckSectionState) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         ) {
+            // Tabs row — no weight so the + button sits directly after the last tab.
             Row(
                 horizontalArrangement = Arrangement.spacedBy(tabSpacing),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .weight(1f)
                     .padding(start = stripPadding)
                     .then(if (needsScroll) Modifier.horizontalScroll(scrollState) else Modifier),
             ) {
@@ -455,10 +455,11 @@ private fun CheckTabStrip(state: CheckSectionState) {
                 }
             }
 
+            // + button sits directly after the last tab (Chrome style).
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(horizontal = stripPadding)
+                    .padding(start = tabSpacing)
                     .size(plusButtonSize)
                     .clip(RoundedCornerShape(6.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
@@ -471,6 +472,9 @@ private fun CheckTabStrip(state: CheckSectionState) {
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
+
+            // Fills remaining space so the tab strip doesn't stretch.
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
