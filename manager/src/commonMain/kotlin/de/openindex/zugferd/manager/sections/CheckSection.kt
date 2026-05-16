@@ -237,6 +237,11 @@ fun CheckSection(state: CheckSectionState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .then(
+                if (state.selectedTab == null)
+                    Modifier.clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } }
+                else Modifier
+            )
             .dragAndDropTarget(
                 target = dragAndDropCallback,
                 shouldStartDragAndDrop = { true },

@@ -162,6 +162,11 @@ fun VisualsSection(state: VisualsSectionState) {
                 .fillMaxSize()
                 .padding(8.dp)
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+                .then(
+                    if (state.documents.isEmpty())
+                        Modifier.clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } }
+                    else Modifier
+                )
                 .dragAndDropTarget(
                     target = remember {
                         createDragAndDropTarget { file ->

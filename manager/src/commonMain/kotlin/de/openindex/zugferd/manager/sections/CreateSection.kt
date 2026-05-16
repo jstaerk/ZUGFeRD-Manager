@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager.sections
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -263,6 +264,11 @@ fun CreateSection(state: CreateSectionState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .then(
+                if (state.selectedPdf == null)
+                    Modifier.clickable { scope.launch(Dispatchers.IO) { state.selectPdf(appState) } }
+                else Modifier
+            )
             .dragAndDropTarget(
                 target = dragAndDropCallback,
                 shouldStartDragAndDrop = { true },
