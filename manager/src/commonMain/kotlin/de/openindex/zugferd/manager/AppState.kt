@@ -78,12 +78,20 @@ class AppState(
     private var _section = mutableStateOf(AppSection.VISUALISATION)
     val section get() = _section.value
 
+    // Volatile mirror of _section for safe reads from the AWT event thread.
+    // Compose snapshot state can be stale when read outside the Compose context;
+    // @Volatile guarantees the AWT key dispatcher always sees the current value.
+    @Volatile
+    var sectionSync: AppSection = AppSection.VISUALISATION
+        private set
+
     fun isSection(section: AppSection): Boolean {
         return _section.value == section
     }
 
     fun setSection(section: AppSection) {
         _section.value = section
+        sectionSync = section
     }
 
     //

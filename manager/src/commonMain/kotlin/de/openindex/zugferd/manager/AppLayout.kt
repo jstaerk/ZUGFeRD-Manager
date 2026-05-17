@@ -27,10 +27,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,13 +38,10 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,22 +51,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.gui.Label
+import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.quba.generated.resources.AppSidebarQuit
 import de.openindex.zugferd.quba.generated.resources.Res
-import de.openindex.zugferd.quba.generated.resources.application
 import de.openindex.zugferd.quba.generated.resources.ic_app_logo
+import java.awt.KeyEventDispatcher
+import java.awt.KeyboardFocusManager
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 
-import androidx.compose.material.icons.filled.Description
-
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun AppLayout() {
-    val appState = LocalAppState.current
-
     //val blur: Float by animateFloatAsState(
     //    targetValue = if (appState.locked) 10f else 0f,
     //    animationSpec = tween(
@@ -79,61 +73,54 @@ fun AppLayout() {
     //    label = "blur",
     //)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier,
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.ic_app_logo),
-                            contentDescription = APP_TITLE,
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 38.dp)
-                                .width(40.dp)
-                        )
-
-                        Text(
-                            text = APP_TITLE,
-                            style = MaterialTheme.typography.headlineMedium,
-                        )
+    // Single global AWT key dispatcher for Ctrl+F / ESC search handling.
+    // Uses _APP_STATE.sectionSync (@Volatile) instead of _APP_STATE.section
+    // (Compose snapshot state) to avoid stale reads on the AWT event thread.
+    DisposableEffect(Unit) {
+        val dispatcher = KeyEventDispatcher { awtEvent ->
+            if (awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
+                && awtEvent.keyCode == java.awt.event.KeyEvent.VK_F
+                && awtEvent.isControlDown
+            ) {
+                when (_APP_STATE.sectionSync) {
+                    AppSection.VISUALISATION ->
+                        (AppSection.VISUALISATION.state as? VisualsSectionState)?.isSearchOpen = true
+                    AppSection.CHECK ->
+                        (AppSection.CHECK.state as? CheckSectionState)?.isSearchOpen = true
+                    else -> {}
+                }
+                true // consume — prevents JCEF from opening its own find bar
+            } else if (awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
+                && awtEvent.keyCode == java.awt.event.KeyEvent.VK_ESCAPE
+            ) {
+                when (_APP_STATE.sectionSync) {
+                    AppSection.VISUALISATION -> {
+                        val state = AppSection.VISUALISATION.state as? VisualsSectionState
+                        if (state?.isSearchOpen == true) { state.isSearchOpen = false; true } else false
                     }
-                },
-                actions = {
-                    appState.section.actions()
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-                modifier = Modifier,
-            )
-        },
-        //bottomBar = {},
-        //snackbarHost = {},
-        //floatingActionButton = {},
-        //floatingActionButtonPosition = FabPosition.End,
-        containerColor = MaterialTheme.colorScheme.background,
-        contentColor = contentColorFor(MaterialTheme.colorScheme.background),
-        //contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
-        //modifier = Modifier,
-        //modifier = appState.lockedModifier,
-        modifier = Modifier
-        //.blur(blur.dp),
-    ) { innerPadding ->
-        Row(
-            verticalAlignment = Alignment.Top,
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-        ) {
-            AppNavigation()
-            VerticalDivider()
-            AppContent()
+                    AppSection.CHECK -> {
+                        val state = AppSection.CHECK.state as? CheckSectionState
+                        if (state?.isSearchOpen == true) { state.isSearchOpen = false; true } else false
+                    }
+                    else -> false
+                }
+            } else {
+                false
+            }
         }
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher)
+        onDispose {
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(dispatcher)
+        }
+    }
+
+    Row(
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        AppNavigation()
+        VerticalDivider()
+        AppContent()
     }
 }
 
@@ -174,6 +161,14 @@ private fun AppNavigation() {
         Spacer(
             modifier = Modifier
                 .weight(1f, fill = true),
+        )
+
+        Image(
+            painter = painterResource(Res.drawable.ic_app_logo),
+            contentDescription = APP_TITLE,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .size(36.dp),
         )
 
         Text(

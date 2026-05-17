@@ -160,23 +160,47 @@ fun getCefBrowser(url: String): CefBrowser {
                             event: org.cef.handler.CefKeyboardHandler.CefKeyEvent?
                         ): Boolean {
                             if (event == null) return false
-                            if (event.type == org.cef.handler.CefKeyboardHandler.CefKeyEvent.EventType.KEYEVENT_RAWKEYDOWN ||
-                                event.type == org.cef.handler.CefKeyboardHandler.CefKeyEvent.EventType.KEYEVENT_KEYDOWN) {
-                                
-                                // Flags from CefKeyboardHandler
-                                // EVENTFLAG_CONTROL_DOWN = 1 << 2
-                                // EVENTFLAG_COMMAND_DOWN = 1 << 7 (Meta/Cmd)
-                                val controlPressed = (event.modifiers and 4 != 0)
-                                val metaPressed = (event.modifiers and 128 != 0)
-                                
-                                if (event.windows_key_code == 70 && (controlPressed || metaPressed)) { // 70 is 'F'
-                                    val visualsState = AppSection.VISUALISATION.state as? de.openindex.zugferd.manager.sections.VisualsSectionState
-                                    if (visualsState != null && visualsState.documents.isNotEmpty()) {
-                                        visualsState.isSearchOpen = true
-                                        return true // Consume event
+                            if (event.type != org.cef.handler.CefKeyboardHandler.CefKeyEvent.EventType.KEYEVENT_RAWKEYDOWN &&
+                                event.type != org.cef.handler.CefKeyboardHandler.CefKeyEvent.EventType.KEYEVENT_KEYDOWN) {
+                                return false
+                            }
+
+                            // EVENTFLAG_CONTROL_DOWN = 1 << 2, EVENTFLAG_COMMAND_DOWN = 1 << 7 (Meta/Cmd)
+                            val controlPressed = (event.modifiers and 4 != 0) || (event.modifiers and 128 != 0)
+
+                            if (event.windows_key_code == 70 && controlPressed) { // Ctrl+F
+                                when (_APP_STATE.sectionSync) {
+                                    AppSection.VISUALISATION ->
+                                        (AppSection.VISUALISATION.state as? de.openindex.zugferd.manager.sections.VisualsSectionState)
+                                            ?.isSearchOpen = true
+                                    AppSection.CHECK ->
+                                        (AppSection.CHECK.state as? de.openindex.zugferd.manager.sections.CheckSectionState)
+                                            ?.isSearchOpen = true
+                                    else -> {}
+                                }
+                                return true // consume — open our search, not the browser's
+                            }
+
+                            if (event.windows_key_code == 27) { // ESC
+                                when (_APP_STATE.sectionSync) {
+                                    AppSection.VISUALISATION -> {
+                                        val state = AppSection.VISUALISATION.state as? de.openindex.zugferd.manager.sections.VisualsSectionState
+                                        if (state?.isSearchOpen == true) {
+                                            state.isSearchOpen = false
+                                            return true
+                                        }
                                     }
+                                    AppSection.CHECK -> {
+                                        val state = AppSection.CHECK.state as? de.openindex.zugferd.manager.sections.CheckSectionState
+                                        if (state?.isSearchOpen == true) {
+                                            state.isSearchOpen = false
+                                            return true
+                                        }
+                                    }
+                                    else -> {}
                                 }
                             }
+
                             return false
                         }
                     })

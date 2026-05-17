@@ -71,7 +71,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -149,11 +148,14 @@ import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryUnknown
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryVersion
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryWarnings
 import de.openindex.zugferd.quba.generated.resources.Res
-import java.awt.KeyboardFocusManager
-import java.awt.KeyEventDispatcher
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PlatformFile
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
 
 /**
  * Main view of the check section.
@@ -172,32 +174,6 @@ fun CheckSection(state: CheckSectionState) {
         }
     }
 
-    // Global AWT key listener — works even when JCEF/PDF viewer has focus.
-    DisposableEffect(Unit) {
-        val dispatcher = KeyEventDispatcher { awtEvent ->
-            when {
-                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
-                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_F
-                        && awtEvent.isControlDown
-                        && state.selectedTab != null -> {
-                    state.isSearchOpen = true
-                    false
-                }
-                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
-                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_ESCAPE
-                        && state.isSearchOpen -> {
-                    state.isSearchOpen = false
-                    true
-                }
-                else -> false
-            }
-        }
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher)
-        onDispose {
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(dispatcher)
-        }
-    }
-
     val dragAndDropCallback = remember {
         createDragAndDropTarget(
             onDrop = { file ->
@@ -208,45 +184,48 @@ fun CheckSection(state: CheckSectionState) {
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Tab strip — visible as soon as at least one document is open.
-        if (state.tabs.isNotEmpty()) {
-            CheckTabStrip(state)
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Tab strip — visible as soon as at least one document is open.
+            if (state.tabs.isNotEmpty()) {
+                CheckTabStrip(state)
+            }
 
-        val selectedTab = state.selectedTab
+            val selectedTab = state.selectedTab
 
-        if (selectedTab == null) {
-            // No document open yet — show the empty/welcome view.
-            EmptyView(state)
-        } else {
-            // Two-column layout: validation results on the left, viewer on the right.
-            Row(modifier = Modifier.weight(1f)) {
-                Column(modifier = Modifier.weight(0.6f, fill = true)) {
-                    VerticalScrollBox(modifier = Modifier.weight(1f, fill = true)) {
-                        CheckView(state, selectedTab)
+            if (selectedTab == null) {
+                // No document open yet — show the empty/welcome view.
+                EmptyView(state)
+            } else {
+                // Two-column layout: validation results on the left, viewer on the right.
+                Row(modifier = Modifier.weight(1f)) {
+                    Column(modifier = Modifier.weight(0.6f, fill = true)) {
+                        VerticalScrollBox(modifier = Modifier.weight(1f, fill = true)) {
+                            CheckView(state, selectedTab)
+                        }
                     }
-                }
-                Column(modifier = Modifier.weight(0.4f, fill = true)) {
-                    DetailsView(state, selectedTab)
+                    Column(modifier = Modifier.weight(0.4f, fill = true)) {
+                        DetailsView(state, selectedTab)
+                    }
                 }
             }
         }
-    }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .then(
-                if (state.selectedTab == null)
-                    Modifier.clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } }
-                else Modifier
-            )
-            .dragAndDropTarget(
-                target = dragAndDropCallback,
-                shouldStartDragAndDrop = { true },
-            ),
-    )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(
+                    if (state.selectedTab == null)
+                        Modifier.clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } }
+                    else Modifier
+                )
+                .dragAndDropTarget(
+                    target = dragAndDropCallback,
+                    shouldStartDragAndDrop = { true },
+                ),
+        )
+
+    }
 }
 
 /**
@@ -254,50 +233,17 @@ fun CheckSection(state: CheckSectionState) {
  */
 @Composable
 fun CheckSectionActions(state: CheckSectionState) {
-    val scope = rememberCoroutineScope()
-    val appState = LocalAppState.current
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(end = 8.dp),
-    ) {
-        // Search bar — only shown when a tab is open.
-        if (state.selectedTab != null) {
-            if (state.isSearchOpen) {
-                CompactSearchBar(
-                    value = state.searchQuery,
-                    onValueChange = {
-                        state.searchQuery = it
-                        state.searchSequence = 0
-                    },
-                    onSubmit = {
-                        if (state.searchQuery.isNotBlank()) {
-                            state.searchSequence++
-                        }
-                    },
-                    onClose = { state.isSearchOpen = false },
-                    modifier = Modifier.width(220.dp),
-                )
-            } else {
-                IconButton(onClick = { state.isSearchOpen = true }) {
-                    Icon(Icons.Default.Search, "Suchen")
-                }
-            }
-        }
-
-        // Add button to select a PDF file for validation.
-        ActionButtonWithTooltip(
-            label = Res.string.AppCheckSelect,
-            tooltip = Res.string.AppCheckSelectInfo,
-            onClick = {
-                scope.launch(Dispatchers.IO) {
-                    state.selectFile(
-                        appState = appState,
-                    )
-                }
-            },
-        )
-    }
+    // Datei-Auswahl-Button ausgeblendet — Drag & Drop und Klick auf leere Fläche genügen.
+    // Suche ist in den Tab-Strip gewandert (zwischen + und Spacer).
+    // ActionButtonWithTooltip(
+    //     label = Res.string.AppCheckSelect,
+    //     tooltip = Res.string.AppCheckSelectInfo,
+    //     onClick = {
+    //         scope.launch(Dispatchers.IO) {
+    //             state.selectFile(appState = appState)
+    //         }
+    //     },
+    // )
 }
 
 /**
@@ -336,12 +282,26 @@ private fun CheckTabStrip(state: CheckSectionState) {
     val appState = LocalAppState.current
     val density = LocalDensity.current
 
+    val fileLauncher = rememberFilePickerLauncher(
+        type = PickerType.File(extensions = listOf("pdf", "xml")),
+        mode = PickerMode.Multiple(),
+        title = "Dateien auswählen",
+        onResult = { files: List<PlatformFile>? ->
+            files?.forEach { file ->
+                scope.launch(Dispatchers.IO) {
+                    state.selectFile(file = file, appState = appState)
+                }
+            }
+        },
+    )
+
     // Layout constants.
     val maxTabWidth = 200.dp
     val minTabWidth = 80.dp
     val tabSpacing = 4.dp
     val plusButtonSize = 32.dp
     val stripPadding = 8.dp
+    val searchIconWidth = 48.dp
 
     // Drag state — lifted here so all tabs can react in real-time.
     var draggedIndex by remember { mutableStateOf<Int?>(null) }
@@ -349,9 +309,12 @@ private fun CheckTabStrip(state: CheckSectionState) {
     // Mutable array so drag lambdas always read the current step without restarting.
     val tabStepPxRef = remember { floatArrayOf(0f) }
 
+    val searchBarWidth = 288.dp // 280 content + 8 padding
+
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val tabCount = state.tabs.size
-        val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing
+        val searchAreaWidth = if (state.isSearchOpen) searchBarWidth else searchIconWidth
+        val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing - searchAreaWidth
         val rawTabWidth = if (tabCount == 0) maxTabWidth
                           else (availableForTabs - tabSpacing * (tabCount - 1)) / tabCount
         val targetTabWidth = rawTabWidth.coerceIn(minTabWidth, maxTabWidth)
@@ -426,7 +389,9 @@ private fun CheckTabStrip(state: CheckSectionState) {
                                 onCloseToRight = if (index < state.tabs.lastIndex) ({ state.removeTabsToRight(index) }) else null,
                                 openInOtherLabel = "In Visualisierung öffnen",
                                 onOpenInOther = if (visualsState != null) ({
-                                    scope.launch(Dispatchers.IO) {
+                                    // Use an independent scope — the local composable scope is
+                                    // cancelled when this section leaves the composition on switch.
+                                    CoroutineScope(Dispatchers.IO).launch {
                                         visualsState.addTabWithFile(tab.file, appState)
                                     }
                                     appState.setSection(AppSection.VISUALISATION)
@@ -468,7 +433,7 @@ private fun CheckTabStrip(state: CheckSectionState) {
                     .size(plusButtonSize)
                     .clip(RoundedCornerShape(6.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
-                    .clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } },
+                    .clickable { fileLauncher.launch() },
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -480,6 +445,24 @@ private fun CheckTabStrip(state: CheckSectionState) {
 
             // Fills remaining space so the tab strip doesn't stretch.
             Spacer(modifier = Modifier.weight(1f))
+
+            // Search: inline bar when open, icon when closed. Lives in the header above JCEF.
+            if (state.isSearchOpen) {
+                CompactSearchBar(
+                    value = state.searchQuery,
+                    onValueChange = { state.searchQuery = it; state.searchSequence = 0 },
+                    onSubmit = { if (state.searchQuery.isNotBlank()) state.searchSequence++ },
+                    onClose = { state.isSearchOpen = false },
+                    modifier = Modifier.width(280.dp).padding(end = 4.dp),
+                )
+            } else {
+                IconButton(
+                    onClick = { state.isSearchOpen = true },
+                    modifier = Modifier.padding(end = 4.dp),
+                ) {
+                    Icon(Icons.Default.Search, contentDescription = "Suchen")
+                }
+            }
         }
     }
 }

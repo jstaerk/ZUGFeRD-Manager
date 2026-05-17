@@ -62,12 +62,15 @@ fun createDragAndDropTarget(
             val dragData = event.dragData()
             if (dragData !is DragData.FilesList) return false
 
-            val supportedFileUri = dragData.readFiles().firstOrNull {
+            val supportedFiles = dragData.readFiles().filter {
                 it.lowercase().endsWith(".pdf") || it.lowercase().endsWith(".xml")
-            } ?: return false
+            }
+            if (supportedFiles.isEmpty()) return false
 
-            val platformFile = getPlatformFileFromURI(supportedFileUri)
-            onDrop(platformFile)
+            // Open every dropped file — each gets its own tab.
+            supportedFiles.forEach { fileUri ->
+                onDrop(getPlatformFileFromURI(fileUri))
+            }
             return true
         }
     }

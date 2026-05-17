@@ -74,18 +74,20 @@ import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationNoXml
 import de.openindex.zugferd.quba.generated.resources.Res
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.awt.Cursor
-import java.awt.KeyboardFocusManager
-import java.awt.KeyEventDispatcher
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationSelectFile
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationSelectInfo
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.isPressed
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PlatformFile
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
 
 
 data class SearchState(
@@ -121,32 +123,6 @@ fun VisualsSection(state: VisualsSectionState) {
         focusRequester.requestFocus()
     }
 
-    // Global AWT key listener — works even when JCEF/PDF viewer has focus.
-    // Ctrl+F opens search; ESC closes search.
-    DisposableEffect(Unit) {
-        val dispatcher = KeyEventDispatcher { awtEvent ->
-            when {
-                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
-                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_F
-                        && awtEvent.isControlDown -> {
-                    state.isSearchOpen = true
-                    false
-                }
-                awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
-                        && awtEvent.keyCode == java.awt.event.KeyEvent.VK_ESCAPE
-                        && state.isSearchOpen -> {
-                    state.isSearchOpen = false
-                    true
-                }
-                else -> false
-            }
-        }
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher)
-        onDispose {
-            KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(dispatcher)
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -170,13 +146,10 @@ fun VisualsSection(state: VisualsSectionState) {
                 .dragAndDropTarget(
                     target = remember {
                         createDragAndDropTarget { file ->
+                            // Each dropped file opens in its own new tab.
                             scope.launch {
                                 try {
-                                    if (state.documents.isEmpty()) {
-                                        state.addTabWithFile(file, appState)
-                                    } else {
-                                        state.loadFileInCurrentTab(file, appState)
-                                    }
+                                    state.addTabWithFile(file, appState)
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }
@@ -198,49 +171,17 @@ fun VisualsSection(state: VisualsSectionState) {
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun VisualsSectionActions(state: VisualsSectionState) {
-    val scope = rememberCoroutineScope()
-    val appState = LocalAppState.current
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(end = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (state.documents.isNotEmpty()) {
-            if (state.isSearchOpen) {
-                CompactSearchBar(
-                    value = state.searchQuery,
-                    onValueChange = {
-                        state.searchQuery = it
-                        state.searchSequence = 0
-                    },
-                    onSubmit = {
-                        if (state.searchQuery.isNotBlank()) {
-                            state.searchSequence++
-                        }
-                    },
-                    onClose = { state.isSearchOpen = false },
-                    modifier = Modifier.width(220.dp)
-                )
-            } else {
-                IconButton(onClick = { state.isSearchOpen = true }) {
-                    Icon(Icons.Default.Search, "Suchen")
-                }
-            }
-
-        }
-
-        // Add button to select a PDF file for validation.
-        ActionButtonWithTooltip(
-            label = Res.string.AppVisualisationSelectFile,
-            tooltip = Res.string.AppVisualisationSelectInfo,
-            onClick = {
-                scope.launch(Dispatchers.IO) {
-                    state.selectFile(appState = appState,)
-                                   }
-            },
-        )
-    }
+    // Datei-Auswahl-Button ausgeblendet — Drag & Drop und Klick auf leere Fläche genügen.
+    // Suche ist in den Tab-Strip gewandert (zwischen + und Spacer).
+    // ActionButtonWithTooltip(
+    //     label = Res.string.AppVisualisationSelectFile,
+    //     tooltip = Res.string.AppVisualisationSelectInfo,
+    //     onClick = {
+    //         scope.launch(Dispatchers.IO) {
+    //             state.selectFile(appState = appState)
+    //         }
+    //     },
+    // )
 }
 
 @Composable
@@ -342,11 +283,26 @@ private fun TabRowWithControls(state: VisualsSectionState) {
     val appState = LocalAppState.current
     val density = LocalDensity.current
 
+    val fileLauncher = rememberFilePickerLauncher(
+        type = PickerType.File(extensions = listOf("pdf", "xml")),
+        mode = PickerMode.Multiple(),
+        title = "Dateien auswählen",
+        onResult = { files: List<PlatformFile>? ->
+            files?.forEach { file ->
+                scope.launch(Dispatchers.IO) {
+                    state.addTabWithFile(file, appState)
+                }
+            }
+        },
+    )
+
     val maxTabWidth = 200.dp
     val minTabWidth = 80.dp
     val tabSpacing = 4.dp
     val plusButtonSize = 32.dp
     val stripPadding = 8.dp
+    val searchIconWidth = 48.dp
+    val searchBarWidth = 288.dp // 280 content + 8 padding
 
     // Drag state — lifted here so all tabs can react in real-time.
     var draggedIndex by remember { mutableStateOf<Int?>(null) }
@@ -356,7 +312,8 @@ private fun TabRowWithControls(state: VisualsSectionState) {
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val tabCount = state.documents.size
-        val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing
+        val searchAreaWidth = if (state.isSearchOpen) searchBarWidth else searchIconWidth
+        val availableForTabs = maxWidth - plusButtonSize - stripPadding * 2 - tabSpacing - searchAreaWidth
         val rawTabWidth = if (tabCount == 0) maxTabWidth
                           else (availableForTabs - tabSpacing * (tabCount - 1)) / tabCount
         val targetTabWidth = rawTabWidth.coerceIn(minTabWidth, maxTabWidth)
@@ -432,7 +389,9 @@ private fun TabRowWithControls(state: VisualsSectionState) {
                                 onCloseToRight = if (index < state.documents.lastIndex) ({ state.removeTabsToRight(index) }) else null,
                                 openInOtherLabel = "In Prüfen öffnen",
                                 onOpenInOther = if (checkState != null && docFile != null) ({
-                                    scope.launch(Dispatchers.IO) {
+                                    // Use an independent scope — the local composable scope is
+                                    // cancelled when this section leaves the composition on switch.
+                                    CoroutineScope(Dispatchers.IO).launch {
                                         checkState.selectFile(docFile, appState)
                                     }
                                     appState.setSection(AppSection.CHECK)
@@ -474,7 +433,7 @@ private fun TabRowWithControls(state: VisualsSectionState) {
                     .size(plusButtonSize)
                     .clip(RoundedCornerShape(6.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
-                    .clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } },
+                    .clickable { fileLauncher.launch() },
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -486,6 +445,24 @@ private fun TabRowWithControls(state: VisualsSectionState) {
 
             // Fills remaining space so the tab strip doesn't stretch.
             Spacer(modifier = Modifier.weight(1f))
+
+            // Search: inline bar when open, icon when closed. Lives in the header above JCEF.
+            if (state.isSearchOpen) {
+                CompactSearchBar(
+                    value = state.searchQuery,
+                    onValueChange = { state.searchQuery = it; state.searchSequence = 0 },
+                    onSubmit = { if (state.searchQuery.isNotBlank()) state.searchSequence++ },
+                    onClose = { state.isSearchOpen = false },
+                    modifier = Modifier.width(280.dp).padding(end = 4.dp),
+                )
+            } else {
+                IconButton(
+                    onClick = { state.isSearchOpen = true },
+                    modifier = Modifier.padding(end = 4.dp),
+                ) {
+                    Icon(Icons.Default.Search, contentDescription = "Suchen")
+                }
+            }
         }
     }
 }

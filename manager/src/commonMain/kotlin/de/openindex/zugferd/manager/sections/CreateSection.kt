@@ -293,18 +293,16 @@ fun CreateSectionActions(state: CreateSectionState) {
         modifier = Modifier
             .padding(end = 8.dp),
     ) {
-        // Add button to select a PDF file to create an e-invoice from.
-        ActionButtonWithTooltip(
-            label = Res.string.AppCreateSelect,
-            tooltip = Res.string.AppCreateSelectInfo,
-            onClick = {
-                scope.launch(Dispatchers.IO) {
-                    state.selectPdf(
-                        appState = appState,
-                    )
-                }
-            },
-        )
+        // Datei-Auswahl-Button ausgeblendet — Drag & Drop und Klick auf leere Fläche genügen.
+        // ActionButtonWithTooltip(
+        //     label = Res.string.AppCreateSelect,
+        //     tooltip = Res.string.AppCreateSelectInfo,
+        //     onClick = {
+        //         scope.launch(Dispatchers.IO) {
+        //             state.selectPdf(appState = appState)
+        //         }
+        //     },
+        // )
 
         // Add button to create an e-invoice from the selected PDF with the user-provided inputs.
         AnimatedVisibility(visible = selectedPdf != null && isSelectedPdfArchiveUsable && isValid) {
