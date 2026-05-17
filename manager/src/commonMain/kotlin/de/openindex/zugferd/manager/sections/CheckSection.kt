@@ -851,6 +851,7 @@ private fun DetailsView(state: CheckSectionState, tab: CheckTab) {
         PdfViewer(
             pdf = tab.file,
             modifier = Modifier.fillMaxSize(),
+            search = activeSearch,
         )
     }
 
