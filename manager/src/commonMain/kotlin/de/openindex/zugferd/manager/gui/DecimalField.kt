@@ -21,10 +21,18 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.utils.format
 import de.openindex.zugferd.manager.utils.parseDouble
 import de.openindex.zugferd.manager.utils.pluralStringResource
@@ -33,7 +41,6 @@ import de.openindex.zugferd.manager.utils.title
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 import kotlin.math.max
-import androidx.compose.material3.TextField as MaterialTextField
 
 @Composable
 fun DecimalField(
@@ -44,31 +51,39 @@ fun DecimalField(
     onValueChange: (Double?) -> Unit,
     requiredIndicator: Boolean = false,
     modifier: Modifier = Modifier,
-) = MaterialTextField(
-    label = {
-        Label(
-            text = label,
-            requiredIndicator = requiredIndicator,
-        )
-    },
-    keyboardOptions = KeyboardOptions.Default
-        .copy(
+) = Column(modifier = modifier) {
+    FieldLabel(
+        text = label,
+        requiredIndicator = requiredIndicator,
+        modifier = Modifier.padding(bottom = 4.dp),
+    )
+    OutlinedTextField(
+        value = value
+            ?.format(
+                minPrecision = if (minPrecision <= 0 && maxPrecision > 0) 1 else minPrecision,
+                maxPrecision = maxPrecision,
+                grouped = false,
+            )
+            ?: "",
+        onValueChange = { newValue: String ->
+            onValueChange(newValue.parseDouble())
+        },
+        keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Decimal
                 .takeIf { max(minPrecision, maxPrecision) > 0 }
                 ?: KeyboardType.Number,
         ),
-    value = value
-        ?.format(
-            minPrecision = if (minPrecision <= 0 && maxPrecision > 0) 1 else minPrecision,
-            maxPrecision = maxPrecision,
-            grouped = false,
-        )
-        ?: "",
-    onValueChange = { newValue ->
-        onValueChange(newValue.parseDouble())
-    },
-    modifier = modifier,
-)
+        singleLine = true,
+        shape = RoundedCornerShape(8.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
 
 @Composable
 fun DecimalField(

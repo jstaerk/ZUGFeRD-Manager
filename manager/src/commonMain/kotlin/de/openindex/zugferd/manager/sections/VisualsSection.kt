@@ -39,6 +39,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
+import de.openindex.zugferd.manager.gui.AppToolbar
 import de.openindex.zugferd.manager.gui.NotificationBar
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.Tooltip
@@ -70,7 +72,9 @@ import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.showTabContextMenu
 import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
+import de.openindex.zugferd.quba.generated.resources.AppSidebarNewVisualisation
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationNoXml
 import de.openindex.zugferd.quba.generated.resources.Res
 import kotlin.math.roundToInt
@@ -129,6 +133,7 @@ fun VisualsSection(state: VisualsSectionState) {
             .focusRequester(focusRequester)
             .focusable()
     ) {
+        AppToolbar(title = stringResource(Res.string.AppSidebarNewVisualisation).title())
         if (state.documents.isNotEmpty()) {
             TabRowWithControls(state)
         }
@@ -658,22 +663,36 @@ private fun EmptyVisualsView(state: VisualsSectionState) {
 
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = stringResource(Res.string.AppCheckSelectMessage),
-                textAlign = TextAlign.Center,
-                softWrap = true
-            )
+        ElevatedCard(
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.widthIn(max = 380.dp),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(horizontal = 32.dp, vertical = 28.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Visibility,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(40.dp),
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            /*
-            Button(onClick = { scope.launch(Dispatchers.IO) { state.selectFile(appState) } }) {
-                Text("Datei auswählen")
+                Text(
+                    text = stringResource(Res.string.AppCheckSelectMessage),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    softWrap = true,
+                )
             }
-                         */
         }
     }
 }

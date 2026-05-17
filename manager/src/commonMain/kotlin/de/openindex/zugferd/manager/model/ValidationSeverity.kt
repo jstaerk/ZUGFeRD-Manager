@@ -44,26 +44,26 @@ enum class ValidationSeverity(
     NOTICE(
         title = Res.string.ValidationSeverity_NOTICE,
         icon = Icons.Default.Info,
-        lightModeColor = Color(0xFF00008B),
-        darkModeColor = Color(0xFF90D5FF),
+        lightModeColor = Color(0xFF1A56DB),   // blue
+        darkModeColor = Color(0xFF93C5FD),    // blue-300
     ),
     WARNING(
         title = Res.string.ValidationSeverity_WARNING,
         icon = Icons.Default.Warning,
-        lightModeColor = Color(0xFFFF8800),
-        darkModeColor = Color(0xFFFF8800),
+        lightModeColor = Color(0xFFD97706),   // amber-600
+        darkModeColor = Color(0xFFFCD34D),    // amber-300
     ),
     ERROR(
         title = Res.string.ValidationSeverity_ERROR,
         icon = Icons.Default.Error,
-        lightModeColor = Color(0xFFFF4400),
-        darkModeColor = Color(0xFFFF4400),
+        lightModeColor = Color(0xFFDC2626),   // red-600
+        darkModeColor = Color(0xFFFCA5A5),    // red-300
     ),
     FATAL(
         title = Res.string.ValidationSeverity_FATAL,
         icon = Icons.Default.Error,
-        lightModeColor = Color(0xFFFF4400),
-        darkModeColor = Color(0xFFFF4400),
+        lightModeColor = Color(0xFFB91C1C),   // red-700
+        darkModeColor = Color(0xFFF87171),    // red-400
     ),
 
     ;

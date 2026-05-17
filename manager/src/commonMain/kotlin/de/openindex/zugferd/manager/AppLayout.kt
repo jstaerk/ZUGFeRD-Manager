@@ -140,59 +140,49 @@ private fun AppNavigation() {
     var shutdownRequested by remember { mutableStateOf(false) }
 
     NavigationRail(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        //windowInsets = NavigationRailDefaults.windowInsets,
-        //header = { Text(text = "Head") },
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier,
     ) {
-        Spacer(
-            modifier = Modifier
-                .height(4.dp),
-        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        //Text(text = "Item")
         AppSection.entries.forEach {
-            AppSectionNavigationItem(
-                section = it,
-            )
+            AppSectionNavigationItem(section = it)
         }
 
-        Spacer(
-            modifier = Modifier
-                .weight(1f, fill = true),
-        )
+        Spacer(modifier = Modifier.weight(1f, fill = true))
 
         Image(
             painter = painterResource(Res.drawable.ic_app_logo),
             contentDescription = APP_TITLE,
             modifier = Modifier
-                .padding(vertical = 8.dp)
-                .size(36.dp),
+                .padding(vertical = 6.dp)
+                .size(32.dp),
         )
 
         Text(
             text = "v${APP_VERSION_SHORT}",
             softWrap = false,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .padding(all = 8.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 4.dp),
         )
 
         HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
             modifier = Modifier
-                .padding(vertical = 8.dp)
-                .width(50.dp)
+                .padding(vertical = 6.dp)
+                .width(48.dp),
         )
 
         AppNavigationItem(
             label = Res.string.AppSidebarQuit,
             activeIcon = Icons.Default.Cancel,
             selected = false,
-            onClick = {
-                shutdownRequested = true
-            },
+            onClick = { shutdownRequested = true },
         )
+
+        Spacer(modifier = Modifier.height(4.dp))
     }
 
     if (shutdownRequested) {
@@ -218,16 +208,21 @@ private fun AppNavigationItem(
             )
         },
         enabled = true,
-        label = { Label(text = label) },
+        label = {
+            Text(
+                text = stringResource(label),
+                style = MaterialTheme.typography.labelMedium,
+                softWrap = false,
+            )
+        },
         alwaysShowLabel = true,
         colors = NavigationRailItemDefaults.colors(
-            indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        //interactionSource = null,
         modifier = Modifier,
     )
 }

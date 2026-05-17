@@ -21,6 +21,7 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -44,6 +45,23 @@ fun Label(
     else
         text,
     softWrap = softWrap,
+    modifier = modifier,
+)
+
+/**
+ * Label displayed above an input field (label-above pattern).
+ * Renders with labelLarge typography and onSurfaceVariant color.
+ */
+@Composable
+fun FieldLabel(
+    text: String,
+    requiredIndicator: Boolean = false,
+    modifier: Modifier = Modifier,
+) = Text(
+    text = if (requiredIndicator) "$text$REQUIRED_FIELD_INDICATOR" else text,
+    style = MaterialTheme.typography.labelLarge,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    softWrap = false,
     modifier = modifier,
 )
 

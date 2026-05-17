@@ -48,7 +48,7 @@ fun SectionTitle(
 ) = Text(
     text = text,
     color = color,
-    style = MaterialTheme.typography.titleLarge,
+    style = MaterialTheme.typography.headlineMedium,
     softWrap = true,
     modifier = modifier,
 )
@@ -91,15 +91,14 @@ fun SectionSubTitle(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleLarge,
             lineHeight = 1.em,
             softWrap = false,
             modifier = Modifier,
         )
 
         HorizontalDivider(
-            //color = MaterialTheme.colorScheme.onSurface
-            //    .copy(alpha = 0.2f),
+            color = MaterialTheme.colorScheme.outlineVariant,
             modifier = Modifier
                 .weight(1f, fill = true),
         )
@@ -135,7 +134,7 @@ fun SectionSubTitle(
 @Composable
 fun SectionInfo(
     text: String,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     modifier: Modifier = Modifier,
 ) = Text(
     text = text,
@@ -148,7 +147,7 @@ fun SectionInfo(
 @Composable
 fun SectionInfo(
     text: StringResource,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     modifier: Modifier = Modifier,
 ) = SectionInfo(
     text = stringResource(text),
@@ -161,7 +160,7 @@ fun SectionInfo(
 fun SectionInfo(
     text: PluralStringResource,
     quantity: Int = 1,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     modifier: Modifier = Modifier,
 ) = SectionInfo(
     text = pluralStringResource(text, quantity),

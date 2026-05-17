@@ -21,13 +21,18 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.TextField
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.translate
@@ -61,54 +67,54 @@ fun <T> DropDown(
             if (value != null) options[value] ?: "" else ""
         )
     }
-    //val textFieldState = rememberTextFieldState(options.get(value) ?: "")
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it },
-        modifier = modifier,
-    ) {
-        TextField(
-            value = textFieldValue,
-            onValueChange = { textFieldValue = it },
-            readOnly = true,
-            label = {
-                Label(
-                    text = label.title(),
-                    requiredIndicator = requiredIndicator,
-                )
-            },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded,
-                )
-            },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier
-                .pointerHoverIcon(PointerIcon.Default, true)
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                .fillMaxWidth(),
+    Column(modifier = modifier) {
+        FieldLabel(
+            text = label.title(),
+            requiredIndicator = requiredIndicator,
+            modifier = Modifier.padding(bottom = 4.dp),
         )
-        ExposedDropdownMenu(
+        ExposedDropdownMenuBox(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
+            onExpandedChange = { expanded = it },
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            options
-                .forEach { option ->
+            OutlinedTextField(
+                value = textFieldValue,
+                onValueChange = { textFieldValue = it },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                modifier = Modifier
+                    .pointerHoverIcon(PointerIcon.Default, true)
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    .fillMaxWidth(),
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                options.forEach { option ->
                     DropdownMenuItem(
                         text = {
-                            Label(
-                                text = option.value,
-                            )
+                            Label(text = option.value)
                         },
                         onClick = {
                             onSelect(option.key)
                             textFieldValue = option.value
-                            //textFieldState.setTextAndPlaceCursorAtEnd(option.value)
                             expanded = false
-                        }
+                        },
                     )
                 }
+            }
         }
     }
 }

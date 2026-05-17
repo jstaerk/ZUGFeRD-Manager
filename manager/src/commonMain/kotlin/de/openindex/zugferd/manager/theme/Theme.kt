@@ -287,10 +287,11 @@ fun AppTheme(
         isDark -> darkScheme
         else -> lightScheme
     }
+    val inter = interFontFamily()
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography,
+        typography = buildAppTypography(inter),
         content = content,
     )
 }

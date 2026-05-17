@@ -39,6 +39,9 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -55,8 +58,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.fillMaxSize
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionDropDownButton
+import de.openindex.zugferd.manager.gui.AppToolbar
 import de.openindex.zugferd.manager.gui.CountryField
 import de.openindex.zugferd.manager.gui.CurrencyField
 import de.openindex.zugferd.manager.gui.DecimalField
@@ -142,23 +147,22 @@ import org.jetbrains.compose.resources.StringResource
  */
 @Composable
 fun SettingsSection(state: SettingsSectionState) {
-    VerticalScrollBox {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier
-                .padding(vertical = 16.dp, horizontal = 20.dp),
-        ) {
-            SectionTitle(
-                text = Res.string.AppSettings,
-            )
-
-            GeneralSettings(state)
-            SenderSettings(state)
-            RecipientSettings(state)
-            ProductSettings(state)
-            CreateSettings(state)
-            ChromeSettings(state)
-            ThemeSettings(state)
+    Column(modifier = Modifier.fillMaxSize()) {
+        AppToolbar(title = stringResource(Res.string.AppSettings).title())
+        VerticalScrollBox {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .padding(vertical = 20.dp, horizontal = 24.dp),
+            ) {
+                GeneralSettings(state)
+                SenderSettings(state)
+                RecipientSettings(state)
+                ProductSettings(state)
+                CreateSettings(state)
+                ChromeSettings(state)
+                ThemeSettings(state)
+            }
         }
     }
 }
@@ -879,43 +883,54 @@ private fun Section(
     info: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
-) = Column(
-    verticalArrangement = Arrangement.spacedBy(12.dp),
-    modifier = Modifier,
 ) {
     var infoVisible by remember { mutableStateOf(false) }
 
-    SectionSubTitle(
-        text = title,
-        actions = {
-            actions()
+    ElevatedCard(
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+        ) {
+            SectionSubTitle(
+                text = title,
+                actions = {
+                    actions()
+
+                    if (info != null) {
+                        Tooltip(
+                            text = Res.string.AppSettingsSectionInfo,
+                        ) {
+                            IconButton(
+                                onClick = { infoVisible = !infoVisible },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = stringResource(Res.string.AppSettingsSectionInfo),
+                                )
+                            }
+                        }
+                    }
+                },
+            )
 
             if (info != null) {
-                Tooltip(
-                    text = Res.string.AppSettingsSectionInfo,
-                ) {
-                    IconButton(
-                        onClick = { infoVisible = !infoVisible },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = stringResource(Res.string.AppSettingsSectionInfo),
-                        )
-                    }
+                AnimatedVisibility(visible = infoVisible) {
+                    SectionInfo(
+                        text = info,
+                    )
                 }
             }
-        },
-    )
 
-    if (info != null) {
-        AnimatedVisibility(visible = infoVisible) {
-            SectionInfo(
-                text = info,
-            )
+            content()
         }
     }
-
-    content()
 }
 
 /**

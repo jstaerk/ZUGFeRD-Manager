@@ -48,11 +48,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Search
@@ -60,6 +62,8 @@ import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -79,6 +83,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size as GeometrySize
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -105,6 +111,7 @@ import androidx.compose.ui.zIndex
 import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
+import de.openindex.zugferd.manager.gui.AppToolbar
 import de.openindex.zugferd.manager.gui.Label
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.SectionSubTitle
@@ -147,6 +154,7 @@ import de.openindex.zugferd.quba.generated.resources.AppCheckSummarySignature
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryUnknown
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryVersion
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryWarnings
+import de.openindex.zugferd.quba.generated.resources.AppSidebarCheck
 import de.openindex.zugferd.quba.generated.resources.Res
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -186,6 +194,7 @@ fun CheckSection(state: CheckSectionState) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            AppToolbar(title = stringResource(Res.string.AppSidebarCheck).title())
             // Tab strip — visible as soon as at least one document is open.
             if (state.tabs.isNotEmpty()) {
                 CheckTabStrip(state)
@@ -253,22 +262,38 @@ fun CheckSectionActions(state: CheckSectionState) {
 @Composable
 @Suppress("UNUSED_PARAMETER")
 private fun EmptyView(state: CheckSectionState) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxSize(),
+        ElevatedCard(
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.widthIn(max = 380.dp),
         ) {
-            // Request user to select a PDF file.
-            Text(
-                text = stringResource(Res.string.AppCheckSelectMessage),
-                textAlign = TextAlign.Center,
-                softWrap = true,
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(horizontal = 32.dp, vertical = 28.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(40.dp),
+                )
+
+                Text(
+                    text = stringResource(Res.string.AppCheckSelectMessage),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    softWrap = true,
+                )
+            }
         }
     }
 }
@@ -1016,85 +1041,84 @@ private fun ValidationMessages(tab: CheckTab) {
  */
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
-private fun ValidationMessage(message: ValidationMessage) =
+private fun ValidationMessage(message: ValidationMessage) {
+    val isDarkMode = LocalAppState.current.preferences.darkMode ?: isSystemInDarkTheme()
+    val accentColor = if (isDarkMode) message.severity.darkModeColor else message.severity.lightModeColor
+    val clipboard = LocalClipboardManager.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(8.dp),
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .drawBehind {
+                    drawRect(color = accentColor, size = GeometrySize(4.dp.toPx(), size.height))
+                }
+                .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(top = 8.dp, start = 16.dp, end = 16.dp)
-                    .fillMaxWidth(),
-            ) {
-                val isDarkMode = LocalAppState.current.preferences.darkMode ?: isSystemInDarkTheme()
-                val clipboard = LocalClipboardManager.current
-
-                Icon(
-                    imageVector = message.severity.icon,
-                    tint = if (isDarkMode)
-                        message.severity.darkModeColor
-                    else
-                        message.severity.lightModeColor,
-                    contentDescription = stringResource(message.severity.title),
-                    modifier = Modifier
-                        .size(36.dp)
-                )
-
-                Text(
-                    text = buildString {
-                        append(stringResource(message.severity.title).title())
-                        append(" (")
-                        append(stringResource(message.type.title))
-                        append(")")
-                    },
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge
-                        .copy(lineHeight = 1.em),
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .weight(1f, fill = true),
-                )
-
-                Tooltip(
-                    text = stringResource(Res.string.AppCheckMessageMessageCopy),
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Button(
-                        onClick = {
-                            clipboard.setText(
-                                AnnotatedString(message.message)
-                            )
+                    Icon(
+                        imageVector = message.severity.icon,
+                        tint = accentColor,
+                        contentDescription = stringResource(message.severity.title),
+                        modifier = Modifier.size(18.dp),
+                    )
+
+                    Text(
+                        text = buildString {
+                            append(stringResource(message.severity.title).title())
+                            append(" · ")
+                            append(stringResource(message.type.title))
                         },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = stringResource(Res.string.AppCheckMessageMessageCopy),
-                        )
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.labelLarge.copy(color = accentColor),
+                    )
+
+                    Spacer(Modifier.weight(1f))
+
+                    Tooltip(text = stringResource(Res.string.AppCheckMessageMessageCopy)) {
+                        IconButton(
+                            onClick = { clipboard.setText(AnnotatedString(message.message)) },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = stringResource(Res.string.AppCheckMessageMessageCopy),
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
                     }
                 }
-            }
 
-            Text(
-                text = message.message.trim(),
-                modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-            )
-
-            if (!message.location.isNullOrBlank()) {
                 Text(
-                    text = message.location,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier
-                        .padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+                    text = message.message.trim(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 6.dp),
                 )
-            }
+
+                if (!message.location.isNullOrBlank()) {
+                    Text(
+                        text = message.location,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
         }
     }
+}

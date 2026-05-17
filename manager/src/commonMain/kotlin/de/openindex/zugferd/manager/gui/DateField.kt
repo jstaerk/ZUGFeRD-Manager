@@ -23,13 +23,19 @@ package de.openindex.zugferd.manager.gui
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TextField
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.utils.formatAsMediumDate
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
@@ -60,7 +67,6 @@ fun DateField(
     onValueChange: (LocalDate?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    //val dateState = rememberDatePickerState()
     var showDialog by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -70,54 +76,56 @@ fun DateField(
         if (isPressed) showDialog = true
     }
 
-    // Text field for date value.
-    TextField(
-        label = {
-            Label(
-                text = label.title(),
-                requiredIndicator = requiredIndicator,
-            )
-        },
-        supportingText = supportingText,
-        value = value?.formatAsMediumDate() ?: "",
-        onValueChange = { },
-        interactionSource = interactionSource,
-        trailingIcon = {
-            Row(
-                //horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier,
-            ) {
-                // Button for date selection via dialog.
-                IconButton(
-                    onClick = { showDialog = true },
-                    modifier = Modifier
-                        .pointerHoverIcon(PointerIcon.Default, true),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = stringResource(Res.string.AppDateSelectionFieldSelect),
-                    )
-                }
-
-                // Button to clear input.
-                if (clearable && value != null) {
+    Column(modifier = modifier) {
+        FieldLabel(
+            text = label.title(),
+            requiredIndicator = requiredIndicator,
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+        OutlinedTextField(
+            value = value?.formatAsMediumDate() ?: "",
+            onValueChange = { },
+            supportingText = supportingText,
+            interactionSource = interactionSource,
+            trailingIcon = {
+                Row {
+                    // Button for date selection via dialog.
                     IconButton(
-                        onClick = { onValueChange(null) },
-                        modifier = Modifier
-                            .pointerHoverIcon(PointerIcon.Default, true),
+                        onClick = { showDialog = true },
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Default, true),
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = stringResource(Res.string.AppDateSelectionFieldClear),
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = stringResource(Res.string.AppDateSelectionFieldSelect),
                         )
                     }
+
+                    // Button to clear input.
+                    if (clearable && value != null) {
+                        IconButton(
+                            onClick = { onValueChange(null) },
+                            modifier = Modifier.pointerHoverIcon(PointerIcon.Default, true),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(Res.string.AppDateSelectionFieldClear),
+                            )
+                        }
+                    }
                 }
-            }
-        },
-        readOnly = true,
-        singleLine = true,
-        modifier = modifier,
-    )
+            },
+            readOnly = true,
+            singleLine = true,
+            shape = RoundedCornerShape(8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 
     // Show dialog, if requested.
     if (showDialog) {

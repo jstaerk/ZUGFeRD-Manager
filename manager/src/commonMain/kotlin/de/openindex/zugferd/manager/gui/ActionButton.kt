@@ -21,12 +21,16 @@
 
 package de.openindex.zugferd.manager.gui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -38,16 +42,17 @@ fun ActionButton(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-) = TextButton(
+) = OutlinedButton(
     onClick = onClick,
-    colors = ButtonDefaults.textButtonColors(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    colors = ButtonDefaults.outlinedButtonColors(
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ),
-    modifier = modifier,
+    modifier = modifier.height(36.dp),
 ) {
-    Label(
+    Text(
         text = label,
+        style = MaterialTheme.typography.labelLarge,
     )
 }
 
