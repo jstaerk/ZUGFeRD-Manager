@@ -25,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.openindex.zugferd.manager.theme.LocalQubaColors
+import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -50,20 +52,23 @@ fun Label(
 
 /**
  * Label displayed above an input field (label-above pattern).
- * Renders with labelLarge typography and onSurfaceVariant color.
+ * Renders with Quba label typography and text3 color.
  */
 @Composable
 fun FieldLabel(
     text: String,
     requiredIndicator: Boolean = false,
     modifier: Modifier = Modifier,
-) = Text(
-    text = if (requiredIndicator) "$text$REQUIRED_FIELD_INDICATOR" else text,
-    style = MaterialTheme.typography.labelLarge,
-    color = MaterialTheme.colorScheme.onSurfaceVariant,
-    softWrap = false,
-    modifier = modifier,
-)
+) {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+    Text(
+        text = if (requiredIndicator) "$text$REQUIRED_FIELD_INDICATOR" else text,
+        style = typo.label.copy(color = colors.text3),
+        softWrap = false,
+        modifier = modifier,
+    )
+}
 
 @Composable
 fun Label(

@@ -24,7 +24,7 @@ package de.openindex.zugferd.manager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
-import de.openindex.zugferd.manager.theme.AppTheme
+import de.openindex.zugferd.manager.theme.QubaTheme
 import de.openindex.zugferd.manager.utils.DEFAULT_LANGUAGE
 import de.openindex.zugferd.manager.utils.ShutdownHandler
 import de.openindex.zugferd.manager.utils.getShutdownHandler
@@ -43,7 +43,7 @@ val LocalShutdownHandler = staticCompositionLocalOf<ShutdownHandler?> { null }
 
 @Composable
 @Preview
-fun App() = AppTheme {
+fun App() = QubaTheme {
 
     val shutdownHandler = getShutdownHandler()
     val language = LocalAppState.current.preferences.language

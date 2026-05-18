@@ -39,8 +39,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,7 +75,10 @@ import de.openindex.zugferd.manager.gui.NotificationBar
 import de.openindex.zugferd.manager.gui.PaymentMethodField
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.ProductFieldWithAdd
-import de.openindex.zugferd.manager.gui.SectionSubTitle
+import de.openindex.zugferd.manager.gui.QubaButton
+import de.openindex.zugferd.manager.gui.QubaButtonVariant
+import de.openindex.zugferd.manager.gui.QubaCard
+import de.openindex.zugferd.manager.gui.QubaSectionHeader
 import de.openindex.zugferd.manager.gui.SectionTitle
 import de.openindex.zugferd.manager.gui.TextField
 import de.openindex.zugferd.manager.gui.Tooltip
@@ -177,7 +178,10 @@ fun CreateSection(state: CreateSectionState) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppToolbar(title = stringResource(Res.string.AppSidebarCreate).title())
+        AppToolbar(
+            title = stringResource(Res.string.AppSidebarCreate).title(),
+            actions = { CreateSectionActions(state) },
+        )
 
     // Show an empty view, if no PDF file was selected.
     if (selectedPdf == null) {
@@ -379,8 +383,9 @@ private fun CreateView(state: CreateSectionState) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            SectionSubTitle(
-                text = Res.string.AppCreateGeneral,
+            QubaSectionHeader(
+                number = "01",
+                title = stringResource(Res.string.AppCreateGeneral).title(),
             )
 
             GeneralForm(state)
@@ -392,18 +397,15 @@ private fun CreateView(state: CreateSectionState) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            SectionSubTitle(
-                text = Res.string.AppCreateItems,
+            QubaSectionHeader(
+                number = "02",
+                title = stringResource(Res.string.AppCreateItems).title(),
             ) {
-                Button(
-                    onClick = {
-                        state.invoiceItems = state.invoiceItems.plus(Item())
-                    },
-                ) {
-                    Label(
-                        text = Res.string.AppCreateItemsAdd,
-                    )
-                }
+                QubaButton(
+                    label = stringResource(Res.string.AppCreateItemsAdd).title(),
+                    onClick = { state.invoiceItems = state.invoiceItems.plus(Item()) },
+                    variant = QubaButtonVariant.Primary,
+                )
             }
 
             ItemsForm(state)
@@ -416,8 +418,9 @@ private fun CreateView(state: CreateSectionState) {
                 .fillMaxWidth()
         ) {
 
-            SectionSubTitle(
-                text = Res.string.AppCreateSummary,
+            QubaSectionHeader(
+                number = "03",
+                title = stringResource(Res.string.AppCreateSummary).title(),
             )
 
             AmountSummary(state)
@@ -928,13 +931,11 @@ private fun RowScope.ItemSummary(
 ) {
     val currency = remember(state.invoiceCurrency) { state.invoiceCurrency ?: FALLBACK_CURRENCY }
 
-    Card(
-        modifier = modifier,
-    ) {
+    QubaCard(modifier = modifier) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .padding(vertical = 8.dp, horizontal = 16.dp)
+                .padding(vertical = 8.dp, horizontal = 14.dp)
         ) {
             // Item net amount.
             Text(
@@ -1003,14 +1004,14 @@ private fun ColumnScope.AmountSummary(
         state.invoiceItems.sumOf { it.totalGrossPrice }
     }
 
-    Card(
+    QubaCard(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
-                .padding(vertical = 8.dp, horizontal = 16.dp)
+                .padding(vertical = 10.dp, horizontal = 14.dp)
                 .fillMaxWidth(),
         ) {
             // Calculated total net amount.

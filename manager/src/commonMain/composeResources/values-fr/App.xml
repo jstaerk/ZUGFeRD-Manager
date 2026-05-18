@@ -28,6 +28,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSidebarCheck">tester</string>
     <string name="AppSidebarSettings">options</string>
     <string name="AppSidebarQuit">terminer</string>
+    <string name="AppSidebarCollapse">réduire</string>
+    <string name="AppSidebarExpand">développer</string>
 
     <string name="AppMoreActions">autres actions</string>
 

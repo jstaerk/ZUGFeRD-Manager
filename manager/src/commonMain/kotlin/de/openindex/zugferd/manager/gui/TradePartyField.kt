@@ -22,31 +22,24 @@
 package de.openindex.zugferd.manager.gui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField as MaterialTextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.utils.getSystemCountryCode
@@ -94,20 +87,12 @@ fun TradePartyFieldWithAdd(
     modifier: Modifier = Modifier,
 ) {
     var newTradeParty by remember { mutableStateOf<TradeParty?>(null) }
-    val unsavedTradeParty by derivedStateOf {
-        tradeParties.find { !it.isSaved }
-    }
+    val savedParties by derivedStateOf { tradeParties.filter { it.isSaved } }
+    val unsavedTradeParty by derivedStateOf { tradeParties.find { !it.isSaved } }
 
-    // Detect clicks on the input field to open the dialog — same as clicking +.
-    val fieldInteractionSource = remember { MutableInteractionSource() }
-    val isFieldPressed by fieldInteractionSource.collectIsPressedAsState()
-
-    LaunchedEffect(isFieldPressed) {
-        if (isFieldPressed) {
-            newTradeParty = unsavedTradeParty ?: TradeParty(
-                country = getSystemCountryCode(),
-            )
-        }
+    // Build entries map from all parties so that even unsaved (draft) selections display correctly.
+    val entriesMap = remember(tradeParties) {
+        buildMap { tradeParties.forEach { put(it, it.summaryShort) } }
     }
 
     Column(modifier = modifier) {
@@ -115,34 +100,17 @@ fun TradePartyFieldWithAdd(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier,
         ) {
-            // Read-only field — click opens the dialog (same as + button).
-            MaterialTextField(
-                value = tradeParty?.summaryShort ?: "",
-                onValueChange = {},
-                readOnly = true,
-                label = {
-                    Label(
-                        text = label.translate().title(),
-                        requiredIndicator = requiredIndicator,
-                    )
-                },
-                interactionSource = fieldInteractionSource,
-                trailingIcon = {
-                    if (tradeParty != null) {
-                        IconButton(
-                            onClick = { onSelect(null, false) },
-                            modifier = Modifier.pointerHoverIcon(PointerIcon.Default, true),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "Auswahl leeren",
-                            )
-                        }
-                    }
-                },
+            // AutoComplete field — shows saved contacts as a searchable dropdown.
+            AutoCompleteField(
+                label = label.translate(),
+                entry = tradeParty,
+                entries = entriesMap,
+                requiredIndicator = requiredIndicator,
+                onSelect = { selected -> onSelect(selected, false) },
                 modifier = Modifier.weight(1f, fill = true),
             )
 
+            // Button to open the dialog and create/edit a trade party.
             Tooltip(
                 text = (addLabel.takeIf { unsavedTradeParty == null } ?: editLabel)
                     .translate()
@@ -154,7 +122,6 @@ fun TradePartyFieldWithAdd(
                             country = getSystemCountryCode(),
                         )
                     },
-                    modifier = Modifier,
                 ) {
                     if (unsavedTradeParty == null) {
                         Icon(
@@ -171,8 +138,8 @@ fun TradePartyFieldWithAdd(
             }
         }
 
-        // Show hint when no entry is selected yet.
-        if (tradeParty == null) {
+        // Show hint when no entry is selected and no saved contacts exist yet.
+        if (tradeParty == null && savedParties.isEmpty()) {
             Text(
                 text = stringResource(Res.string.AppTradePartyFieldHint),
                 style = MaterialTheme.typography.bodySmall,

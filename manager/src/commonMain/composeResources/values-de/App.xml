@@ -29,6 +29,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppSidebarSettings">Optionen</string>
     <string name="AppSidebarNewVisualisation">Visualisieren</string>
     <string name="AppSidebarQuit">beenden</string>
+    <string name="AppSidebarCollapse">zuklappen</string>
+    <string name="AppSidebarExpand">aufklappen</string>
 
     <string name="AppMoreActions">weitere Aktionen</string>
 

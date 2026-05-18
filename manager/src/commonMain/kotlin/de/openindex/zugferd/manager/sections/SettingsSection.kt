@@ -23,23 +23,29 @@ package de.openindex.zugferd.manager.sections
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import de.openindex.zugferd.manager.gui.QubaButton
+import de.openindex.zugferd.manager.gui.QubaButtonVariant
+import de.openindex.zugferd.manager.theme.LocalQubaColors
+import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
@@ -48,7 +54,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +65,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxSize
 import de.openindex.zugferd.manager.LocalAppState
@@ -142,28 +153,158 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 
+private enum class SettingsPage {
+    GENERAL, THEME, SENDERS, RECIPIENTS, PRODUCTS, CREATE, CHROME
+}
+
 /**
  * Main view of the settings section.
  */
 @Composable
 fun SettingsSection(state: SettingsSectionState) {
+    var currentPage by remember { mutableStateOf(SettingsPage.GENERAL) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         AppToolbar(title = stringResource(Res.string.AppSettings).title())
-        VerticalScrollBox {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .padding(vertical = 20.dp, horizontal = 24.dp),
-            ) {
-                GeneralSettings(state)
-                SenderSettings(state)
-                RecipientSettings(state)
-                ProductSettings(state)
-                CreateSettings(state)
-                ChromeSettings(state)
-                ThemeSettings(state)
+        Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            // Left nav — 200dp
+            SettingsLeftNav(
+                currentPage = currentPage,
+                onPageChange = { currentPage = it },
+                modifier = Modifier.width(200.dp).fillMaxHeight(),
+            )
+            VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            // Right content area
+            VerticalScrollBox(modifier = Modifier.weight(1f)) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(vertical = 20.dp, horizontal = 24.dp),
+                ) {
+                    when (currentPage) {
+                        SettingsPage.GENERAL -> GeneralSettings(state)
+                        SettingsPage.THEME -> ThemeSettings(state)
+                        SettingsPage.SENDERS -> SenderSettings(state)
+                        SettingsPage.RECIPIENTS -> RecipientSettings(state)
+                        SettingsPage.PRODUCTS -> ProductSettings(state)
+                        SettingsPage.CREATE -> CreateSettings(state)
+                        SettingsPage.CHROME -> ChromeSettings(state)
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsLeftNav(
+    currentPage: SettingsPage,
+    onPageChange: (SettingsPage) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    VerticalScrollBox(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 8.dp),
+        ) {
+            SettingsNavGroup(label = "Workspace") {
+                SettingsNavItem(
+                    label = stringResource(Res.string.AppSettingsGeneral).title(),
+                    selected = currentPage == SettingsPage.GENERAL,
+                    onClick = { onPageChange(SettingsPage.GENERAL) },
+                )
+                SettingsNavItem(
+                    label = stringResource(Res.string.AppSettingsTheme).title(),
+                    selected = currentPage == SettingsPage.THEME,
+                    onClick = { onPageChange(SettingsPage.THEME) },
+                )
+            }
+            SettingsNavGroup(label = "Contacts") {
+                SettingsNavItem(
+                    label = stringResource(Res.string.AppSettingsSender).title(),
+                    selected = currentPage == SettingsPage.SENDERS,
+                    onClick = { onPageChange(SettingsPage.SENDERS) },
+                )
+                SettingsNavItem(
+                    label = stringResource(Res.string.AppSettingsRecipient).title(),
+                    selected = currentPage == SettingsPage.RECIPIENTS,
+                    onClick = { onPageChange(SettingsPage.RECIPIENTS) },
+                )
+                SettingsNavItem(
+                    label = stringResource(Res.string.AppSettingsProduct).title(),
+                    selected = currentPage == SettingsPage.PRODUCTS,
+                    onClick = { onPageChange(SettingsPage.PRODUCTS) },
+                )
+            }
+            SettingsNavGroup(label = "E-Invoice") {
+                SettingsNavItem(
+                    label = stringResource(Res.string.AppSettingsCreate).title(),
+                    selected = currentPage == SettingsPage.CREATE,
+                    onClick = { onPageChange(SettingsPage.CREATE) },
+                )
+                SettingsNavItem(
+                    label = stringResource(Res.string.AppSettingsChrome).title(),
+                    selected = currentPage == SettingsPage.CHROME,
+                    onClick = { onPageChange(SettingsPage.CHROME) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsNavGroup(
+    label: String,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+        ) {
+            Text(
+                text = label.uppercase(),
+                style = typo.caption.copy(color = colors.text4),
+                letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified,
+            )
+            androidx.compose.material3.HorizontalDivider(
+                color = colors.borderSubtle,
+                thickness = 1.dp,
+                modifier = Modifier.weight(1f).padding(start = 8.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(2.dp))
+        content()
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+}
+
+@Composable
+private fun SettingsNavItem(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
+            ),
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
@@ -670,118 +811,53 @@ private fun ProductSettings(state: SettingsSectionState) {
  */
 @Composable
 @Suppress("UNUSED_PARAMETER")
-@OptIn(ExperimentalLayoutApi::class)
 private fun ThemeSettings(state: SettingsSectionState) =
     Section(
         title = Res.string.AppSettingsTheme,
     ) {
         // Theme selection (light and dark mode).
-        FlowRow(
+        Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier,
         ) {
             val scope = rememberCoroutineScope()
             val preferences = LocalAppState.current.preferences
 
             // automatic selection
-            Button(
+            QubaButton(
+                label = stringResource(Res.string.AppSettingsThemeAuto),
+                leadingIcon = Icons.Default.Settings,
                 onClick = {
                     preferences.setDarkMode(null)
-                    scope.launch {
-                        preferences.save()
-                    }
+                    scope.launch { preferences.save() }
                 },
-                colors = if (preferences.isThemeAuto) {
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                } else {
-                    ButtonDefaults.buttonColors()
-                },
-                modifier = Modifier,
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = stringResource(Res.string.AppSettingsThemeAuto),
-                    )
-                    Label(
-                        text = stringResource(Res.string.AppSettingsThemeAuto),
-                    )
-                }
-            }
+                variant = if (preferences.isThemeAuto) QubaButtonVariant.Primary else QubaButtonVariant.Default,
+                size = de.openindex.zugferd.manager.gui.QubaButtonSize.Large,
+            )
 
             // light mode selection
-            Button(
+            QubaButton(
+                label = stringResource(Res.string.AppSettingsThemeLight),
+                leadingIcon = Icons.Default.LightMode,
                 onClick = {
                     preferences.setDarkMode(false)
-                    scope.launch {
-                        preferences.save()
-                    }
+                    scope.launch { preferences.save() }
                 },
-                colors = if (preferences.isThemeLight) {
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                } else {
-                    ButtonDefaults.buttonColors()
-                },
-                modifier = Modifier,
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LightMode,
-                        contentDescription = stringResource(Res.string.AppSettingsThemeLight),
-                    )
-                    Label(
-                        text = stringResource(Res.string.AppSettingsThemeLight),
-                    )
-                }
-            }
+                variant = if (preferences.isThemeLight) QubaButtonVariant.Primary else QubaButtonVariant.Default,
+                size = de.openindex.zugferd.manager.gui.QubaButtonSize.Large,
+            )
 
             // dark mode selection
-            Button(
+            QubaButton(
+                label = stringResource(Res.string.AppSettingsThemeDark),
+                leadingIcon = Icons.Default.DarkMode,
                 onClick = {
                     preferences.setDarkMode(true)
-                    scope.launch {
-                        preferences.save()
-                    }
+                    scope.launch { preferences.save() }
                 },
-                colors = if (preferences.isThemeDark) {
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                } else {
-                    ButtonDefaults.buttonColors()
-                },
-                modifier = Modifier,
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DarkMode,
-                        contentDescription = stringResource(Res.string.AppSettingsThemeDark)
-                    )
-                    Label(
-                        text = stringResource(Res.string.AppSettingsThemeDark),
-                    )
-                }
-            }
+                variant = if (preferences.isThemeDark) QubaButtonVariant.Primary else QubaButtonVariant.Default,
+                size = de.openindex.zugferd.manager.gui.QubaButtonSize.Large,
+            )
         }
     }
 
@@ -805,6 +881,7 @@ private fun CreateSettings(state: SettingsSectionState) =
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier,
         ) {
+            val colors = LocalQubaColors.current
             Switch(
                 checked = preferences.autoRemoveAttachments,
                 onCheckedChange = {
@@ -812,7 +889,14 @@ private fun CreateSettings(state: SettingsSectionState) =
                     scope.launch {
                         preferences.save()
                     }
-                }
+                },
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor    = colors.accent,
+                    checkedThumbColor    = colors.surface,
+                    uncheckedTrackColor  = colors.border,
+                    uncheckedBorderColor = colors.text3,
+                    uncheckedThumbColor  = colors.text3,
+                ),
             )
 
             Column {
@@ -851,6 +935,7 @@ private fun ChromeSettings(state: SettingsSectionState) =
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier,
         ) {
+            val colors = LocalQubaColors.current
             Switch(
                 checked = preferences.chromeGpuEnabled,
                 onCheckedChange = {
@@ -858,7 +943,14 @@ private fun ChromeSettings(state: SettingsSectionState) =
                     scope.launch {
                         preferences.save()
                     }
-                }
+                },
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor    = colors.accent,
+                    checkedThumbColor    = colors.surface,
+                    uncheckedTrackColor  = colors.border,
+                    uncheckedBorderColor = colors.text3,
+                    uncheckedThumbColor  = colors.text3,
+                ),
             )
 
             Column {

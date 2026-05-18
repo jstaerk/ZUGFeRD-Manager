@@ -27,6 +27,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,11 +37,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -60,6 +60,9 @@ import de.openindex.zugferd.manager.model.TradeParty
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.manager.utils.translate
+import de.openindex.zugferd.manager.theme.LocalQubaColors
+import de.openindex.zugferd.manager.gui.QubaButton
+import de.openindex.zugferd.manager.gui.QubaButtonVariant
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogAccount
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogAccountBIC
 import de.openindex.zugferd.quba.generated.resources.AppTradePartyDialogAccountCreditorReferenceId
@@ -224,56 +227,65 @@ private fun TradePartyDialogContent(
             ) {
                 // Dialog title, if available.
                 if (title != null) {
+                    val colors = LocalQubaColors.current
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .background(color = MaterialTheme.colorScheme.primaryContainer)
+                            .background(color = colors.accentSoft)
                             .padding(horizontal = 16.dp, vertical = 12.dp),
                     ) {
                         Text(
                             text = title,
                             softWrap = false,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = colors.accent,
                             style = MaterialTheme.typography.titleLarge,
                         )
                     }
                 }
 
-                // Trade party form.
-                TradePartyForm(
-                    value = tradeParty,
-                    isCustomer = isCustomer,
-                    onUpdate = { tradeParty = it },
-                )
+                // Tab state lives here so the TabRow stays outside the scroll area.
+                var formState by remember { mutableStateOf(0) }
 
-                Spacer(Modifier.weight(1f, true))
-
-                // Bottom row.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                ) {
-                    // Submit button — disabled when required fields are missing.
-                    Button(
-                        onClick = {
-                            onSubmitRequest(
-                                tradeParty,
-                                savePermanently,
-                            )
-                        },
-                        enabled = isTradePartyValid,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    ) {
-                        Label(
-                            text = Res.string.AppTradePartyDialogSubmit,
+                // Tab bar — always visible, not inside the scroll box.
+                TabRow(selectedTabIndex = formState) {
+                    TradePartyForm.entries.forEachIndexed { index, form ->
+                        Tab(
+                            selected = formState == index,
+                            onClick = { formState = index },
+                            text = { Label(text = form.title()) },
                         )
                     }
+                }
+
+                // Trade party form — scrollable so content never hides the bottom buttons.
+                VerticalScrollBox(modifier = Modifier.weight(1f)) {
+                    TradePartyForm(
+                        value = tradeParty,
+                        isCustomer = isCustomer,
+                        state = formState,
+                        onUpdate = { tradeParty = it },
+                    )
+                }
+
+                // Bottom row — always visible (not inside scroll).
+                androidx.compose.material3.HorizontalDivider(
+                    color = LocalQubaColors.current.border,
+                    thickness = 1.dp,
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                ) {
+                    // Submit button — disabled when required fields are missing.
+                    QubaButton(
+                        label = stringResource(Res.string.AppTradePartyDialogSubmit).title(),
+                        onClick = { onSubmitRequest(tradeParty, savePermanently) },
+                        enabled = isTradePartyValid,
+                        variant = QubaButtonVariant.Primary,
+                    )
 
                     // Save permanently toggle.
                     if (permanentSaveOption) {
@@ -281,33 +293,37 @@ private fun TradePartyDialogContent(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier
-                                .clickable { savePermanently = !savePermanently },
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                ) { savePermanently = !savePermanently },
                         ) {
+                            val colors = LocalQubaColors.current
                             Switch(
                                 checked = savePermanently,
                                 onCheckedChange = { savePermanently = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedTrackColor    = colors.accent,
+                                    checkedThumbColor    = colors.surface,
+                                    uncheckedTrackColor  = colors.border,
+                                    uncheckedBorderColor = colors.text3,
+                                    uncheckedThumbColor  = colors.text3,
+                                ),
                             )
                             Label(
-                                // Evaluate translation string immediately,
-                                // to avoid title conversion within the label component.
                                 text = stringResource(Res.string.AppTradePartyDialogSavePermanently),
                             )
                         }
                     }
 
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1f, true),
-                    )
+                    Spacer(modifier = Modifier.weight(1f, true))
 
                     // Cancel button.
-                    Button(
+                    QubaButton(
+                        label = stringResource(Res.string.AppTradePartyDialogCancel).title(),
                         onClick = { onDismissRequest() },
-                    ) {
-                        Label(
-                            text = Res.string.AppTradePartyDialogCancel,
-                        )
-                    }
+                        variant = QubaButtonVariant.Ghost,
+                    )
                 }
             }
         }
@@ -321,27 +337,9 @@ private fun TradePartyDialogContent(
 private fun TradePartyForm(
     value: TradeParty,
     isCustomer: Boolean,
+    state: Int,
     onUpdate: (tradeParty: TradeParty) -> Unit,
 ) {
-    var state by remember { mutableStateOf(0) }
-
-    // Available tabs.
-    TabRow(
-        selectedTabIndex = state,
-    ) {
-        TradePartyForm.entries.forEachIndexed { index, form ->
-            Tab(
-                selected = state == index,
-                onClick = { state = index },
-                text = {
-                    Label(
-                        text = form.title(),
-                    )
-                },
-            )
-        }
-    }
-
     // Contents for each tab.
     Column(
         modifier = Modifier

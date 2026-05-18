@@ -22,31 +22,24 @@
 package de.openindex.zugferd.manager.gui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField as MaterialTextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.model.Product
@@ -100,20 +93,12 @@ fun ProductFieldWithAdd(
     val defaultTaxPercentage = preferences.vatPercentage ?: 0.toDouble()
 
     var newProduct by remember { mutableStateOf<Product?>(null) }
-    val unsavedProduct by derivedStateOf {
-        products.find { !it.isSaved }
-    }
+    val savedProducts by derivedStateOf { products.filter { it.isSaved } }
+    val unsavedProduct by derivedStateOf { products.find { !it.isSaved } }
 
-    // Detect clicks on the input field to open the dialog — same as clicking +.
-    val fieldInteractionSource = remember { MutableInteractionSource() }
-    val isFieldPressed by fieldInteractionSource.collectIsPressedAsState()
-
-    LaunchedEffect(isFieldPressed) {
-        if (isFieldPressed) {
-            newProduct = unsavedProduct ?: Product(
-                vatPercent = defaultTaxPercentage,
-            )
-        }
+    // Build entries from ALL products so unsaved selections display their name too.
+    val entriesMap = remember(products, preferences.currency) {
+        buildMap { products.forEach { put(it, it.getSummary(preferences)) } }
     }
 
     Column(modifier = modifier) {
@@ -121,34 +106,17 @@ fun ProductFieldWithAdd(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier,
         ) {
-            // Read-only field — click opens the dialog (same as + button).
-            MaterialTextField(
-                value = product?.name ?: "",
-                onValueChange = {},
-                readOnly = true,
-                label = {
-                    Label(
-                        text = label.translate().title(),
-                        requiredIndicator = requiredIndicator,
-                    )
-                },
-                interactionSource = fieldInteractionSource,
-                trailingIcon = {
-                    if (product != null) {
-                        IconButton(
-                            onClick = { onSelect(null, false) },
-                            modifier = Modifier.pointerHoverIcon(PointerIcon.Default, true),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "Auswahl leeren",
-                            )
-                        }
-                    }
-                },
+            // AutoComplete field — shows saved products as a searchable dropdown.
+            AutoCompleteField(
+                label = label.translate(),
+                entry = product,
+                entries = entriesMap,
+                requiredIndicator = requiredIndicator,
+                onSelect = { selected -> onSelect(selected, false) },
                 modifier = Modifier.weight(1f, fill = true),
             )
 
+            // Button to open the dialog and create/edit a product.
             Tooltip(
                 text = (addLabel.takeIf { unsavedProduct == null } ?: editLabel)
                     .translate()
@@ -160,7 +128,6 @@ fun ProductFieldWithAdd(
                             vatPercent = defaultTaxPercentage,
                         )
                     },
-                    modifier = Modifier,
                 ) {
                     if (unsavedProduct == null) {
                         Icon(
@@ -177,8 +144,8 @@ fun ProductFieldWithAdd(
             }
         }
 
-        // Show hint when no entry is selected yet.
-        if (product == null) {
+        // Show hint only when nothing is selected and no saved products exist yet.
+        if (product == null && savedProducts.isEmpty()) {
             Text(
                 text = stringResource(Res.string.AppTradePartyFieldHint),
                 style = MaterialTheme.typography.bodySmall,

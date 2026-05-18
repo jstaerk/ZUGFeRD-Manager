@@ -24,13 +24,13 @@ package de.openindex.zugferd.manager.theme
 import androidx.compose.ui.graphics.Color
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Light scheme — professional blue-slate fintech palette
+// Light scheme — Quba premium SaaS design (indigo accent, per design prototype)
 // ─────────────────────────────────────────────────────────────────────────────
 
-val primaryLight = Color(0xFF1A56DB)              // Deep blue — primary actions
+val primaryLight = Color(0xFF4F46E5)              // Indigo — accent (Linear/Stripe style)
 val onPrimaryLight = Color(0xFFFFFFFF)
-val primaryContainerLight = Color(0xFFE8EFFD)     // Soft blue tint — chips, badges
-val onPrimaryContainerLight = Color(0xFF0A2D6E)
+val primaryContainerLight = Color(0xFFEEF0FE)     // accent-soft — indicator bg, chips
+val onPrimaryContainerLight = Color(0xFF1E1B4B)   // indigo-950
 
 val secondaryLight = Color(0xFF0D9488)            // Teal — secondary actions
 val onSecondaryLight = Color(0xFFFFFFFF)
@@ -44,29 +44,29 @@ val onTertiaryContainerLight = Color(0xFF4C1D95)
 
 val errorLight = Color(0xFFDC2626)
 val onErrorLight = Color(0xFFFFFFFF)
-val errorContainerLight = Color(0xFFFEE2E2)
+val errorContainerLight = Color(0xFFFEEAEA)
 val onErrorContainerLight = Color(0xFF7F1D1D)
 
-val backgroundLight = Color(0xFFF8FAFC)           // Slate-50
-val onBackgroundLight = Color(0xFF0F172A)          // Slate-900
+val backgroundLight = Color(0xFFFBFBFC)           // --bg from design
+val onBackgroundLight = Color(0xFF0A0A0F)          // --text from design
 
-val surfaceLight = Color(0xFFFFFFFF)
-val onSurfaceLight = Color(0xFF1E293B)             // Slate-800
-val surfaceVariantLight = Color(0xFFF1F5F9)        // Slate-100
-val onSurfaceVariantLight = Color(0xFF475569)      // Slate-600
-val outlineLight = Color(0xFFCBD5E1)               // Slate-300
-val outlineVariantLight = Color(0xFFE2E8F0)        // Slate-200
+val surfaceLight = Color(0xFFFFFFFF)              // --surface
+val onSurfaceLight = Color(0xFF0A0A0F)             // --text
+val surfaceVariantLight = Color(0xFFF7F7F9)        // --surface-2
+val onSurfaceVariantLight = Color(0xFF4A4A52)      // --text-2
+val outlineLight = Color(0xFFE8E8EE)               // --border
+val outlineVariantLight = Color(0xFFF0F0F4)        // --border-subtle
 val scrimLight = Color(0xFF000000)
-val inverseSurfaceLight = Color(0xFF1E293B)
-val inverseOnSurfaceLight = Color(0xFFF1F5F9)
-val inversePrimaryLight = Color(0xFF93C5FD)
-val surfaceDimLight = Color(0xFFE2E8F0)
+val inverseSurfaceLight = Color(0xFF1A1A1F)
+val inverseOnSurfaceLight = Color(0xFFF1F1F4)
+val inversePrimaryLight = Color(0xFFA5B4FC)        // indigo-300
+val surfaceDimLight = Color(0xFFE8E8EE)
 val surfaceBrightLight = Color(0xFFFFFFFF)
 val surfaceContainerLowestLight = Color(0xFFFFFFFF)
-val surfaceContainerLowLight = Color(0xFFF8FAFC)
-val surfaceContainerLight = Color(0xFFF1F5F9)
-val surfaceContainerHighLight = Color(0xFFE2E8F0)
-val surfaceContainerHighestLight = Color(0xFFCBD5E1)
+val surfaceContainerLowLight = Color(0xFFFBFBFC)
+val surfaceContainerLight = Color(0xFFF7F7F9)      // --surface-2
+val surfaceContainerHighLight = Color(0xFFF1F1F4)  // --surface-3
+val surfaceContainerHighestLight = Color(0xFFE8E8EE) // --border
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Light — medium contrast
@@ -152,10 +152,10 @@ val surfaceContainerHighestLightHighContrast = Color(0xFFCBD5E1)
 // Dark scheme — refined dark mode
 // ─────────────────────────────────────────────────────────────────────────────
 
-val primaryDark = Color(0xFF93C5FD)               // Blue-300
-val onPrimaryDark = Color(0xFF1E3A5F)
-val primaryContainerDark = Color(0xFF1D4ED8)
-val onPrimaryContainerDark = Color(0xFFDBEAFE)
+val primaryDark = Color(0xFFA5B4FC)               // Indigo-300
+val onPrimaryDark = Color(0xFF1E1B4B)             // Indigo-950
+val primaryContainerDark = Color(0xFF3730A3)      // Indigo-700
+val onPrimaryContainerDark = Color(0xFFE0E7FF)    // Indigo-100
 
 val secondaryDark = Color(0xFF5EEAD4)             // Teal-300
 val onSecondaryDark = Color(0xFF134E4A)
@@ -184,7 +184,7 @@ val outlineVariantDark = Color(0xFF334155)         // Slate-700
 val scrimDark = Color(0xFF000000)
 val inverseSurfaceDark = Color(0xFFE2E8F0)
 val inverseOnSurfaceDark = Color(0xFF334155)
-val inversePrimaryDark = Color(0xFF1A56DB)
+val inversePrimaryDark = Color(0xFF4F46E5)         // Indigo
 val surfaceDimDark = Color(0xFF0F172A)
 val surfaceBrightDark = Color(0xFF334155)
 val surfaceContainerLowestDark = Color(0xFF0A1220)

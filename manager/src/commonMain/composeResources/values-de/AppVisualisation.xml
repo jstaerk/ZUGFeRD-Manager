@@ -97,4 +97,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
     <string name="AppVisualisationNoXml">Diese Datei enthält keine E-Rechnung-Daten (kein eingebettetes ZUGFeRD-XML).</string>
 
+    <string name="AppVisualisationViewPdf">PDF</string>
+    <string name="AppVisualisationViewSplit">geteilt</string>
+    <string name="AppVisualisationViewCode">Html/Xml</string>
+
 </resources>

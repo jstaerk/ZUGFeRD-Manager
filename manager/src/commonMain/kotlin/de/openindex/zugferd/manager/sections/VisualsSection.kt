@@ -45,6 +45,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -71,11 +72,16 @@ import de.openindex.zugferd.manager.model.DocumentTab
 import de.openindex.zugferd.manager.utils.createDragAndDropTarget
 import de.openindex.zugferd.manager.utils.showTabContextMenu
 import de.openindex.zugferd.manager.sections.CheckSectionState
+import de.openindex.zugferd.manager.theme.LocalQubaColors
+import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
 import de.openindex.zugferd.quba.generated.resources.AppSidebarNewVisualisation
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationNoXml
+import de.openindex.zugferd.quba.generated.resources.AppVisualisationViewCode
+import de.openindex.zugferd.quba.generated.resources.AppVisualisationViewPdf
+import de.openindex.zugferd.quba.generated.resources.AppVisualisationViewSplit
 import de.openindex.zugferd.quba.generated.resources.Res
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -283,6 +289,7 @@ internal fun CompactSearchBar(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun TabRowWithControls(state: VisualsSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
@@ -350,7 +357,10 @@ private fun TabRowWithControls(state: VisualsSectionState) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(LocalQubaColors.current.surface2)
+                .padding(horizontal = 0.dp, vertical = 4.dp),
         ) {
             // Tabs row — no weight so the + button sits directly after the last tab.
             Row(
@@ -461,11 +471,13 @@ private fun TabRowWithControls(state: VisualsSectionState) {
                     modifier = Modifier.width(280.dp).padding(end = 4.dp),
                 )
             } else {
-                IconButton(
-                    onClick = { state.isSearchOpen = true },
-                    modifier = Modifier.padding(end = 4.dp),
-                ) {
-                    Icon(Icons.Default.Search, contentDescription = "Suchen")
+                Tooltip(text = "Suchen (Strg+F) — Enter: nächster Treffer · Esc: schließen") {
+                    IconButton(
+                        onClick = { state.isSearchOpen = true },
+                        modifier = Modifier.padding(end = 4.dp),
+                    ) {
+                        Icon(Icons.Default.Search, contentDescription = "Suchen")
+                    }
                 }
             }
         }
@@ -501,25 +513,23 @@ private fun DocumentTabItem(
     val updatedOnDragDelta = rememberUpdatedState(onDragDelta)
     val updatedOnDragEnd = rememberUpdatedState(onDragEnd)
 
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+    val tabShape = RoundedCornerShape(6.dp)
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .width(width)
-            // Dragged tab floats above siblings; offset is layout-neutral (Row sees original size).
-            .zIndex(if (isDragged) 2f else 0f)
+            .zIndex(if (isDragged) 2f else if (isSelected) 1f else 0f)
             .offset { IntOffset(visualOffsetPx.roundToInt(), 0) }
             .scale(if (isDragged) 1.05f else 1f)
-            .clip(RoundedCornerShape(6.dp))
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                else MaterialTheme.colorScheme.surface
+            .shadow(
+                elevation = if (isSelected || isDragged) 2.dp else 0.dp,
+                shape = tabShape,
             )
-            .border(
-                width = if (isSelected || isDragged) 2.dp else 1.dp,
-                color = if (isDragged || isSelected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(6.dp)
-            )
+            .clip(tabShape)
+            .background(if (isSelected || isDragged) colors.surface else Color.Transparent)
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { updatedOnDragStart.value() },
@@ -543,30 +553,45 @@ private fun DocumentTabItem(
                     }
                 }
             }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
+        // Status icon — spinner while loading, document icon otherwise.
+        if (document.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(12.dp),
+                strokeWidth = 1.5.dp,
+                color = colors.text3,
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Visibility,
+                contentDescription = null,
+                modifier = Modifier.size(13.dp),
+                tint = if (isSelected) colors.accent else colors.text3,
+            )
+        }
+
+        Spacer(modifier = Modifier.width(6.dp))
+
         Text(
             text = document.name.ifBlank { "Neuer Tab" },
-            color = if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium,
+            color = if (isSelected) colors.text else colors.text2,
+            style = typo.small,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
 
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(4.dp))
 
-        if (document.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-        } else {
+        if (!document.isLoading) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Tab schließen",
                 modifier = Modifier
                     .size(14.dp)
                     .clickable(onClick = onClose),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                tint = if (isSelected) colors.text2 else colors.text3,
             )
         }
     }
@@ -802,9 +827,9 @@ private fun ViewModeToggle(
         verticalAlignment = Alignment.CenterVertically
     ) {
         listOf(
-            ViewMode.PDF_ONLY to "PDF",
-            ViewMode.SPLIT to "Geteilt",
-            ViewMode.CODE_ONLY to "Html/Xml"
+            ViewMode.PDF_ONLY to stringResource(Res.string.AppVisualisationViewPdf),
+            ViewMode.SPLIT to stringResource(Res.string.AppVisualisationViewSplit),
+            ViewMode.CODE_ONLY to stringResource(Res.string.AppVisualisationViewCode),
         ).forEach { (mode, label) ->
             Text(
                 text = label,

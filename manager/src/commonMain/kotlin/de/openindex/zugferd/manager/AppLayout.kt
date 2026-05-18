@@ -21,25 +21,31 @@
 
 package de.openindex.zugferd.manager
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -48,34 +54,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import de.openindex.zugferd.manager.gui.Label
+import de.openindex.zugferd.manager.gui.QubaTitleBar
+import de.openindex.zugferd.manager.gui.QubaStatusBar
+import de.openindex.zugferd.manager.gui.QubaDocumentStatus
 import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.sections.VisualsSectionState
+import de.openindex.zugferd.manager.theme.LocalQubaColors
 import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.quba.generated.resources.AppSidebarCollapse
+import de.openindex.zugferd.quba.generated.resources.AppSidebarExpand
 import de.openindex.zugferd.quba.generated.resources.AppSidebarQuit
 import de.openindex.zugferd.quba.generated.resources.Res
-import de.openindex.zugferd.quba.generated.resources.ic_app_logo
 import java.awt.KeyEventDispatcher
 import java.awt.KeyboardFocusManager
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun AppLayout() {
-    //val blur: Float by animateFloatAsState(
-    //    targetValue = if (appState.locked) 10f else 0f,
-    //    animationSpec = tween(
-    //        easing = FastOutLinearInEasing,
-    //        durationMillis = 250,
-    //    ),
-    //    label = "blur",
-    //)
-
     // Single global AWT key dispatcher for Ctrl+F / ESC search handling.
-    // Uses _APP_STATE.sectionSync (@Volatile) instead of _APP_STATE.section
-    // (Compose snapshot state) to avoid stale reads on the AWT event thread.
     DisposableEffect(Unit) {
         val dispatcher = KeyEventDispatcher { awtEvent ->
             if (awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
@@ -89,7 +94,7 @@ fun AppLayout() {
                         (AppSection.CHECK.state as? CheckSectionState)?.isSearchOpen = true
                     else -> {}
                 }
-                true // consume — prevents JCEF from opening its own find bar
+                true
             } else if (awtEvent.id == java.awt.event.KeyEvent.KEY_PRESSED
                 && awtEvent.keyCode == java.awt.event.KeyEvent.VK_ESCAPE
             ) {
@@ -114,13 +119,25 @@ fun AppLayout() {
         }
     }
 
-    Row(
-        verticalAlignment = Alignment.Top,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        AppNavigation()
-        VerticalDivider()
-        AppContent()
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Titlebar — 36h
+        QubaTitleBar(
+            appTitle = APP_TITLE,
+            appVersion = APP_VERSION_SHORT,
+        )
+
+        // Middle: rail + content
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.weight(1f),
+        ) {
+            AppNavigation()
+            VerticalDivider(color = LocalQubaColors.current.border)
+            AppContent()
+        }
+
+        // Status bar — 26h
+        QubaStatusBar()
     }
 }
 
@@ -131,54 +148,63 @@ private fun AppContent() {
     ) {
         LocalAppState.current.section.content()
     }
-
-
 }
 
 @Composable
 private fun AppNavigation() {
     var shutdownRequested by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(false) }
+    val colors = LocalQubaColors.current
+    val navWidth = if (isExpanded) 180.dp else 56.dp
 
-    NavigationRail(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(navWidth)
+            .animateContentSize()
+            .fillMaxHeight()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFFAFAFC),
+                        Color(0xFFF4F4F7),
+                    ),
+                )
+            )
+            .padding(vertical = 10.dp),
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
+        // Main section items
         AppSection.entries.forEach {
-            AppSectionNavigationItem(section = it)
+            AppSectionNavigationItem(section = it, isExpanded = isExpanded)
         }
 
+        // Divider before bottom actions
         Spacer(modifier = Modifier.weight(1f, fill = true))
 
-        Image(
-            painter = painterResource(Res.drawable.ic_app_logo),
-            contentDescription = APP_TITLE,
-            modifier = Modifier
-                .padding(vertical = 6.dp)
-                .size(32.dp),
-        )
-
-        Text(
-            text = "v${APP_VERSION_SHORT}",
-            softWrap = false,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 4.dp),
-        )
-
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
+            color = colors.border,
             modifier = Modifier
                 .padding(vertical = 6.dp)
-                .width(48.dp),
+                .then(if (isExpanded) Modifier.padding(horizontal = 12.dp) else Modifier.width(32.dp)),
         )
 
+        // Expand/collapse toggle
+        AppNavigationItem(
+            label = if (isExpanded) Res.string.AppSidebarCollapse else Res.string.AppSidebarExpand,
+            icon = if (isExpanded) Icons.AutoMirrored.Filled.MenuOpen else Icons.Default.Menu,
+            selected = false,
+            isExpanded = isExpanded,
+            onClick = { isExpanded = !isExpanded },
+        )
+
+        // Quit / Shutdown
         AppNavigationItem(
             label = Res.string.AppSidebarQuit,
-            activeIcon = Icons.Default.Cancel,
+            icon = Icons.Default.PowerSettingsNew,
             selected = false,
+            isExpanded = isExpanded,
             onClick = { shutdownRequested = true },
         )
 
@@ -193,50 +219,100 @@ private fun AppNavigation() {
 @Composable
 private fun AppNavigationItem(
     label: StringResource,
-    activeIcon: ImageVector,
-    inactiveIcon: ImageVector = activeIcon,
+    icon: ImageVector,
     selected: Boolean,
+    isExpanded: Boolean,
     onClick: () -> Unit,
 ) {
-    NavigationRailItem(
-        selected = selected,
-        onClick = onClick,
-        icon = {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+    val displayLabel = stringResource(label)
+    val iconTint = if (selected) colors.accent else colors.text3
+
+    if (isExpanded) {
+        // Expanded: full-width row with icon + label
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()
+                .height(36.dp)
+                .drawBehind {
+                    if (selected) {
+                        drawRoundRect(
+                            color = colors.accent,
+                            topLeft = Offset(0f, 4.dp.toPx()),
+                            size = Size(3.dp.toPx(), size.height - 8.dp.toPx()),
+                            cornerRadius = CornerRadius(2.dp.toPx()),
+                        )
+                    }
+                }
+                .clip(RoundedCornerShape(8.dp))
+                .background(if (selected) colors.accentSoft else Color.Transparent)
+                .clickable(onClick = onClick)
+                .padding(start = 10.dp, end = 8.dp),
+        ) {
             Icon(
-                imageVector = if (selected) activeIcon else inactiveIcon,
-                contentDescription = stringResource(label),
+                imageVector = icon,
+                contentDescription = displayLabel,
+                tint = iconTint,
+                modifier = Modifier.size(18.dp),
             )
-        },
-        enabled = true,
-        label = {
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = stringResource(label),
-                style = MaterialTheme.typography.labelMedium,
+                text = displayLabel,
+                style = typo.bodyMed.copy(
+                    color = if (selected) colors.accent else colors.text2,
+                ),
                 softWrap = false,
             )
-        },
-        alwaysShowLabel = true,
-        colors = NavigationRailItemDefaults.colors(
-            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-            selectedIconColor = MaterialTheme.colorScheme.primary,
-            selectedTextColor = MaterialTheme.colorScheme.primary,
-            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        ),
-        modifier = Modifier,
-    )
+        }
+    } else {
+        // Collapsed: icon-only, 3px accent bar on left when active
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .width(56.dp)
+                .height(40.dp)
+                .drawBehind {
+                    if (selected) {
+                        drawRoundRect(
+                            color = colors.accent,
+                            topLeft = Offset(0f, 8.dp.toPx()),
+                            size = Size(3.dp.toPx(), size.height - 16.dp.toPx()),
+                            cornerRadius = CornerRadius(2.dp.toPx()),
+                        )
+                    }
+                },
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(width = 40.dp, height = 36.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (selected) colors.accentSoft else Color.Transparent)
+                    .clickable(onClick = onClick),
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = displayLabel,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+    }
 }
 
-
 @Composable
-private fun AppSectionNavigationItem(section: AppSection) {
+private fun AppSectionNavigationItem(section: AppSection, isExpanded: Boolean) {
     val appState = LocalAppState.current
 
     AppNavigationItem(
         label = section.label,
-        activeIcon = section.activeIcon,
-        inactiveIcon = section.inactiveIcon,
+        icon = if (appState.isSection(section)) section.activeIcon else section.inactiveIcon,
         selected = appState.isSection(section),
+        isExpanded = isExpanded,
         onClick = { appState.setSection(section) },
     )
 }

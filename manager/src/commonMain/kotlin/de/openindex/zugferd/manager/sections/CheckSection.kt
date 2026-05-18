@@ -60,8 +60,12 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.ui.graphics.Color
+import de.openindex.zugferd.manager.gui.QubaButton
+import de.openindex.zugferd.manager.gui.QubaButtonVariant
+import de.openindex.zugferd.manager.theme.LocalQubaColors
+import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.CircularProgressIndicator
@@ -84,6 +88,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size as GeometrySize
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -302,6 +307,7 @@ private fun EmptyView(state: CheckSectionState) {
  * Scrollable row of open document tabs with a button to open additional files.
  */
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun CheckTabStrip(state: CheckSectionState) {
     val scope = rememberCoroutineScope()
     val appState = LocalAppState.current
@@ -371,7 +377,10 @@ private fun CheckTabStrip(state: CheckSectionState) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(LocalQubaColors.current.surface2)
+                .padding(vertical = 4.dp),
         ) {
             // Tabs row — no weight so the + button sits directly after the last tab.
             Row(
@@ -481,11 +490,13 @@ private fun CheckTabStrip(state: CheckSectionState) {
                     modifier = Modifier.width(280.dp).padding(end = 4.dp),
                 )
             } else {
-                IconButton(
-                    onClick = { state.isSearchOpen = true },
-                    modifier = Modifier.padding(end = 4.dp),
-                ) {
-                    Icon(Icons.Default.Search, contentDescription = "Suchen")
+                Tooltip(text = "Suchen (Strg+F) — Enter: nächster Treffer · Esc: schließen") {
+                    IconButton(
+                        onClick = { state.isSearchOpen = true },
+                        modifier = Modifier.padding(end = 4.dp),
+                    ) {
+                        Icon(Icons.Default.Search, contentDescription = "Suchen")
+                    }
                 }
             }
         }
@@ -524,25 +535,23 @@ private fun CheckTabItem(
     val updatedOnDragDelta = rememberUpdatedState(onDragDelta)
     val updatedOnDragEnd = rememberUpdatedState(onDragEnd)
 
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+    val tabShape = RoundedCornerShape(6.dp)
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .width(width)
-            // Dragged tab floats above siblings; offset is layout-neutral (Row sees original size).
-            .zIndex(if (isDragged) 2f else 0f)
+            .zIndex(if (isDragged) 2f else if (isSelected) 1f else 0f)
             .offset { IntOffset(visualOffsetPx.roundToInt(), 0) }
             .scale(if (isDragged) 1.05f else 1f)
-            .clip(RoundedCornerShape(6.dp))
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                else MaterialTheme.colorScheme.surface,
+            .shadow(
+                elevation = if (isSelected || isDragged) 2.dp else 0.dp,
+                shape = tabShape,
             )
-            .border(
-                width = if (isSelected || isDragged) 2.dp else 1.dp,
-                color = if (isDragged || isSelected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(6.dp),
-            )
+            .clip(tabShape)
+            .background(if (isSelected || isDragged) colors.surface else Color.Transparent)
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { updatedOnDragStart.value() },
@@ -566,33 +575,60 @@ private fun CheckTabItem(
                     }
                 }
             }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
     ) {
+        // Status icon — spinner while loading, check/x based on validation result otherwise.
+        if (tab.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(12.dp),
+                strokeWidth = 1.5.dp,
+                color = colors.text3,
+            )
+        } else {
+            val validation = tab.validation
+            when {
+                validation == null -> Icon(
+                    imageVector = Icons.Default.CheckBoxOutlineBlank,
+                    contentDescription = null,
+                    modifier = Modifier.size(13.dp),
+                    tint = if (isSelected) colors.accent else colors.text3,
+                )
+                validation.isValid -> Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(13.dp),
+                    tint = if (isSelected) colors.accent else colors.text3,
+                )
+                else -> Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(13.dp),
+                    tint = colors.danger,
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(6.dp))
+
         Text(
             text = tab.name,
-            color = if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium,
+            color = if (isSelected) colors.text else colors.text2,
+            style = typo.small,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
 
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(4.dp))
 
-        if (tab.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(14.dp),
-                strokeWidth = 2.dp,
-            )
-        } else {
+        if (!tab.isLoading) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Tab schließen",
                 modifier = Modifier
                     .size(14.dp)
                     .clickable(onClick = onClose),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                tint = if (isSelected) colors.text2 else colors.text3,
             )
         }
     }
@@ -660,17 +696,14 @@ private fun CheckView(state: CheckSectionState, tab: CheckTab) {
                 SectionSubTitle(
                     text = Res.string.AppCheckSummary,
                 ) {
-                    Button(
+                    QubaButton(
+                        label = stringResource(Res.string.AppCheckSummaryExport).title(),
                         onClick = {
                             scope.launch {
                                 state.exportValidation(tab)
                             }
                         },
-                    ) {
-                        Label(
-                            text = Res.string.AppCheckSummaryExport,
-                        )
-                    }
+                    )
                 }
 
                 ValidationSummary(validation)
@@ -689,13 +722,10 @@ private fun CheckView(state: CheckSectionState, tab: CheckTab) {
                         Box {
                             var expanded by remember { mutableStateOf(false) }
 
-                            Button(
+                            QubaButton(
+                                label = stringResource(Res.string.AppCheckMessagesFilter).title(),
                                 onClick = { expanded = true },
-                            ) {
-                                Label(
-                                    text = Res.string.AppCheckMessagesFilter,
-                                )
-                            }
+                            )
 
                             DropdownMenu(
                                 expanded = expanded,
@@ -900,116 +930,128 @@ private fun DetailsView(state: CheckSectionState, tab: CheckTab) {
 }
 
 /**
- * Summary about the validation.
+ * KPI strip + profile/version details for validation summary.
  */
 @Composable
 private fun ValidationSummary(validation: Validation) {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth(),
     ) {
+        // 4-card KPI strip
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            ValidationKpiCard(
+                label = pluralStringResource(Res.plurals.AppCheckSummaryErrors, validation.countErrors, validation.countErrors),
+                value = validation.countErrors.toString(),
+                bgColor = colors.dangerSoft,
+                textColor = colors.danger,
+                modifier = Modifier.weight(1f),
+            )
+            ValidationKpiCard(
+                label = pluralStringResource(Res.plurals.AppCheckSummaryWarnings, validation.countWarnings, validation.countWarnings),
+                value = validation.countWarnings.toString(),
+                bgColor = colors.warnSoft,
+                textColor = colors.warn,
+                modifier = Modifier.weight(1f),
+            )
+            ValidationKpiCard(
+                label = pluralStringResource(Res.plurals.AppCheckSummaryNotices, validation.countNotices, validation.countNotices),
+                value = validation.countNotices.toString(),
+                bgColor = colors.accentSoft,
+                textColor = colors.accent,
+                modifier = Modifier.weight(1f),
+            )
+            ValidationKpiCard(
+                label = stringResource(Res.string.AppCheckSummaryMessages).title(),
+                value = validation.messages.size.toString(),
+                bgColor = if (validation.isValid) colors.successSoft else colors.surface2,
+                textColor = if (validation.isValid) colors.success else colors.text2,
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        // Profile / version / signature details block
+        val shape = RoundedCornerShape(8.dp)
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
-                .padding(vertical = 8.dp, horizontal = 16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clip(shape)
+                .background(colors.surface2)
+                .border(1.dp, colors.border, shape)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
         ) {
-            // Invoice details on the left side.
-            Text(
-                text = buildAnnotatedString {
-                    val bold = SpanStyle(fontWeight = FontWeight.Bold)
-                    val unknown = SpanStyle(fontStyle = FontStyle.Normal)
-
-                    // Invoice profile.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummaryProfile).title())
-                        append("\n")
-                    }
-                    withStyle(style = bold.takeIf { validation.profile != null } ?: unknown) {
-                        append(
-                            validation.profile?.split(":")?.joinToString("\n")
-                                ?: stringResource(Res.string.AppCheckSummaryUnknown)
-                        )
-                        append("\n")
-                    }
-
-                    // Invoice version.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummaryVersion).title())
-                        append("\n")
-                    }
-                    withStyle(style = bold.takeIf { validation.version != null } ?: unknown) {
-                        append(
-                            validation.version
-                                ?: stringResource(Res.string.AppCheckSummaryUnknown)
-                        )
-                        append("\n")
-                    }
-
-                    // Invoice signature.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummarySignature).title())
-                        append("\n")
-                    }
-                    withStyle(style = bold.takeIf { validation.signature != null } ?: unknown) {
-                        append(
-                            validation.signature
-                                ?: stringResource(Res.string.AppCheckSummaryUnknown)
-                        )
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge,
-            )
-
-            // Message count on the right side.
-            Text(
-                text = buildAnnotatedString {
-                    // Title.
-                    withStyle(style = SpanStyle(fontSize = 0.9.em)) {
-                        append(stringResource(Res.string.AppCheckSummaryMessages).title())
-                        append("\n")
-                    }
-
-                    // Total number of errors.
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(
-                            pluralStringResource(
-                                Res.plurals.AppCheckSummaryErrors,
-                                validation.countErrors,
-                                validation.countErrors
-                            )
-                        )
-                        append("\n")
-                    }
-
-                    // Total number of warnings.
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(
-                            pluralStringResource(
-                                Res.plurals.AppCheckSummaryWarnings,
-                                validation.countWarnings,
-                                validation.countWarnings,
-                            )
-                        )
-                        append("\n")
-                    }
-
-                    // Total number of notices.
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(
-                            pluralStringResource(
-                                Res.plurals.AppCheckSummaryNotices,
-                                validation.countNotices,
-                                validation.countNotices
-                            )
-                        )
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                softWrap = false,
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = stringResource(Res.string.AppCheckSummaryProfile).title(),
+                    style = typo.small.copy(color = colors.text3),
+                )
+                Text(
+                    text = validation.profile?.split(":")?.joinToString(" · ")
+                        ?: stringResource(Res.string.AppCheckSummaryUnknown),
+                    style = typo.bodyMed.copy(color = colors.text),
+                )
+                if (!validation.signature.isNullOrBlank()) {
+                    Text(
+                        text = "${stringResource(Res.string.AppCheckSummarySignature).title()}: ${validation.signature}",
+                        style = typo.small.copy(color = colors.text3),
+                    )
+                }
+            }
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.AppCheckSummaryVersion).title(),
+                    style = typo.small.copy(color = colors.text3),
+                )
+                Text(
+                    text = validation.version ?: stringResource(Res.string.AppCheckSummaryUnknown),
+                    style = typo.bodyMed.copy(color = colors.text),
+                )
+            }
         }
+    }
+}
+
+/**
+ * Single KPI metric card used in the validation summary strip.
+ */
+@Composable
+private fun ValidationKpiCard(
+    label: String,
+    value: String,
+    bgColor: Color,
+    textColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    val typo = LocalQubaTypography.current
+    val shape = RoundedCornerShape(8.dp)
+
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(bgColor)
+            .border(1.dp, textColor.copy(alpha = 0.15f), shape)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Text(
+            text = value,
+            style = typo.h1.copy(color = textColor),
+        )
+        Text(
+            text = label,
+            style = typo.small.copy(color = textColor.copy(alpha = 0.75f)),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

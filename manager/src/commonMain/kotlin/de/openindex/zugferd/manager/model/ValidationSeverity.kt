@@ -44,8 +44,8 @@ enum class ValidationSeverity(
     NOTICE(
         title = Res.string.ValidationSeverity_NOTICE,
         icon = Icons.Default.Info,
-        lightModeColor = Color(0xFF1A56DB),   // blue
-        darkModeColor = Color(0xFF93C5FD),    // blue-300
+        lightModeColor = Color(0xFF4F46E5),   // indigo
+        darkModeColor = Color(0xFFA5B4FC),    // indigo-300
     ),
     WARNING(
         title = Res.string.ValidationSeverity_WARNING,

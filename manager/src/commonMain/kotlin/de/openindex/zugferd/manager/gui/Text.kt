@@ -26,14 +26,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
+import de.openindex.zugferd.manager.theme.LocalQubaColors
+import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import de.openindex.zugferd.manager.utils.pluralStringResource
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
@@ -43,20 +43,24 @@ import org.jetbrains.compose.resources.StringResource
 @Composable
 fun SectionTitle(
     text: String,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
-) = Text(
-    text = text,
-    color = color,
-    style = MaterialTheme.typography.headlineMedium,
-    softWrap = true,
-    modifier = modifier,
-)
+) {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+    Text(
+        text = text,
+        color = if (color == Color.Unspecified) colors.text else color,
+        style = typo.h1,
+        softWrap = true,
+        modifier = modifier,
+    )
+}
 
 @Composable
 fun SectionTitle(
     text: StringResource,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
 ) = SectionTitle(
     text = stringResource(text).title(),
@@ -69,7 +73,7 @@ fun SectionTitle(
 fun SectionTitle(
     text: PluralStringResource,
     quantity: Int = 1,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
 ) = SectionTitle(
     text = pluralStringResource(text, quantity).title(),
@@ -83,24 +87,24 @@ fun SectionSubTitle(
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+
     Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleLarge,
-            lineHeight = 1.em,
+            style = typo.h2.copy(color = colors.text),
             softWrap = false,
-            modifier = Modifier,
         )
 
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            modifier = Modifier
-                .weight(1f, fill = true),
+            color = colors.border,
+            thickness = 1.dp,
+            modifier = Modifier.weight(1f, fill = true),
         )
 
         actions()
@@ -134,20 +138,24 @@ fun SectionSubTitle(
 @Composable
 fun SectionInfo(
     text: String,
-    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    color: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
-) = Text(
-    text = text,
-    color = color,
-    modifier = modifier,
-    style = MaterialTheme.typography.bodyMedium,
-    softWrap = true,
-)
+) {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+    Text(
+        text = text,
+        color = if (color == Color.Unspecified) colors.text3 else color,
+        style = typo.small,
+        softWrap = true,
+        modifier = modifier,
+    )
+}
 
 @Composable
 fun SectionInfo(
     text: StringResource,
-    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    color: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
 ) = SectionInfo(
     text = stringResource(text),
@@ -160,7 +168,7 @@ fun SectionInfo(
 fun SectionInfo(
     text: PluralStringResource,
     quantity: Int = 1,
-    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    color: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
 ) = SectionInfo(
     text = pluralStringResource(text, quantity),

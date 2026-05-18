@@ -67,4 +67,8 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppVisualisationDetailsXml">XML data</string>
 
     <string name="AppVisualisationNoXml">This file does not contain any e-invoice data (no embedded ZUGFeRD XML).</string>
+
+    <string name="AppVisualisationViewPdf">PDF</string>
+    <string name="AppVisualisationViewSplit">split</string>
+    <string name="AppVisualisationViewCode">Html/Xml</string>
 </resources>
