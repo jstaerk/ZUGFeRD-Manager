@@ -170,10 +170,7 @@ private fun AppNavigation() {
             .fillMaxHeight()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFFAFAFC),
-                        Color(0xFFF4F4F7),
-                    ),
+                    colors = listOf(colors.surfaceInset, colors.surface2),
                 )
             )
             .padding(vertical = 10.dp),
