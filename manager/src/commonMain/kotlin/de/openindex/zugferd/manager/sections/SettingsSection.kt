@@ -72,7 +72,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxSize
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionDropDownButton
-import de.openindex.zugferd.manager.gui.AppToolbar
 import de.openindex.zugferd.manager.gui.CountryField
 import de.openindex.zugferd.manager.gui.CurrencyField
 import de.openindex.zugferd.manager.gui.DecimalField
@@ -92,7 +91,6 @@ import de.openindex.zugferd.manager.utils.getCountryDefaultTax
 import de.openindex.zugferd.manager.utils.getString
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
-import de.openindex.zugferd.quba.generated.resources.AppSettings
 import de.openindex.zugferd.quba.generated.resources.AppSettingsChrome
 import de.openindex.zugferd.quba.generated.resources.AppSettingsChromeAcceleration
 import de.openindex.zugferd.quba.generated.resources.AppSettingsChromeAccelerationRestart
@@ -165,7 +163,6 @@ fun SettingsSection(state: SettingsSectionState) {
     var currentPage by remember { mutableStateOf(SettingsPage.GENERAL) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppToolbar(title = stringResource(Res.string.AppSettings).title())
         Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
             // Left nav — 200dp
             SettingsLeftNav(

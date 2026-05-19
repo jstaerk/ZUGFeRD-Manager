@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
-import de.openindex.zugferd.manager.gui.AppToolbar
 import de.openindex.zugferd.manager.gui.NotificationBar
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.Tooltip
@@ -77,7 +76,6 @@ import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
-import de.openindex.zugferd.quba.generated.resources.AppSidebarNewVisualisation
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationNoXml
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationViewCode
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationViewPdf
@@ -133,13 +131,40 @@ fun VisualsSection(state: VisualsSectionState) {
         focusRequester.requestFocus()
     }
 
+    // Current tab info — needed by title bar toggle and CurrentTabContent.
+    val currentTab = state.documents.getOrNull(state.selectedIndex)
+    val hasPdf = currentTab?.pdf != null
+    val hasXml = currentTab?.xml != null
+    val hasHtml = currentTab?.html != null
+    val hasCode = hasXml || hasHtml || (currentTab?.isHtmlLoading == true)
+    val hasStableCode = hasXml || hasHtml
+
+    // Reset viewMode when the tab changes.
+    LaunchedEffect(currentTab) {
+        state.viewMode = when {
+            hasPdf && hasStableCode -> ViewMode.SPLIT
+            hasStableCode           -> ViewMode.CODE_ONLY
+            else                    -> ViewMode.PDF_ONLY
+        }
+    }
+
+    // Correct viewMode and toggle visibility when content changes asynchronously.
+    LaunchedEffect(hasPdf, hasStableCode) {
+        state.showViewModeToggle = hasPdf && hasCode
+        when {
+            !hasPdf && state.viewMode != ViewMode.CODE_ONLY                -> state.viewMode = ViewMode.CODE_ONLY
+            !hasStableCode && state.viewMode == ViewMode.CODE_ONLY         -> state.viewMode = ViewMode.PDF_ONLY
+            !hasStableCode && state.viewMode == ViewMode.SPLIT             -> state.viewMode = ViewMode.PDF_ONLY
+            hasStableCode && hasPdf && state.viewMode == ViewMode.PDF_ONLY -> state.viewMode = ViewMode.SPLIT
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .focusRequester(focusRequester)
             .focusable()
     ) {
-        AppToolbar(title = stringResource(Res.string.AppSidebarNewVisualisation).title())
         if (state.documents.isNotEmpty()) {
             TabRowWithControls(state)
         }
@@ -173,26 +198,25 @@ fun VisualsSection(state: VisualsSectionState) {
             if (state.documents.isEmpty()) {
                 EmptyVisualsView(state)
             } else {
-                CurrentTabContent(state, activeSearch)
+                CurrentTabContent(
+                    state = state,
+                    search = activeSearch,
+                    viewMode = state.viewMode,
+                    onViewModeChange = { state.viewMode = it },
+                )
             }
         }
     }
 }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 fun VisualsSectionActions(state: VisualsSectionState) {
-    // Datei-Auswahl-Button ausgeblendet — Drag & Drop und Klick auf leere Fläche genügen.
-    // Suche ist in den Tab-Strip gewandert (zwischen + und Spacer).
-    // ActionButtonWithTooltip(
-    //     label = Res.string.AppVisualisationSelectFile,
-    //     tooltip = Res.string.AppVisualisationSelectInfo,
-    //     onClick = {
-    //         scope.launch(Dispatchers.IO) {
-    //             state.selectFile(appState = appState)
-    //         }
-    //     },
-    // )
+    if (state.showViewModeToggle) {
+        ViewModeToggle(
+            currentMode = state.viewMode,
+            onModeChanged = { state.viewMode = it },
+        )
+    }
 }
 
 @Composable
@@ -598,7 +622,12 @@ private fun DocumentTabItem(
 }
 
 @Composable
-private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) {
+private fun CurrentTabContent(
+    state: VisualsSectionState,
+    search: SearchState?,
+    viewMode: ViewMode,
+    onViewModeChange: (ViewMode) -> Unit,
+) {
     val currentTab = state.documents.getOrNull(state.selectedIndex) ?: return
 
     if (currentTab.isLoading) {
@@ -618,45 +647,10 @@ private fun CurrentTabContent(state: VisualsSectionState, search: SearchState?) 
         return
     }
 
-    // hasStableCode excludes isHtmlLoading intentionally:
-    // plain PDFs briefly have isHtmlLoading=true (HTML generation returns null),
-    // which would incorrectly trigger SPLIT mode for one frame.
-    val hasStableCode = hasXml || hasHtml
-
-    // Reset viewMode when the tab changes; initialize based on stable content.
-    var viewMode by remember(currentTab) {
-        mutableStateOf(when {
-            hasPdf && hasStableCode -> ViewMode.SPLIT
-            hasStableCode -> ViewMode.CODE_ONLY
-            else -> ViewMode.PDF_ONLY
-        })
-    }
-
-    // Correct viewMode when content availability changes asynchronously
-    // (e.g. XML/HTML arrives after the PDF was already shown).
-    LaunchedEffect(hasPdf, hasStableCode) {
-        when {
-            !hasPdf && viewMode != ViewMode.CODE_ONLY -> viewMode = ViewMode.CODE_ONLY
-            !hasStableCode && viewMode == ViewMode.CODE_ONLY -> viewMode = ViewMode.PDF_ONLY
-            !hasStableCode && viewMode == ViewMode.SPLIT -> viewMode = ViewMode.PDF_ONLY
-            hasStableCode && hasPdf && viewMode == ViewMode.PDF_ONLY -> viewMode = ViewMode.SPLIT
-        }
-    }
-
     var tabState by remember(currentTab) { mutableStateOf(0) }
     val splitRatioState = remember(currentTab) { mutableStateOf(0.5f) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Mode toggle — only shown when both PDF and code content are available
-        if (hasPdf && hasCode) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                ViewModeToggle(currentMode = viewMode, onModeChanged = { viewMode = it })
-            }
-        }
-
         // Informational banner for plain PDFs without embedded e-invoice data
         if (hasPdf && !hasCode) {
             NotificationBar(text = stringResource(Res.string.AppVisualisationNoXml))

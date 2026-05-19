@@ -57,6 +57,10 @@ class VisualsSectionState : SectionState() {
     var searchQuery by mutableStateOf("")
     var searchSequence by mutableStateOf(0)
 
+    // View mode — shared with title bar actions
+    var viewMode by mutableStateOf(ViewMode.PDF_ONLY)
+    var showViewModeToggle by mutableStateOf(false)
+
     fun addNewTab() {
         documents.add(DocumentTab(name = "Neuer Tab", pdf = null, isLoading = false))
         selectedIndex = documents.lastIndex

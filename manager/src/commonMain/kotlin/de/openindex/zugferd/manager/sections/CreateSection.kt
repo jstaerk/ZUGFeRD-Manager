@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
-import de.openindex.zugferd.manager.gui.AppToolbar
 import de.openindex.zugferd.manager.gui.CurrencyField
 import de.openindex.zugferd.manager.gui.DateField
 import de.openindex.zugferd.manager.gui.DecimalField
@@ -145,7 +144,6 @@ import de.openindex.zugferd.quba.generated.resources.AppCreateSummary
 import de.openindex.zugferd.quba.generated.resources.AppCreateSummaryGross
 import de.openindex.zugferd.quba.generated.resources.AppCreateSummaryNet
 import de.openindex.zugferd.quba.generated.resources.AppCreateSummaryTax
-import de.openindex.zugferd.quba.generated.resources.AppSidebarCreate
 import de.openindex.zugferd.quba.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -178,11 +176,6 @@ fun CreateSection(state: CreateSectionState) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppToolbar(
-            title = stringResource(Res.string.AppSidebarCreate).title(),
-            actions = { CreateSectionActions(state) },
-        )
-
     // Show an empty view, if no PDF file was selected.
     if (selectedPdf == null) {
         EmptyView(state)

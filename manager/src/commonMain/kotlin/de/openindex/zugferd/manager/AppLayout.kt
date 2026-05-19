@@ -24,6 +24,7 @@ package de.openindex.zugferd.manager
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -63,6 +64,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import de.openindex.zugferd.manager.gui.QubaTitleBar
 import de.openindex.zugferd.manager.gui.QubaStatusBar
 import de.openindex.zugferd.manager.gui.QubaDocumentStatus
@@ -70,6 +72,7 @@ import de.openindex.zugferd.manager.sections.CheckSectionState
 import de.openindex.zugferd.manager.sections.VisualsSectionState
 import de.openindex.zugferd.manager.theme.LocalQubaColors
 import de.openindex.zugferd.manager.utils.stringResource
+import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.quba.generated.resources.AppSidebarCollapse
 import de.openindex.zugferd.quba.generated.resources.AppSidebarExpand
 import de.openindex.zugferd.quba.generated.resources.AppSidebarQuit
@@ -119,11 +122,13 @@ fun AppLayout() {
         }
     }
 
+    val appState = LocalAppState.current
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Titlebar — 36h
         QubaTitleBar(
-            appTitle = APP_TITLE,
-            appVersion = APP_VERSION_SHORT,
+            sectionTitle = stringResource(appState.section.label).title(),
+            actions = { appState.section.actions() },
         )
 
         // Middle: rail + content
@@ -180,9 +185,72 @@ private fun AppNavigation() {
             AppSectionNavigationItem(section = it, isExpanded = isExpanded)
         }
 
-        // Divider before bottom actions
         Spacer(modifier = Modifier.weight(1f, fill = true))
 
+        // Brand: Q logo + name + version (above divider)
+        if (isExpanded) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .padding(bottom = 2.dp),
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(colors.accent),
+                ) {
+                    Text(
+                        text = "Q",
+                        style = LocalQubaTypography.current.bodyMed.copy(
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        ),
+                    )
+                }
+                Text(
+                    text = APP_TITLE,
+                    style = LocalQubaTypography.current.bodyMed.copy(color = colors.text),
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "v$APP_VERSION_SHORT",
+                    style = LocalQubaTypography.current.small.copy(color = colors.text4),
+                    softWrap = false,
+                )
+            }
+        } else {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .width(56.dp)
+                    .height(28.dp),
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(colors.accent),
+                ) {
+                    Text(
+                        text = "Q",
+                        style = LocalQubaTypography.current.bodyMed.copy(
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        ),
+                    )
+                }
+            }
+        }
+
+        // Divider before bottom actions
         HorizontalDivider(
             color = colors.border,
             modifier = Modifier

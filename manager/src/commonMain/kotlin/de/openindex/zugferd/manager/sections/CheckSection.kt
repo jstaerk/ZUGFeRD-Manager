@@ -116,7 +116,6 @@ import androidx.compose.ui.zIndex
 import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager.LocalAppState
 import de.openindex.zugferd.manager.gui.ActionButtonWithTooltip
-import de.openindex.zugferd.manager.gui.AppToolbar
 import de.openindex.zugferd.manager.gui.Label
 import de.openindex.zugferd.manager.gui.PdfViewer
 import de.openindex.zugferd.manager.gui.SectionSubTitle
@@ -159,7 +158,6 @@ import de.openindex.zugferd.quba.generated.resources.AppCheckSummarySignature
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryUnknown
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryVersion
 import de.openindex.zugferd.quba.generated.resources.AppCheckSummaryWarnings
-import de.openindex.zugferd.quba.generated.resources.AppSidebarCheck
 import de.openindex.zugferd.quba.generated.resources.Res
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -199,7 +197,6 @@ fun CheckSection(state: CheckSectionState) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            AppToolbar(title = stringResource(Res.string.AppSidebarCheck).title())
             // Tab strip — visible as soon as at least one document is open.
             if (state.tabs.isNotEmpty()) {
                 CheckTabStrip(state)
