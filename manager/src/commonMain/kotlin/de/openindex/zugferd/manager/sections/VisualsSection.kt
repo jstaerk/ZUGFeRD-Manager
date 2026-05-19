@@ -33,12 +33,16 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.VerticalSplit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -52,7 +56,12 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.Layout
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -212,7 +221,7 @@ fun VisualsSection(state: VisualsSectionState) {
 @Composable
 fun VisualsSectionActions(state: VisualsSectionState) {
     if (state.showViewModeToggle) {
-        ViewModeToggle(
+        ViewModeOrbitMenu(
             currentMode = state.viewMode,
             onModeChanged = { state.viewMode = it },
         )
@@ -805,44 +814,123 @@ enum class ViewMode {
     SPLIT
 }
 
-// Toggle-Buttons für die Ansichtsauswahl
+// Orbit-Menü für die Ansichtsauswahl.
+// Trigger (32 dp) passt in die 36 dp Titelleiste.
+// Orbit-Items (28 dp) klappen beim Hover nach LINKS auf — bleiben in der Titelleiste,
+// keine Überlappung mit dem Inhaltsbereich darunter.
 @Composable
-private fun ViewModeToggle(
+@OptIn(ExperimentalComposeUiApi::class)
+private fun ViewModeOrbitMenu(
     currentMode: ViewMode,
     onModeChanged: (ViewMode) -> Unit,
-    modifier: Modifier = Modifier // <- das hier hinzufügen
 ) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        listOf(
-            ViewMode.PDF_ONLY to stringResource(Res.string.AppVisualisationViewPdf),
-            ViewMode.SPLIT to stringResource(Res.string.AppVisualisationViewSplit),
-            ViewMode.CODE_ONLY to stringResource(Res.string.AppVisualisationViewCode),
-        ).forEach { (mode, label) ->
-            Text(
-                text = label,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable { onModeChanged(mode) }
-                    .background(
-                        if (currentMode == mode) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                        else Color.Transparent
-                    )
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                color = if (currentMode == mode) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelMedium
-            )
+    val colors = LocalQubaColors.current
+    val scope = rememberCoroutineScope()
+    var expanded by remember { mutableStateOf(false) }
+    var closeJob by remember { mutableStateOf<Job?>(null) }
 
-            if (mode != ViewMode.CODE_ONLY) {
-                Spacer(modifier = Modifier.width(4.dp))
+    fun keepOpen() {
+        closeJob?.cancel()
+        closeJob = null
+    }
+
+    fun scheduleClose() {
+        closeJob?.cancel()
+        closeJob = scope.launch {
+            delay(200L)
+            expanded = false
+        }
+    }
+
+    // Left-to-right order when spread: PDF | Split | Code | [trigger]
+    // Items slide out to the left; each is 28 dp with 8 dp gap → 36 dp step.
+    val orbitModes  = listOf(ViewMode.PDF_ONLY, ViewMode.SPLIT, ViewMode.CODE_ONLY)
+    val orbitIcons  = listOf(Icons.Default.PictureAsPdf, Icons.Default.VerticalSplit, Icons.Default.Code)
+    val orbitLabels = listOf(
+        stringResource(Res.string.AppVisualisationViewPdf),
+        stringResource(Res.string.AppVisualisationViewSplit),
+        stringResource(Res.string.AppVisualisationViewCode),
+    )
+    // Collapsed → (0, 0); open: 3 items to the left at equal spacing
+    val openOffsets = listOf(-108.dp, -72.dp, -36.dp)
+
+    val triggerIcon = when (currentMode) {
+        ViewMode.PDF_ONLY  -> Icons.Default.PictureAsPdf
+        ViewMode.SPLIT     -> Icons.Default.VerticalSplit
+        ViewMode.CODE_ONLY -> Icons.Default.Code
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .zIndex(10f)
+            .size(32.dp),
+    ) {
+        // Orbit items — rendered first so trigger sits on top in z-order
+        orbitModes.indices.forEach { i ->
+            val targetX = if (expanded) openOffsets[i] else 0.dp
+            val animX by animateDpAsState(
+                targetValue = targetX,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow,
+                ),
+                label = "orbitX$i",
+            )
+            val animAlpha by animateFloatAsState(
+                targetValue = if (expanded) 1f else 0f,
+                label = "orbitAlpha$i",
+            )
+            val animScale by animateFloatAsState(
+                targetValue = if (expanded) 1f else 0f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow,
+                ),
+                label = "orbitScale$i",
+            )
+            val isActive = orbitModes[i] == currentMode
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(28.dp)
+                    .offset(x = animX, y = 0.dp)
+                    .alpha(animAlpha)
+                    .scale(animScale)
+                    .clip(CircleShape)
+                    .background(if (isActive) colors.accentSoft else colors.surface2)
+                    .border(1.dp, if (isActive) colors.accent else colors.border, CircleShape)
+                    .clickable(enabled = expanded) { onModeChanged(orbitModes[i]); expanded = false }
+                    .onPointerEvent(PointerEventType.Enter) { keepOpen() }
+                    .onPointerEvent(PointerEventType.Exit) { scheduleClose() },
+            ) {
+                Icon(
+                    imageVector = orbitIcons[i],
+                    contentDescription = orbitLabels[i],
+                    modifier = Modifier.size(15.dp),
+                    tint = if (isActive) colors.accent else colors.text2,
+                )
             }
+        }
+
+        // Trigger — on top, shows current mode icon
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(if (expanded) colors.accentSoft else Color.Transparent)
+                .border(1.dp, if (expanded) colors.accent else colors.border, CircleShape)
+                .onPointerEvent(PointerEventType.Enter) { keepOpen(); expanded = true }
+                .onPointerEvent(PointerEventType.Exit) { scheduleClose() },
+        ) {
+            Icon(
+                imageVector = triggerIcon,
+                contentDescription = "Ansicht wechseln",
+                modifier = Modifier.size(16.dp),
+                tint = if (expanded) colors.accent else colors.text2,
+            )
         }
     }
 }
