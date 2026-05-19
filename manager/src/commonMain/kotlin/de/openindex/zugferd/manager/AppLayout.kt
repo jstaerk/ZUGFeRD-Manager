@@ -41,6 +41,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.foundation.Image
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -64,7 +65,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import de.openindex.zugferd.manager.gui.QubaTitleBar
 import de.openindex.zugferd.manager.gui.QubaStatusBar
 import de.openindex.zugferd.manager.gui.QubaDocumentStatus
@@ -77,9 +77,11 @@ import de.openindex.zugferd.quba.generated.resources.AppSidebarCollapse
 import de.openindex.zugferd.quba.generated.resources.AppSidebarExpand
 import de.openindex.zugferd.quba.generated.resources.AppSidebarQuit
 import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.ic_app_logo
 import java.awt.KeyEventDispatcher
 import java.awt.KeyboardFocusManager
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun AppLayout() {
@@ -184,35 +186,20 @@ private fun AppNavigation() {
 
         Spacer(modifier = Modifier.weight(1f, fill = true))
 
-        // Brand: Q logo + name + version (above divider)
+        // Brand: Quba SVG logo + version (above divider)
         if (isExpanded) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
                     .padding(bottom = 2.dp),
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(colors.accent),
-                ) {
-                    Text(
-                        text = "Q",
-                        style = LocalQubaTypography.current.bodyMed.copy(
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        ),
-                    )
-                }
-                Text(
-                    text = APP_TITLE,
-                    style = LocalQubaTypography.current.bodyMed.copy(color = colors.text),
+                Image(
+                    painter = painterResource(Res.drawable.ic_app_logo),
+                    contentDescription = APP_TITLE,
+                    modifier = Modifier.height(40.dp),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
@@ -226,24 +213,13 @@ private fun AppNavigation() {
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .width(56.dp)
-                    .height(28.dp),
+                    .height(32.dp),
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(colors.accent),
-                ) {
-                    Text(
-                        text = "Q",
-                        style = LocalQubaTypography.current.bodyMed.copy(
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        ),
-                    )
-                }
+                Image(
+                    painter = painterResource(Res.drawable.ic_app_logo),
+                    contentDescription = APP_TITLE,
+                    modifier = Modifier.height(28.dp),
+                )
             }
         }
 

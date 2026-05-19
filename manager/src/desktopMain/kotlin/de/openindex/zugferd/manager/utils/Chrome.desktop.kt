@@ -440,6 +440,14 @@ private fun openAttachmentInWindow(url: String, title: String) {
             frame.defaultCloseOperation = javax.swing.JFrame.DISPOSE_ON_CLOSE
             frame.setSize(900, 700)
             frame.setLocationRelativeTo(null)
+            // Reuse the icon from the main Compose window (has the full SVG rendered).
+            // Fall back to the painted icon if no main window found yet.
+            val mainIcons = java.awt.Frame.getFrames().firstOrNull()?.iconImages
+            if (!mainIcons.isNullOrEmpty()) {
+                frame.iconImages = mainIcons
+            } else {
+                frame.iconImage = createQubaAwtIcon()
+            }
 
             // For non-PDF attachments (e.g. images), Chrome shows no download button.
             // Add a minimal toolbar with a save button only in that case.
@@ -487,4 +495,26 @@ private fun openAttachmentInWindow(url: String, title: String) {
             APP_LOGGER.error("Anhang-Fenster konnte nicht geöffnet werden.", e)
         }
     }
+}
+
+/**
+ * Draws the Quba brand icon as a BufferedImage for use in plain Swing JFrames.
+ * Matches the golden-yellow color (#ead017) of ic_app_logo.svg.
+ */
+private fun createQubaAwtIcon(): java.awt.image.BufferedImage {
+    val size = 64
+    val img = java.awt.image.BufferedImage(size, size, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+    val g = img.createGraphics()
+    g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING, java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+    // Golden-yellow background — matches ic_app_logo.svg fill color
+    g.color = java.awt.Color(0xEA, 0xD0, 0x17)
+    g.fillRoundRect(0, 0, size, size, 14, 14)
+    // "Q" in dark color for contrast
+    g.color = java.awt.Color(0x1A, 0x0F, 0x00)
+    g.font = java.awt.Font("SansSerif", java.awt.Font.BOLD, 42)
+    val fm = g.fontMetrics
+    g.drawString("Q", (size - fm.stringWidth("Q")) / 2, (size - fm.height) / 2 + fm.ascent)
+    g.dispose()
+    return img
 }

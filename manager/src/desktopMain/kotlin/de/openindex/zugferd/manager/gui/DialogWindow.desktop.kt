@@ -25,6 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import de.openindex.zugferd.quba.generated.resources.Res
+import de.openindex.zugferd.quba.generated.resources.ic_app_logo
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.window.DialogWindow as DesktopDialogWindow
 
 @Composable
@@ -47,6 +50,7 @@ actual fun DialogWindow(
         state = dialogWindowState,
         title = title,
         resizable = resizable,
+        icon = painterResource(Res.drawable.ic_app_logo),
     ) {
         content()
     }
